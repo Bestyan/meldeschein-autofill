@@ -20,10 +20,23 @@ function handleFile(e) {
         });
 
         /*
-            TODO: modify column names to not contain forbidden characters
+            modify column names to not contain forbidden characters
         */
         let sheet = workbook.Sheets[workbook.SheetNames[0]];
         console.log(sheet);
+        for (let i = 65; i < 100; i++) {
+            let cellName = String.fromCharCode(i) + '1';
+            let cell = sheet[cellName];
+            if (cell === undefined) {
+                break;
+            }
+            cell.w = cell.w.replace(/ä/g, "ae")
+                .replace(/ö/g, "oe")
+                .replace(/ü/g, "ue")
+                .replace(/ß/g, "ss")
+                .replace(/[ \/]/g, "_")
+                .replace(/#/g, "Nr");
+        }
 
 
         let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
@@ -64,13 +77,25 @@ function initDB(rows) {
         try {
 
             let name = row.Kunde.split(",");
-            let vorname = name[1].trim(), nachname = name[0].trim();
+            let vorname = name[1].trim(),
+                nachname = name[0].trim();
             row.Vorname = vorname;
             row.Nachname = nachname;
 
         } catch (exception) {
 
-            console.error(`bad data in column Kunde: ${row.Kunde}`);
+            console.error(`non-conforming data in column Kunde: "${row.Kunde}". Retrying...`);
+            try {
+                let name = row.Kunde.trim().split(" ");
+                let vorname = name[1].trim(),
+                    nachname = name[0].trim();
+                row.Vorname = vorname;
+                row.Nachname = nachname;
+                console.error(`retry successful!`)
+
+            } catch (exception) {
+                console.error(`non-conforming data "${row.Kunde}" is not salvageable. Skipping...`);
+            }
 
         }
     });
