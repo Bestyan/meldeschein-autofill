@@ -1,10 +1,35 @@
+// for webpack (css needs to be referenced to be packed)
+import "../css/popup.css";
+
 import XLSX from 'xlsx';
 import localStorageDB from 'localstoragedb';
+import Tabulator from 'tabulator-tables';
 
-const RAW_TABLE = "raw_data";
-const SEARCH_TABLE = "clean_data";
+const STATUS_DATE_FORMAT = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+};
+
+const SEARCH_RESULT_DATE_FORMAT = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+};
+
 const DB = new localStorageDB("meldeschein", localStorage);
-const COLUMNS = [];
+const TABLE_RAW = "raw_data";
+const TABLE_SEARCH = "clean_data";
+const COLUMNS_RAW = [];
+const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email"];
+
+let can_search = false;
+const LOCALSTORAGE_LAST_UPLOAD = "last_upload";
+let last_upload = window.localStorage.getItem(LOCALSTORAGE_LAST_UPLOAD);
+
+let result_table = null;
 
 /**
  * reads xls to json
@@ -38,7 +63,7 @@ function handleFile(e) {
                 .replace(/ß/g, "ss")
                 .replace(/[ \/]/g, "_")
                 .replace(/#/g, "Nr");
-            COLUMNS.push(cell.w);
+            COLUMNS_RAW.push(cell.w);
         }
 
         /*
@@ -66,20 +91,20 @@ function initDB(rows) {
     /*
         clear old data and create table
     */
-    if (DB.tableExists(RAW_TABLE)) {
-        DB.dropTable(RAW_TABLE);
+    if (DB.tableExists(TABLE_RAW)) {
+        DB.dropTable(TABLE_RAW);
     }
-    DB.createTableWithData(RAW_TABLE, rows);
+    DB.createTableWithData(TABLE_RAW, rows);
 
-    if (DB.tableExists(SEARCH_TABLE)) {
-        DB.dropTable(SEARCH_TABLE);
+    if (DB.tableExists(TABLE_SEARCH)) {
+        DB.dropTable(TABLE_SEARCH);
     }
-    DB.createTable(SEARCH_TABLE, ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email"]);
+    DB.createTable(TABLE_SEARCH, COLUMNS_SEARCH);
 
     /*
         reformat column Kunde to Vorname, Nachname
     */
-    let raw_rows = DB.queryAll(RAW_TABLE);
+    let raw_rows = DB.queryAll(TABLE_RAW);
     raw_rows.forEach(row => {
         let data = {
             vorname: "",
@@ -89,8 +114,8 @@ function initDB(rows) {
             plz: "",
             ort: "",
             land: "",
-            anreise: row.Anreise,
-            abreise: row.Abreise,
+            anreise: row.Anreise.toLocaleDateString("de-DE", SEARCH_RESULT_DATE_FORMAT),
+            abreise: row.Abreise.toLocaleDateString("de-DE", SEARCH_RESULT_DATE_FORMAT),
             apartment: "",
             personen: row.Personen,
             vermerk: row.Interner_Vermerk,
@@ -123,7 +148,6 @@ function initDB(rows) {
         // extract strasse, plz, ort, land from Anschrift
         try {
             let adressdaten = row.Anschrift.replace(/\#[0-9]+\#/g, "").trim().match(/(.{3,}) ([0-9]{3,5}) (.+)/m);
-            console.log(adressdaten);
             if (adressdaten != null && adressdaten.length == 4) {
                 data.strasse = adressdaten[1];
                 data.plz = adressdaten[2];
@@ -143,11 +167,141 @@ function initDB(rows) {
         }
 
         // insert row
-        DB.insert(SEARCH_TABLE, data);
+        DB.insert(TABLE_SEARCH, data);
         DB.commit();
+
+        last_upload = new Date().toLocaleDateString('de-DE', STATUS_DATE_FORMAT);
+        window.localStorage.setItem(LOCALSTORAGE_LAST_UPLOAD, last_upload);
+        refreshStatus();
     });
 
-    console.log(DB.queryAll(SEARCH_TABLE));
+    console.log(DB.queryAll(TABLE_SEARCH));
 }
 
+function refreshStatus() {
+    const NO_DATA = "no data";
+    let status = document.getElementById("status");
+    status.classList.remove("good");
+    status.classList.remove("bad");
+
+    if (!DB.tableExists(TABLE_SEARCH)) {
+        can_search = false;
+        status.classList.add("bad");
+        status.innerHTML = NO_DATA;
+        return;
+    }
+
+    if (DB.queryAll(TABLE_SEARCH).length === 0) {
+        can_search = false;
+        status.classList.add("bad");
+        status.innerHTML = NO_DATA;
+        return;
+    }
+
+    can_search = true;
+    status.classList.add("good");
+    status.innerHTML = `Daten vom ${last_upload}`;
+    return;
+}
+
+function populateSearchDropDowns() {
+    let dropdowns = [
+        document.getElementById("search1"),
+        document.getElementById("search2"),
+        document.getElementById("search3")
+    ];
+
+    dropdowns.forEach(dropdown => {
+        COLUMNS_SEARCH.forEach(column => {
+            let option = document.createElement("option");
+            option.value = column;
+            option.innerHTML = column;
+            dropdown.append(option);
+        });
+    });
+}
+
+function search(event) {
+    event.preventDefault();
+    let searchParams = {};
+
+    let search1 = document.getElementById("search1_input").value;
+    if (search1.length > 0) {
+        searchParams[document.getElementById("search1").value] = search1;
+    }
+
+    let search2 = document.getElementById("search2_input").value;
+    if (search2.length > 0) {
+        searchParams[document.getElementById("search2").value] = search2;
+    }
+
+    let search3 = document.getElementById("search3_input").value;
+    if (search3.length > 0) {
+        searchParams[document.getElementById("search3").value] = search3;
+    }
+
+    console.log(searchParams);
+
+    // query DB
+    let rows = [];
+    if (searchParams.length === 0) {
+        rows = DB.queryAll(TABLE_SEARCH);
+    } else {
+        rows = DB.queryAll(TABLE_SEARCH, {
+            query: row => {
+                for (const [key, value] of Object.entries(searchParams)) {
+                    if (!(row[key] + "").includes(value)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        })
+    }
+
+    console.log(rows);
+    result_table = new Tabulator("#search_results", {
+        layout: "fitDataStretch",
+        data: rows,
+        selectableRollingSelection: true,
+        selectable: 1,
+        pagination: "local",
+        paginationSize: 10,
+        columns: [{
+                title: "Vorname",
+                field: "vorname"
+            },
+            {
+                title: "Nachname",
+                field: "nachname"
+            },
+            {
+                title: "Anreise",
+                field: "anreise"
+            },
+            {
+                title: "Abreise",
+                field: "abreise"
+            },
+            {
+                title: "Apartment",
+                field: "apartment"
+            },
+            {
+                title: "Personen",
+                field: "personen"
+            },
+            {
+                title: "Vermerk",
+                field: "vermerk"
+            }
+        ]
+    });
+}
+
+//var selectedData = table.getSelectedData();
+
+refreshStatus();
 document.getElementById('upload').addEventListener('change', handleFile, false);
+document.getElementById('search').addEventListener('submit', search);
+populateSearchDropDowns();

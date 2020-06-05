@@ -1,12 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title></title>
 </head>
+
 <body>
   <h1>Meldeschein Autofill</h1>
-  <input type="file" id="upload" />
+
+  <div>
+    Status: <span id="status" class="status bad">no data</span>
+  </div>
+
+  <div>
+    <input type="file" id="upload" />
+  </div>
+
+  <form id="search">
+    <div>
+      <select id="search1"></select><input type="text" id="search1_input" />
+    </div>
+    <div>
+      <select id="search2"></select><input type="text" id="search2_input" />
+    </div>
+    <div>
+      <select id="search3"></select><input type="text" id="search3_input" />
+    </div>
+    <div>
+      <button type="submit" class="hide">suchen</button>
+    </div>
+  </form>
+
+  <div id="search_container">
+    <div id="search_results">
+    </div>
+  </div>
+
   <scipt src="js/popup.js"></scipt>
 </body>
+
 </html>

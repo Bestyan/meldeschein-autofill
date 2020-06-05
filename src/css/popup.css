@@ -1,0 +1,22 @@
+
+@import url('~tabulator-tables/dist/css/tabulator.min.css');
+
+body{
+    width: 98vw;
+}
+
+.bad{
+    color: red;
+}
+
+.good{
+    color: green;
+}
+
+.status{
+    font-weight: bold;
+}
+
+.hide{
+    display: none;
+}
