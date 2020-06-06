@@ -324,7 +324,7 @@ document.getElementById('fill').addEventListener("click", event => {
         "vorname0": data.vorname,
         "strasse0": data.strasse || data.anschrift,
         "plz0_input": data.plz,
-        "ort0": data.ort,
+        "ort0_input": data.ort,
         "email": data.email
     };
 
