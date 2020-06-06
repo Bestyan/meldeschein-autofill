@@ -34,12 +34,11 @@ var options = {
       {
         test: /\.css$/,
         loader: "style-loader!css-loader",
-        exclude: /node_modules/,
-        options: {
-          modules: {
-            auto: (resourcePath) => resourcePath.endsWith('tabulator.min.css')
-          }
-        }
+        exclude: /node_modules/
+      },
+      {
+        test: /\tabulator-tables.min.css$/,
+        loader: "style-loader!css-loader"
       },
       {
         test: new RegExp('.(' + fileExtensions.join('|') + ')$'),

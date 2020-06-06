@@ -19,15 +19,19 @@ const SEARCH_RESULT_DATE_FORMAT = {
     day: 'numeric'
 };
 
-const DB = new localStorageDB("meldeschein", localStorage);
+const DB = new localStorageDB("meldeschein", sessionStorage);
 const TABLE_RAW = "raw_data";
 const TABLE_SEARCH = "clean_data";
+// columns of the RAW table
 const COLUMNS_RAW = [];
+// columns of the SEARCH table
 const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email"];
+// dropdowns in popup
+const COLUMNS_FILTER = ["anreise", "apartment", "vorname", "nachname", "abreise"]
 
 let can_search = false;
-const LOCALSTORAGE_LAST_UPLOAD = "last_upload";
-let last_upload = window.localStorage.getItem(LOCALSTORAGE_LAST_UPLOAD);
+const SESSIONSTORAGE_LAST_UPLOAD = "last_upload";
+let last_upload = window.sessionStorage.getItem(SESSIONSTORAGE_LAST_UPLOAD);
 
 let result_table = null;
 
@@ -171,7 +175,7 @@ function initDB(rows) {
         DB.commit();
 
         last_upload = new Date().toLocaleDateString('de-DE', STATUS_DATE_FORMAT);
-        window.localStorage.setItem(LOCALSTORAGE_LAST_UPLOAD, last_upload);
+        window.sessionStorage.setItem(SESSIONSTORAGE_LAST_UPLOAD, last_upload);
         refreshStatus();
     });
 
@@ -212,13 +216,18 @@ function populateSearchDropDowns() {
     ];
 
     dropdowns.forEach(dropdown => {
-        COLUMNS_SEARCH.forEach(column => {
+        COLUMNS_FILTER.forEach(column => {
             let option = document.createElement("option");
             option.value = column;
             option.innerHTML = column;
             dropdown.append(option);
         });
     });
+
+    dropdowns[1].value = "nachname";
+    dropdowns[2].value = "apartment";
+
+    document.getElementById("search1_input").value = new Date().toLocaleDateString("de-DE", SEARCH_RESULT_DATE_FORMAT);
 }
 
 function search(event) {
@@ -299,9 +308,42 @@ function search(event) {
     });
 }
 
-//var selectedData = table.getSelectedData();
-
 refreshStatus();
 document.getElementById('upload').addEventListener('change', handleFile, false);
 document.getElementById('search').addEventListener('submit', search);
 populateSearchDropDowns();
+
+document.getElementById('fill').addEventListener("click", event => {
+    let data = result_table.getSelectedData()[0];
+    console.log(data);
+    let form_data = {
+        "anreise_input": data.anreise,
+        "abreise_input": data.abreise,
+        "nachname0": data.nachname, //Nachname Gast
+        "nachname1_input": data.nachname, // Nachname Begl. 1
+        "vorname0": data.vorname,
+        "strasse0": data.strasse || data.anschrift,
+        "plz0_input": data.plz,
+        "ort0": data.ort,
+        "email": data.email
+    };
+
+    if (data.land !== "") {
+        form_data["land0_input"] = data.land; // Land in Adresse (vorausgefüllt Deutschland)
+        form_data["staat0_input"] = data.land; // Staatsangehörigkeit Gast
+        form_data["staat1_input"] = data.land; // Staatsangehörigkeit Begl. 1
+    }
+
+
+    let stringified_data = JSON.stringify(form_data);
+    /*
+        really, really dirty, but it might just work on that wonky website
+    */
+    chrome.tabs.executeScript(null, {
+        code: `
+        for (const [key, value] of Object.entries(${stringified_data})) {
+            document.getElementById(key).value = value;
+        }
+    `
+    });
+});
