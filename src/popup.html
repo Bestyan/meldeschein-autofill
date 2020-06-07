@@ -7,7 +7,7 @@
 </head>
 
 <body>
-  <h1>Meldeschein Autofill</h1>
+  <h2>Meldeschein Autofill</h2>
 
   <div>
     Status: <span id="status" class="status bad">no data</span>
@@ -28,7 +28,7 @@
       <select id="search3"></select><input type="text" id="search3_input" />
     </div>
     <div>
-      <button type="submit" class="hide">suchen</button>
+      <button type="submit">suchen</button>
     </div>
   </form>
 
@@ -39,6 +39,20 @@
 
   <div>
     <button id="fill">ausfüllen</button>
+  </div>
+
+  <div>
+    <h2>Bewertungs-Email</h2>
+    <select id="anrede">
+      <option value="Familie">Familie</option>
+      <option value="Herr">Herr</option>
+      <option value="Frau">Frau</option>
+    </select>
+    <select id="first_timer">
+      <option value="true">war zum ersten Mal da</option>
+      <option value="false">war zum wiederholten Mal da</option>
+    </select>
+    <button id="generate">erstellen</button>
   </div>
 
   <script src="js/popup.js"></script>

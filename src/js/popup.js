@@ -4,6 +4,7 @@ import "../css/popup.css";
 import XLSX from 'xlsx';
 import localStorageDB from 'localstoragedb';
 import Tabulator from 'tabulator-tables';
+import mail from './mail';
 
 const STATUS_DATE_FORMAT = {
     year: 'numeric',
@@ -308,13 +309,39 @@ function search(event) {
     });
 }
 
+function generateMail() {
+    let data = result_table.getSelectedData()[0];
+    if (data == null) {
+        alert("keine Tabellenzeile ausgewählt");
+        return;
+    }
+
+    if (data.email.endsWith("booking.com") ||
+        data.email.endsWith("tomas.travel")) {
+        alert(`Buchungsportal-Email erkannt: ${data.email}
+            Mail wird nicht generiert.`);
+        return;
+    }
+
+    data.anrede = document.getElementById('anrede').value;
+
+    mail.generate(data);
+}
+
 refreshStatus();
+// Button "Choose file"
 document.getElementById('upload').addEventListener('change', handleFile, false);
+// Button/Form "suchen"
 document.getElementById('search').addEventListener('submit', search);
 populateSearchDropDowns();
 
+// Button "ausfüllen"
 document.getElementById('fill').addEventListener("click", event => {
     let data = result_table.getSelectedData()[0];
+    if (data == null) {
+        alert("keine Tabellenzeile ausgewählt");
+        return;
+    }
     console.log(data);
     let form_data = {
         "anreise_input": data.anreise,
@@ -347,3 +374,6 @@ document.getElementById('fill').addEventListener("click", event => {
     `
     });
 });
+
+// Button [Mail] "erstellen"
+document.getElementById('generate').addEventListener('click', generateMail, false);
