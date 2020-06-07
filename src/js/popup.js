@@ -8,16 +8,16 @@ import mail from './mail';
 
 const STATUS_DATE_FORMAT = {
     year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit'
 };
 
 const SEARCH_RESULT_DATE_FORMAT = {
     year: 'numeric',
-    month: 'numeric',
-    day: 'numeric'
+    month: '2-digit',
+    day: '2-digit'
 };
 
 const DB = new localStorageDB("meldeschein", sessionStorage);
@@ -28,7 +28,8 @@ const COLUMNS_RAW = [];
 // columns of the SEARCH table
 const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email"];
 // dropdowns in popup
-const COLUMNS_FILTER = ["anreise", "apartment", "vorname", "nachname", "abreise"]
+const COLUMNS_FILTER_REISE = ["anreise", "abreise"]
+const COLUMNS_FILTER = ["nachname", "strasse", "plz", "ort", "apartment", "personen", "vermerk", "email"]
 
 let can_search = false;
 const SESSIONSTORAGE_LAST_UPLOAD = "last_upload";
@@ -209,26 +210,29 @@ function refreshStatus() {
     return;
 }
 
-function populateSearchDropDowns() {
-    let dropdowns = [
-        document.getElementById("search1"),
-        document.getElementById("search2"),
-        document.getElementById("search3")
-    ];
+function setupSearchDropDowns() {
 
-    dropdowns.forEach(dropdown => {
-        COLUMNS_FILTER.forEach(column => {
-            let option = document.createElement("option");
-            option.value = column;
-            option.innerHTML = column;
-            dropdown.append(option);
-        });
+    COLUMNS_FILTER_REISE.forEach(column => {
+        let option = document.createElement("option");
+        option.value = column;
+        option.innerHTML = column;
+        document.getElementById("search1").append(option);
+    });
+    COLUMNS_FILTER.forEach(column => {
+        let option = document.createElement("option");
+        option.value = column;
+        option.innerHTML = column;
+        document.getElementById("search2").append(option);
     });
 
-    dropdowns[1].value = "nachname";
-    dropdowns[2].value = "apartment";
+    document.getElementById("search1_input").value = new Date().toISOString().substr(0, "yyyy-mm-dd".length);
+    document.getElementById("date_plus_one").addEventListener("click", event => {
+        document.getElementById("search1_input").stepUp(1);
+    });
+    document.getElementById("date_minus_one").addEventListener("click", event => {
+        document.getElementById("search1_input").stepUp(-1);
+    });
 
-    document.getElementById("search1_input").value = new Date().toLocaleDateString("de-DE", SEARCH_RESULT_DATE_FORMAT);
 }
 
 function search(event) {
@@ -237,17 +241,12 @@ function search(event) {
 
     let search1 = document.getElementById("search1_input").value;
     if (search1.length > 0) {
-        searchParams[document.getElementById("search1").value] = search1;
+        searchParams[document.getElementById("search1").value] = new Date(search1).toLocaleDateString("de-DE", SEARCH_RESULT_DATE_FORMAT);
     }
 
     let search2 = document.getElementById("search2_input").value;
     if (search2.length > 0) {
         searchParams[document.getElementById("search2").value] = search2;
-    }
-
-    let search3 = document.getElementById("search3_input").value;
-    if (search3.length > 0) {
-        searchParams[document.getElementById("search3").value] = search3;
     }
 
     console.log(searchParams);
@@ -333,7 +332,7 @@ refreshStatus();
 document.getElementById('upload').addEventListener('change', handleFile, false);
 // Button/Form "suchen"
 document.getElementById('search').addEventListener('submit', search);
-populateSearchDropDowns();
+setupSearchDropDowns();
 
 // Button "ausfüllen"
 document.getElementById('fill').addEventListener("click", event => {
@@ -351,8 +350,7 @@ document.getElementById('fill').addEventListener("click", event => {
         "vorname0": data.vorname,
         "strasse0": data.strasse || data.anschrift,
         "plz0_input": data.plz,
-        "ort0_input": data.ort,
-        "email": data.email
+        "ort0_input": data.ort
     };
 
     if (data.land !== "") {
