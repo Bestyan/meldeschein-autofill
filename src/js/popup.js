@@ -20,7 +20,7 @@ const SEARCH_RESULT_DATE_FORMAT = {
     day: '2-digit'
 };
 
-const DB = new localStorageDB("meldeschein", sessionStorage);
+const DB = new localStorageDB("meldeschein", localStorage);
 const TABLE_RAW = "raw_data";
 const TABLE_SEARCH = "clean_data";
 // columns of the RAW table
@@ -32,8 +32,8 @@ const COLUMNS_FILTER_REISE = ["anreise", "abreise"]
 const COLUMNS_FILTER = ["nachname", "strasse", "plz", "ort", "apartment", "personen", "vermerk", "email"]
 
 let can_search = false;
-const SESSIONSTORAGE_LAST_UPLOAD = "last_upload";
-let last_upload = window.sessionStorage.getItem(SESSIONSTORAGE_LAST_UPLOAD);
+const LOCALSTORAGE_LAST_UPLOAD = "last_upload";
+let last_upload = window.localStorage.getItem(LOCALSTORAGE_LAST_UPLOAD);
 
 let result_table = null;
 
@@ -177,7 +177,7 @@ function initDB(rows) {
         DB.commit();
 
         last_upload = new Date().toLocaleDateString('de-DE', STATUS_DATE_FORMAT);
-        window.sessionStorage.setItem(SESSIONSTORAGE_LAST_UPLOAD, last_upload);
+        window.localStorage.setItem(LOCALSTORAGE_LAST_UPLOAD, last_upload);
         refreshStatus();
     });
 
@@ -375,3 +375,15 @@ document.getElementById('fill').addEventListener("click", event => {
 
 // Button [Mail] "erstellen"
 document.getElementById('generate').addEventListener('click', generateMail, false);
+
+// Button "Daten löschen"
+document.getElementById('delete').addEventListener('click', event => {
+    if(DB.tableExists(TABLE_SEARCH)){
+        DB.dropTable(TABLE_SEARCH);
+    }
+    if(DB.tableExists(TABLE_RAW)){
+        DB.dropTable(TABLE_RAW);
+    }
+    alert("Daten gelöscht");
+    refreshStatus();
+});
