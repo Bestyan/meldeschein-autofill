@@ -23,7 +23,6 @@
   "dependencies": {
     "localstoragedb": "^2.3.2",
     "tabulator-tables": "^4.6.3",
-    "text-encoding": "^0.7.0",
     "xlsx": "^0.16.1"
   }
 }
