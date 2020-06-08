@@ -236,6 +236,10 @@ function setupSearchDropDowns() {
 }
 
 function search(event) {
+    if(!DB.tableExists(TABLE_SEARCH)){
+        alert("Keine Daten. Bitte xls hochladen");
+    }
+
     event.preventDefault();
     let searchParams = {};
 
