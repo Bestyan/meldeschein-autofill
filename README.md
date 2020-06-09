@@ -1,3 +1,15 @@
+
+# How to install (developer mode)
+
+1. download `meldeschein-autofill.zip` from [here](https://github.com/Bestyan/meldeschein-autofill/releases) (always choose the latest release)
+2. unzip it
+3. open chrome
+4. go to `...` - `weitere Tools` - `Extensions / Erweiterungen`
+5. activate developer mode in the top right
+6. choose `Load unpacked / Entpackte Erweiterung laden`
+7. Select the unzipped `meldeschein-autofill` folder
+8. Done!
+
 # How to run it
 
 1. Check if your Node.js version is >= 6.
