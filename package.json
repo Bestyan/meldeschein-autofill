@@ -4,9 +4,11 @@
   "description": "Meldeschein Autofill from Excel",
   "scripts": {
     "build": "node utils/build.js",
-    "start": "node utils/webserver.js"
+    "start": "node utils/webserver.js",
+    "zip": "node utils/zip.js"
   },
   "devDependencies": {
+    "archiver": "^4.0.1",
     "clean-webpack-plugin": "3.0.0",
     "copy-webpack-plugin": "5.0.5",
     "css-loader": "3.2.0",
@@ -18,7 +20,8 @@
     "webpack": "4.41.2",
     "webpack-cli": "3.3.10",
     "webpack-dev-server": "3.9.0",
-    "write-file-webpack-plugin": "4.5.1"
+    "write-file-webpack-plugin": "4.5.1",
+    "fs": "^0.0.1-security"
   },
   "dependencies": {
     "localstoragedb": "^2.3.2",
