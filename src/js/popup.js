@@ -327,8 +327,9 @@ function generateMail() {
     }
 
     data.anrede = document.getElementById('anrede').value;
+    const isFirstVisit = document.getElementById('is_first_visit').value == 'true';
 
-    mail.generate(data);
+    mail.generate(data, isFirstVisit);
 }
 
 refreshStatus();
