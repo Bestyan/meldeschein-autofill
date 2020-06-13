@@ -147,6 +147,11 @@ function searchDB(event) {
 }
 
 function generateMail() {
+    if(result_table == null){
+        alert("keine Tabellenzeile ausgewählt");
+        return;
+    }
+
     let data = result_table.getSelectedData()[0];
     if (data == null) {
         alert("keine Tabellenzeile ausgewählt");
