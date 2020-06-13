@@ -225,6 +225,36 @@ function buildUI() {
 
     // Button [Mail] "erstellen"
     document.getElementById('generate').addEventListener('click', generateMail, false);
+
+
+    let fill_button = document.getElementById('fill');
+    fill_button.classList.remove('hide')
+
+    chrome.tabs.query({
+            currentWindow: true,
+            active: true
+        },
+        tabs => {
+            let url = tabs[0].url;
+            console.log(url);
+
+            // no url entered
+            if (url == null || url == undefined) {
+                // hide search
+                fill_button.classList.add('hide');
+                return;
+            }
+
+            if (url.toString().includes('emeldeschein.de')) {
+                //show search (keeping it visible by not adding hide class)
+                return;
+            }
+
+            // doesn't match emeldeschein
+            fill_button.classList.add('hide');
+            return;
+
+        });
 }
 
 buildUI();
