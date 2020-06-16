@@ -147,7 +147,7 @@ function searchDB(event) {
 }
 
 function generateMail() {
-    if(result_table == null){
+    if (result_table == null) {
         alert("keine Tabellenzeile ausgewählt");
         return;
     }
@@ -191,7 +191,7 @@ function buildUI() {
     document.getElementById('search').addEventListener('submit', searchDB);
 
     // Button "ausfüllen"
-    document.getElementById('fill').addEventListener("click", event => {
+    document.getElementById('meldeschein_fill').addEventListener("click", event => {
         let data = result_table.getSelectedData()[0];
         if (data == null) {
             alert("keine Tabellenzeile ausgewählt");
@@ -232,33 +232,32 @@ function buildUI() {
     document.getElementById('generate').addEventListener('click', generateMail, false);
 
 
-    let fill_button = document.getElementById('fill');
-    fill_button.classList.remove('hide')
-
+    // Visibility of Buttons
     chrome.tabs.query({
             currentWindow: true,
             active: true
         },
         tabs => {
             let url = tabs[0].url;
-            console.log(url);
+
+            let meldeschein_fill_button = document.getElementById('meldeschein_fill');
+            let wlan_voucher_fill_button = document.getElementById('wlan_voucher_fill');
+            meldeschein_fill_button.classList.remove('hide');
+            wlan_voucher_fill_button.classList.remove('hide');
 
             // no url entered
             if (url == null || url == undefined) {
-                // hide search
-                fill_button.classList.add('hide');
-                return;
+                url = "";
             }
 
-            if (url.toString().includes('emeldeschein.de')) {
-                //show search (keeping it visible by not adding hide class)
-                return;
+            if (!url.toString().includes('emeldeschein.de')) {
+                meldeschein_fill_button.classList.add('hide');
             }
 
-            // doesn't match emeldeschein
-            fill_button.classList.add('hide');
-            return;
-
+            if (!url.toString().includes('192.168.1.254:44444')) {
+                // TODO
+                // wlan_voucher_fill_button.classList.add('hide');
+            }
         });
 }
 
