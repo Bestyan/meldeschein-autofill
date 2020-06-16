@@ -53,8 +53,6 @@ export default {
                 email: row.EMail
             };
 
-            console.log(data);
-
             // insert row
             DB.insert(TABLE_SEARCH, data);
             DB.commit();

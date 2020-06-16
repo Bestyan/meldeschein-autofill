@@ -1,11 +1,11 @@
 var webpack = require("webpack"),
-    path = require("path"),
-    fileSystem = require("fs"),
-    env = require("./utils/env"),
-    CleanWebpackPlugin = require("clean-webpack-plugin").CleanWebpackPlugin,
-    CopyWebpackPlugin = require("copy-webpack-plugin"),
-    HtmlWebpackPlugin = require("html-webpack-plugin"),
-    WriteFilePlugin = require("write-file-webpack-plugin");
+  path = require("path"),
+  fileSystem = require("fs"),
+  env = require("./utils/env"),
+  CleanWebpackPlugin = require("clean-webpack-plugin").CleanWebpackPlugin,
+  CopyWebpackPlugin = require("copy-webpack-plugin"),
+  HtmlWebpackPlugin = require("html-webpack-plugin"),
+  WriteFilePlugin = require("write-file-webpack-plugin");
 
 // load the secrets
 var alias = {};
@@ -30,8 +30,7 @@ var options = {
     filename: "[name].bundle.js"
   },
   module: {
-    rules: [
-      {
+    rules: [{
         test: /\.css$/,
         loader: "style-loader!css-loader",
         exclude: /node_modules/
@@ -73,6 +72,10 @@ var options = {
           ...JSON.parse(content.toString())
         }))
       }
+    }]),
+    new CopyWebpackPlugin(patterns = [{
+      from: 'src/js/content_scripts',
+      to: 'content_scripts'
     }]),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "src", "popup.html"),

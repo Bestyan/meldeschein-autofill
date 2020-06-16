@@ -192,6 +192,11 @@ function buildUI() {
 
     // Button "ausfüllen"
     document.getElementById('meldeschein_fill').addEventListener("click", event => {
+        if (result_table == null) {
+            alert("keine Tabellenzeile ausgewählt");
+            return;
+        }
+
         let data = result_table.getSelectedData()[0];
         if (data == null) {
             alert("keine Tabellenzeile ausgewählt");
@@ -214,17 +219,15 @@ function buildUI() {
             form_data["staat0_input"] = data.land; // Staatsangehörigkeit Gast
             form_data["staat1_input"] = data.land; // Staatsangehörigkeit Begl. 1
         }
-
-        let stringified_data = JSON.stringify(form_data);
-        /*
-            really, really dirty, but it works
-        */
-        chrome.tabs.executeScript(null, {
-            code: `
-        for (const [key, value] of Object.entries(${stringified_data})) {
-            document.getElementById(key).value = value;
-        }
-    `
+        
+        // send data to content script fill_meldeschein.js
+        chrome.tabs.query({
+            active: true,
+            currentWindow: true
+        }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                data: form_data
+            });
         });
     });
 
