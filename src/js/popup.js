@@ -190,7 +190,7 @@ function buildUI() {
     // Button/Form "suchen"
     document.getElementById('search').addEventListener('submit', searchDB);
 
-    // Button "ausfüllen"
+    // Button "Meldeschein ausfüllen"
     document.getElementById('meldeschein_fill').addEventListener("click", event => {
         if (result_table == null) {
             alert("keine Tabellenzeile ausgewählt");
@@ -231,9 +231,20 @@ function buildUI() {
         });
     });
 
+    // Button "WLAN Voucher ausfüllen"
+    document.getElementById('wlan_voucher_fill').addEventListener('click', event => {
+        chrome.tabs.query({
+            active: true,
+            currentWindow: true
+        }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                data: ""
+            });
+        });
+    });
+
     // Button [Mail] "erstellen"
     document.getElementById('generate').addEventListener('click', generateMail, false);
-
 
     // Visibility of Buttons
     chrome.tabs.query({
