@@ -5,7 +5,8 @@
   "scripts": {
     "build": "node utils/build.js",
     "start": "node utils/webserver.js",
-    "zip": "node utils/zip.js"
+    "zip": "node utils/zip.js",
+    "gender-db": "node utils/make_gender_json.js"
   },
   "devDependencies": {
     "archiver": "^4.0.1",
