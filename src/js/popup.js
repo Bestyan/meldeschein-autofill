@@ -259,6 +259,18 @@ function buildUI() {
         });
     });
 
+    // Button "TManager ausfüllen"
+    document.getElementById('tmanager_fill').addEventListener('click', event => {
+        chrome.tabs.query({
+            active: true,
+            currentWindow: true
+        }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                hello: 'go do your stuff' // message content doesn't matter at all here, just sending a message is important
+            });
+        });
+    });
+
     // Button [Mail] "erstellen"
     document.getElementById('generate').addEventListener('click', generateMail, false);
 
@@ -272,8 +284,10 @@ function buildUI() {
 
             let meldeschein_fill_button = document.getElementById('meldeschein_fill');
             let wlan_voucher_fill_button = document.getElementById('wlan_voucher_fill');
+            let tmanager_fill_button = document.getElementById('tmanager_fill');
             meldeschein_fill_button.classList.remove('hide');
             wlan_voucher_fill_button.classList.remove('hide');
+            tmanager_fill_button.classList.remove('hide');
 
             // no url entered
             if (url == null || url == undefined) {
@@ -286,6 +300,10 @@ function buildUI() {
 
             if (!url.toString().includes('192.168.1.254:44444')) {
                 wlan_voucher_fill_button.classList.add('hide');
+            }
+
+            if (!url.toString().includes('tmanager.tomas-travel.com')) {
+                tmanager_fill_button.classList.add('hide');
             }
         });
 }
