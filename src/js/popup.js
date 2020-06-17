@@ -41,7 +41,7 @@ function handleFile(e) {
             hand over to database
         */
         let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
-        db.initDB(sheet_as_json)
+        db.initDB(sheet_as_json);
     };
     reader.readAsArrayBuffer(f);
 }
