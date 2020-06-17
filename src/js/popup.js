@@ -233,12 +233,28 @@ function buildUI() {
 
     // Button "WLAN Voucher ausfüllen"
     document.getElementById('wlan_voucher_fill').addEventListener('click', event => {
+        if (result_table == null) {
+            alert("keine Tabellenzeile ausgewählt");
+            return;
+        }
+
+        let data = result_table.getSelectedData()[0];
+        if (data == null) {
+            alert("keine Tabellenzeile ausgewählt");
+            return;
+        }
+
+        // message to content script fill_vlan_voucher.js
         chrome.tabs.query({
             active: true,
             currentWindow: true
         }, function (tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {
-                data: ""
+                data: {
+                    hotspot: util.getHotspot(data.apartment),
+                    gueltigkeit: util.getVoucherGueltigkeit(data.abreise),
+                    kommentar: util.getKommentar(data)
+                }
             });
         });
     });
@@ -269,8 +285,7 @@ function buildUI() {
             }
 
             if (!url.toString().includes('192.168.1.254:44444')) {
-                // TODO
-                // wlan_voucher_fill_button.classList.add('hide');
+                wlan_voucher_fill_button.classList.add('hide');
             }
         });
 }

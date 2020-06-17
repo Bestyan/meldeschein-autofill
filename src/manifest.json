@@ -15,7 +15,7 @@
       "js": ["content_scripts/fill_meldeschein.js"]
     },
     {
-      "matches": ["file://*"],
+      "matches": ["http://192.168.1.254:44444/*", "https://192.168.1.254:44444/*"],
       "js": ["content_scripts/fill_wlan_voucher.js"]
     }
   ],
