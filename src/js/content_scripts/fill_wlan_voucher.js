@@ -30,6 +30,7 @@ chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
         const tdTags = document.getElementsByTagName("td");
         const data_fields = {};
+        const text_to_data_field = JSON.parse(JSON.stringify(TEXT_TO_DATA_FIELD));
 
         // find input fields / selects
         [...tdTags].forEach(
@@ -40,19 +41,19 @@ chrome.runtime.onMessage.addListener(
                     return;
                 }
                 const textNode = td.childNodes[0];
-                for (const [text, data_field] of Object.entries(TEXT_TO_DATA_FIELD)) {
+                for (const [text, data_field] of Object.entries(text_to_data_field)) {
 
                     if (textNode.nodeValue.includes(text)) {
                         let input_field = td.nextSibling.childNodes[0];
                         data_fields[data_field] = input_field;
-                        delete TEXT_TO_DATA_FIELD[text];
+                        delete text_to_data_field[text];
                         break;
                     }
                 }
             }
         );
 
-        console.log(data_fields);
+        console.log(request.data);
 
         data_fields["anzahl"].value = 2;
         data_fields["drucken"].checked = true;
