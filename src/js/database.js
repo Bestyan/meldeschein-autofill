@@ -3,9 +3,13 @@ import util from './data_utils';
 import constants from './constants';
 
 const LOCALSTORAGE_LAST_UPLOAD = "xls_upload_datetime";
-const TABLE_RAW = "raw_data";
 
+const TABLE_RAW = "raw_data";
 const TABLE_SEARCH = "clean_data";
+const TABLE_NAME_TO_GENDER = "name_to_gender";
+
+const PATH_TO_GENDER_JSON = "../data/gender.json";
+
 // columns of the SEARCH table
 const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email"];
 
@@ -31,9 +35,9 @@ export default {
      * sets up db for use
      * @param {JSON} rows 
      */
-    initDB: function(rows) {
+    initDB: function (rows) {
         /*
-            clear old data and create table
+        clear old data and create table
         */
         this.resetDB();
         DB.createTableWithData(TABLE_RAW, rows);
@@ -58,14 +62,26 @@ export default {
             DB.commit();
 
         });
-
         this.setUploadTime();
+
+        this.initGenderTable();
+    },
+
+    initGenderTable: function () {
+        if (DB.tableExists(TABLE_NAME_TO_GENDER)) {
+            return;
+        }
+
+        console.log(window.location.pathname);
+        let name_to_gender_json = require(PATH_TO_GENDER_JSON);
+        DB.createTableWithData(TABLE_NAME_TO_GENDER, name_to_gender_json);
+        DB.commit();
     },
 
     /**
      * sets xls_upload_datetime to current time
      */
-    setUploadTime: function() {
+    setUploadTime: function () {
         this.xls_upload_datetime = new Date().toLocaleDateString('de-DE', constants.STATUS_DATE_FORMAT);
         window.localStorage.setItem(LOCALSTORAGE_LAST_UPLOAD, this.xls_upload_datetime);
         this.refreshStatus();
@@ -75,7 +91,7 @@ export default {
         return DB.tableExists(TABLE_SEARCH) && DB.queryAll(TABLE_SEARCH).length > 0;
     },
 
-    search: function(params) {
+    search: function (params) {
         if (!this.hasData()) {
             alert("Keine Daten. Bitte xls hochladen");
         }
@@ -94,5 +110,20 @@ export default {
                 }
             });
         }
+    },
+
+    getAnrede: function (vorname) {
+        const result = DB.queryAll(TABLE_NAME_TO_GENDER, {
+            query: {
+                "name": vorname
+            },
+            limit: 1
+        });
+
+        if (result.length === 0) {
+            return constants.ANREDE_GAST;
+        }
+
+        return result[0].gender === 'M' ? constants.ANREDE_HERR : constants.ANREDE_FRAU;
     }
 }
