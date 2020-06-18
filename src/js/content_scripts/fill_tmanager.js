@@ -39,14 +39,21 @@ chrome.runtime.onMessage.addListener(
             }
         );
 
+        // weird jsp mechanics require everything to be clicked in order to register
+        if(!radioAnreise.checked){
+            radioAnreise.click();
+        }
+        if(!checkboxBuchung.checked){
+            checkboxBuchung.click();
+        }
+        if(!checkboxEigenbelegung.checked){
+            checkboxEigenbelegung.click();
+        }
+
         // this is not enough for the date fields. need to trigger them via datepicker as well.
         dateFields[0].value = ' ' + new Date(new Date().getFullYear(), 0, 1).toLocaleDateString("de-DE", DD_MM_YYYY);
         dateFields[1].value = ' ' + new Date(new Date().getFullYear(), 11, 31).toLocaleDateString("de-DE", DD_MM_YYYY);
 
-        // this however is ok
-        radioAnreise.checked = true;
-        checkboxBuchung.checked = true;
-        checkboxEigenbelegung.checked = true;
 
         // picking dates via datepicker because weird jsp stuff doesn't recognize the set values
         const datepickers = document.getElementsByClassName('tm-handCursor');
