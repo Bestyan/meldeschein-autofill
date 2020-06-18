@@ -1,6 +1,6 @@
 {
   "name": "Meldeschein Autofill",
-  "version": "0.2",
+  "version": "1.2.0",
   "options_page": "options.html",
   "background": {
     "page": "background.html"
