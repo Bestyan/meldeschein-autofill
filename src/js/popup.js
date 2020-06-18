@@ -22,6 +22,7 @@ db.setup(refreshStatus);
  * @param {Event} e 
  */
 function handleFile(e) {
+    setLoadingScreenVisible(true);
     let files = e.target.files,
         f = files[0];
     let reader = new FileReader();
@@ -42,6 +43,7 @@ function handleFile(e) {
         */
         let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
         db.initDB(sheet_as_json);
+        setLoadingScreenVisible(false);
     };
     reader.readAsArrayBuffer(f);
 }
@@ -169,6 +171,16 @@ function generateMail() {
     const isFirstVisit = document.getElementById('is_first_visit').value == 'true';
 
     mail.generate(data, isFirstVisit);
+}
+
+function setLoadingScreenVisible(visible){
+    const loadingScreen = document.getElementById('loading_screen');
+    loadingScreen.classList.remove('hide', 'flex');
+    if(visible){
+        loadingScreen.classList.add('flex');
+    } else{
+        loadingScreen.classList.add('hide');
+    }
 }
 
 function buildUI() {

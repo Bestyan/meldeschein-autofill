@@ -20,3 +20,22 @@ body{
 .hide{
     display: none;
 }
+
+.flex{
+    display: flex;
+}
+
+#loading_screen{
+    height: 100vh;
+    width: 98vw;
+    position: absolute;
+    background: lightpink;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.6;
+}
+
+#loading_message{
+    font-size: 24pt;
+    font-weight: bold;
+}
