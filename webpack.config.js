@@ -20,6 +20,7 @@ if (fileSystem.existsSync(secretsPath)) {
 
 var options = {
   mode: process.env.NODE_ENV || "development",
+  target: 'node',
   entry: {
     popup: path.join(__dirname, "src", "js", "popup.js"),
     options: path.join(__dirname, "src", "js", "options.js"),
@@ -74,9 +75,14 @@ var options = {
       }
     }]),
     new CopyWebpackPlugin(patterns = [{
-      from: 'src/js/content_scripts',
-      to: 'content_scripts'
-    }]),
+        from: 'src/js/content_scripts',
+        to: 'content_scripts'
+      },
+      {
+        from: 'src/data',
+        to: 'data'
+      }
+    ]),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "src", "popup.html"),
       filename: "popup.html",

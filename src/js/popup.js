@@ -214,12 +214,18 @@ function buildUI() {
             "ort0_input": data.ort
         };
 
+        const anrede = db.getAnrede(data.vorname);
+        form_data["anrede0"] = anrede;
+        // Anrede der Begleitperson != Anrede des Buchenden
+        form_data["anrede1"] = anrede === constants.ANREDE_GAST ? constants.ANREDE_GAST : anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
+        
+
         if (data.land !== "") {
             form_data["land0_input"] = data.land; // Land in Adresse (vorausgefüllt Deutschland)
             form_data["staat0_input"] = data.land; // Staatsangehörigkeit Gast
             form_data["staat1_input"] = data.land; // Staatsangehörigkeit Begl. 1
         }
-        
+
         // send data to content script fill_meldeschein.js
         chrome.tabs.query({
             active: true,
