@@ -1,24 +1,24 @@
-var webpack = require("webpack"),
-  path = require("path"),
-  fileSystem = require("fs"),
-  env = require("./utils/env"),
-  CleanWebpackPlugin = require("clean-webpack-plugin").CleanWebpackPlugin,
-  CopyWebpackPlugin = require("copy-webpack-plugin"),
-  HtmlWebpackPlugin = require("html-webpack-plugin"),
-  WriteFilePlugin = require("write-file-webpack-plugin");
+const webpack = require("webpack");
+const path = require("path");
+const fileSystem = require("fs");
+const env = require("./utils/env");
+const CleanWebpackPlugin = require("clean-webpack-plugin").CleanWebpackPlugin;
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const WriteFilePlugin = require("write-file-webpack-plugin");
 
 // load the secrets
-var alias = {};
+const alias = {};
 
-var secretsPath = path.join(__dirname, ("secrets." + env.NODE_ENV + ".js"));
+const secretsPath = path.join(__dirname, ("secrets." + env.NODE_ENV + ".js"));
 
-var fileExtensions = ["jpg", "jpeg", "png", "gif", "eot", "otf", "svg", "ttf", "woff", "woff2"];
+const fileExtensions = ["jpg", "jpeg", "png", "gif", "eot", "otf", "svg", "ttf", "woff", "woff2"];
 
 if (fileSystem.existsSync(secretsPath)) {
-  alias["secrets"] = secretsPath;
+  alias.secrets = secretsPath;
 }
 
-var options = {
+const options = {
   mode: process.env.NODE_ENV || "development",
   entry: {
     popup: path.join(__dirname, "src", "js", "popup.js"),
@@ -65,7 +65,7 @@ var options = {
     new CopyWebpackPlugin({
       patterns: [{
         from: "src/manifest.json",
-        transform: function (content, path) {
+        transform(content, path) {
           // generates the manifest file using the package.json informations
           return Buffer.from(JSON.stringify({
             description: process.env.npm_package_description,
