@@ -55,9 +55,20 @@ chrome.runtime.onMessage.addListener(
 
         console.log(request.data);
 
+        // set value and trigger change event
+        data_fields["hotspot"].value = HOTSPOT_TO_VALUE[request.data.hotspot];
+        const changeEvent_hotspot = document.createEvent("HTMLEvents");
+        changeEvent_hotspot.initEvent("change", false, true);
+        data_fields["hotspot"].dispatchEvent(changeEvent_hotspot);
+        
+        // set value and trigger change event
+        data_fields["gueltigkeit"].value = GUELTIGKEIT_TO_VALUE[request.data.gueltigkeit];
+        const changeEvent_gueltigkeit = document.createEvent("HTMLEvents");
+        changeEvent_gueltigkeit.initEvent("change", false, true);
+        data_fields["hotspot"].dispatchEvent(changeEvent_gueltigkeit);
+
+        // just setting value is enough here
         data_fields["anzahl"].value = 2;
         data_fields["drucken"].checked = true;
-        data_fields["hotspot"].value = HOTSPOT_TO_VALUE[request.data.hotspot];
-        data_fields["gueltigkeit"].value = GUELTIGKEIT_TO_VALUE[request.data.gueltigkeit];
         data_fields["kommentar"].value = request.data.kommentar;
     });
