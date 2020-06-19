@@ -1,7 +1,7 @@
 const XLSX = require('xlsx');
 const fs = require('fs');
 
-const OUTPUT_FILE_PATH = 'src/data/genders.json';
+const OUTPUT_FILE_PATH = 'src/js/firstnames.json';
 const INPUT_FILE_PATH = 'vornamen.xls';
 
 console.log("reading xls");
