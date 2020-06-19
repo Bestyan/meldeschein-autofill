@@ -35,6 +35,9 @@ chrome.runtime.onMessage.addListener(
                 const textNode = select.parentNode.previousSibling.childNodes[0].childNodes[0];
                 if (textNode.nodeValue.includes('Anzahl Datensätze')) {
                     select.value = -1; // -1 = Alle
+                    const changeEvent = document.createEvent("HTMLEvents");
+                    changeEvent.initEvent("change", false, true);
+                    select.dispatchEvent(changeEvent);
                 }
             }
         );
