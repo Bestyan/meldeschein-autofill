@@ -173,12 +173,12 @@ function generateMail() {
     mail.generate(data, isFirstVisit);
 }
 
-function setLoadingScreenVisible(visible){
+function setLoadingScreenVisible(visible) {
     const loadingScreen = document.getElementById('loading_screen');
     loadingScreen.classList.remove('hide', 'flex');
-    if(visible){
+    if (visible) {
         loadingScreen.classList.add('flex');
-    } else{
+    } else {
         loadingScreen.classList.add('hide');
     }
 }
@@ -230,7 +230,7 @@ function buildUI() {
         form_data["anrede0"] = anrede;
         // Anrede der Begleitperson != Anrede des Buchenden
         form_data["anrede1"] = anrede === constants.ANREDE_GAST ? constants.ANREDE_GAST : anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
-        
+
 
         if (data.land !== "") {
             form_data["land0_input"] = data.land; // Land in Adresse (vorausgefüllt Deutschland)
@@ -316,7 +316,8 @@ function buildUI() {
                 meldeschein_fill_button.classList.add('hide');
             }
 
-            if (!url.toString().includes('192.168.1.254:44444')) {
+            if (!url.toString().includes('192.168.1.254:44444') &&
+                !url.toString().includes('file://')) {
                 wlan_voucher_fill_button.classList.add('hide');
             }
 
