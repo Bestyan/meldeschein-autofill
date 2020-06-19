@@ -76,26 +76,22 @@ var options = {
     new CopyWebpackPlugin(patterns = [{
         from: 'src/js/content_scripts',
         to: 'content_scripts'
-      },
-      {
-        from: 'src/data',
-        to: 'data'
       }
     ]),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "src", "popup.html"),
       filename: "popup.html",
-      chunks: ["popup"]
+      chunks: ["popup"] // list of js bundle files to be included
     }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "src", "options.html"),
       filename: "options.html",
-      chunks: ["options"]
+      chunks: ["options"] // list of js bundle files to be included
     }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "src", "background.html"),
       filename: "background.html",
-      chunks: ["background"]
+      chunks: ["background"] // list of js bundle files to be included
     }),
     new WriteFilePlugin()
   ]

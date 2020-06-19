@@ -8,8 +8,6 @@ const TABLE_RAW = "raw_data";
 const TABLE_SEARCH = "clean_data";
 const TABLE_NAME_TO_GENDER = "name_to_gender";
 
-const PATH_TO_GENDER_JSON = "../data/gender.json";
-
 // columns of the SEARCH table
 const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email"];
 
@@ -28,6 +26,11 @@ export default {
         }
         if (DB.tableExists(TABLE_SEARCH)) {
             DB.dropTable(TABLE_SEARCH);
+        }
+
+        // TEMPORARY
+        if (DB.tableExists(TABLE_NAME_TO_GENDER)) {
+            DB.dropTable(TABLE_NAME_TO_GENDER);
         }
     },
 
@@ -71,9 +74,8 @@ export default {
         if (DB.tableExists(TABLE_NAME_TO_GENDER)) {
             return;
         }
-
-        console.log(window.location.pathname);
-        let name_to_gender_json = require(PATH_TO_GENDER_JSON);
+        const name_to_gender_json = require("./firstnames.json");
+        console.log(name_to_gender_json);
         DB.createTableWithData(TABLE_NAME_TO_GENDER, name_to_gender_json);
         DB.commit();
     },
