@@ -10,81 +10,59 @@ export default {
                 .replace(/ö/g, "oe")
                 .replace(/ü/g, "ue")
                 .replace(/ß/g, "ss")
+                .replace(/ẞ/g, "ss")
                 .replace(/[ \/]/g, "_")
                 .replace(/#/g, "Nr");
         }
     },
 
     processKunde: kunde => {
-        try {
-
-            let name = kunde.split(",");
-            return {
-                vorname: name[1].trim(),
-                nachname: name[0].trim()
-            };
-
-        } catch (exception) {
-
-            console.log(`non-conforming data in column Kunde: "${kunde}". Retrying...`);
-            /*
-                retry with a space as the delimiter
-            */
-            try {
-                let name = kunde.trim().split(" ");
-                return {
-                    vorname: name[1].trim(),
-                    nachname: name[0].trim()
-                };
-
-            } catch (exception) {
-                console.log(`non-conforming data "${kunde}" is not salvageable. Skipping...`);
-                return {
-                    vorname: "",
-                    nachname: ""
-                };
+        const processed = {
+            vorname: "",
+            nachname: ""
+        };
+        let success = false;
+        for (const delimiter of [",", " "]) {
+            if (delimiter === " ") console.log(`non-conforming data in column Kunde: "${kunde}". Retrying...`);
+            let name = kunde.split(delimiter);
+            if (name.length >= 2) {
+                processed.vorname = name[1].trim();
+                processed.nachname = name[0].trim();
+                success = true;
+                break;
             }
         }
+        if (!success) console.log(`non-conforming data "${kunde}" is not salvageable. Skipping...`);
+        return processed;
     },
 
     processAnschrift: anschrift => {
+        const result = {
+            strasse: "",
+            plz: "",
+            ort: "",
+            land: ""
+        };
+
         try {
             let adressdaten = anschrift
                 .replace(/\#[0-9]+\#/g, "") // remove rebate patterns like #15# from the start
                 .trim()
                 .match(/(.{3,}) ([0-9]{4,5}) (.+)/m); // match '3+letters 4-5numbers 1+letters'
             if (adressdaten != null && adressdaten.length == 4) {
-
-                let result = {
-                    strasse: adressdaten[1],
-                    plz: adressdaten[2],
-                    ort: adressdaten[3],
-                    land: ""
-                };
-
+                result.strasse = adressdaten[1];
+                result.plz = adressdaten[2];
+                result.ort = adressdaten[3];
                 // 5-stellige PLZ => DE
                 // 4-stellige PLZ => NL
                 result.land = result.plz.length == 5 ? "Deutschland" : result.plz.length == 4 ? "Niederlande" : ""
-
-                return result;
-            } else {
-                return {
-                    strasse: "",
-                    plz: "",
-                    ort: "",
-                    land: ""
-                };
             }
+            return result;
         } catch (exception) {
             console.log(`non-conforming data in column Anschrift: "${row.Anschrift}". Skipping...`);
             console.log(exception);
 
-            return {
-                strasse: "",
-                plz: "",
-                ort: "",
-                land: ""
-            };
+            return result;
         }
     },
 

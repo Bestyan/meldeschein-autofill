@@ -16,11 +16,11 @@ const DB = new localStorageDB("meldeschein", localStorage);
 export default {
     xls_upload_datetime: window.localStorage.getItem(LOCALSTORAGE_LAST_UPLOAD),
 
-    setup: function (refreshStatusFunc) {
+    setup(refreshStatusFunc) {
         this.refreshStatus = refreshStatusFunc;
     },
 
-    resetDB: function () {
+    resetDB() {
         if (DB.tableExists(TABLE_RAW)) {
             DB.dropTable(TABLE_RAW);
         }
@@ -38,7 +38,7 @@ export default {
      * sets up db for use
      * @param {JSON} rows 
      */
-    initDB: function (rows) {
+    initDB(rows) {
         /*
         clear old data and create table
         */
@@ -70,7 +70,7 @@ export default {
         this.initGenderTable();
     },
 
-    initGenderTable: function () {
+    initGenderTable() {
         if (DB.tableExists(TABLE_NAME_TO_GENDER)) {
             return;
         }
@@ -83,17 +83,17 @@ export default {
     /**
      * sets xls_upload_datetime to current time
      */
-    setUploadTime: function () {
+    setUploadTime() {
         this.xls_upload_datetime = new Date().toLocaleDateString('de-DE', constants.STATUS_DATE_FORMAT);
         window.localStorage.setItem(LOCALSTORAGE_LAST_UPLOAD, this.xls_upload_datetime);
         this.refreshStatus();
     },
 
-    hasData: function () {
+    hasData() {
         return DB.tableExists(TABLE_SEARCH) && DB.queryAll(TABLE_SEARCH).length > 0;
     },
 
-    search: function (params) {
+    search(params) {
         if (!this.hasData()) {
             alert("Keine Daten. Bitte xls hochladen");
         }
@@ -114,10 +114,10 @@ export default {
         }
     },
 
-    getAnrede: function (vorname) {
+    getAnrede(vorname) {
         const result = DB.queryAll(TABLE_NAME_TO_GENDER, {
             query: {
-                "name": vorname
+                name: vorname
             },
             limit: 1
         });

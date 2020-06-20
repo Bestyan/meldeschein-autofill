@@ -18,13 +18,13 @@ Content-Transfer-Encoding: base64
 ${Buffer.from(`Hallo ${data.anrede} ${data.nachname},
 es freut uns sehr, dass Sie bei uns waren und Sie sich wohl gefühlt haben.
 
-Da inzwischen nahezu alle Interessenten vor der Wahl ihrer Unterkunft die Bewertungen in den Portalen lesen, ist es für uns existentiell, dass wir im Internet bewertet werden.   
+Da inzwischen nahezu alle Interessenten vor der Wahl ihrer Unterkunft die Bewertungen in den Portalen lesen, ist es für uns existentiell, dass wir im Internet bewertet werden.
 Deshalb habe ich Sie bei Abreise gebeten, ${isFirstVisit ? "" : "auch wenn Sie bereits bei uns zu Gast waren, " }für unser Haus eine kurze Bewertung abzugeben.
 
-Für uns ist das unabhängige Bewertungsportal www.HolidayCheck.de entscheidend und wir würden uns freuen, wenn Sie hier Ihre Eindrücke von unserem Haus kurz schildern würden.  
+Für uns ist das unabhängige Bewertungsportal www.HolidayCheck.de entscheidend und wir würden uns freuen, wenn Sie hier Ihre Eindrücke von unserem Haus kurz schildern würden.
 Einfach auf den Link gehen, Button „Bewerten“ und Apartmenthaus Sonnenschein eingeben und uns dann bewerten.
 
-Um gefälschten Bewertungen vorzubeugen, wird Ihnen HolidayCheck nach Durchführung der Bewertung eine Mail zuschicken, in der Sie gebeten werden, diese zu bestätigen. Erst dann kann die Bewertung veröffentlicht werden.  
+Um gefälschten Bewertungen vorzubeugen, wird Ihnen HolidayCheck nach Durchführung der Bewertung eine Mail zuschicken, in der Sie gebeten werden, diese zu bestätigen. Erst dann kann die Bewertung veröffentlicht werden.
 
 Vielen Dank im Voraus und  Viele Grüße aus Inzell
 Andrea und Jan Schattenberg
