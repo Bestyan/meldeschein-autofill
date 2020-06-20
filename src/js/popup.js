@@ -19,7 +19,7 @@ db.setup(refreshStatus);
 
 /**
  * reads xls to json
- * @param {Event} e 
+ * @param {Event} e
  */
 function handleFile(e) {
     setLoadingScreenVisible(true);
@@ -62,7 +62,6 @@ function refreshStatus() {
 
     status.classList.add("good");
     status.innerHTML = `Daten vom ${db.xls_upload_datetime}`;
-    return;
 }
 
 function setupSearchDropDowns() {
@@ -227,15 +226,15 @@ function buildUI() {
         };
 
         const anrede = db.getAnrede(data.vorname);
-        form_data["anrede0"] = anrede;
+        form_data.anrede0 = anrede;
         // Anrede der Begleitperson != Anrede des Buchenden
-        form_data["anrede1"] = anrede === constants.ANREDE_GAST ? constants.ANREDE_GAST : anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
+        form_data.anrede1 = anrede === constants.ANREDE_GAST ? constants.ANREDE_GAST : anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
 
 
         if (data.land !== "") {
-            form_data["land0_input"] = data.land; // Land in Adresse (vorausgefüllt Deutschland)
-            form_data["staat0_input"] = data.land; // Staatsangehörigkeit Gast
-            form_data["staat1_input"] = data.land; // Staatsangehörigkeit Begl. 1
+            form_data.land0_input = data.land; // Land in Adresse (vorausgefüllt Deutschland)
+            form_data.staat0_input = data.land; // Staatsangehörigkeit Gast
+            form_data.staat1_input = data.land; // Staatsangehörigkeit Begl. 1
         }
 
         // send data to content script fill_meldeschein.js
