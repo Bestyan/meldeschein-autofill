@@ -21,24 +21,20 @@ chrome.runtime.onMessage.addListener(
 
         // Anzahl Datensaetze
         const selects = document.getElementsByTagName('select');
-        [...selects].forEach(
-            select => {
-
+        [...selects]
+            .filter((_) => {
                 // skip if no textNode as first child
-                if (select.parentNode.previousSibling == null ||
-                    !select.parentNode.previousSibling.hasChildNodes() ||
-                    !select.parentNode.previousSibling.childNodes[0].hasChildNodes() ||
-                    select.parentNode.previousSibling.childNodes[0].childNodes[0].nodeType !== Node.TEXT_NODE) {
-
-                    return;
-                }
-                const textNode = select.parentNode.previousSibling.childNodes[0].childNodes[0];
-                if (textNode.nodeValue.includes('Anzahl Datensätze')) {
-                    select.value = -1; // -1 = Alle
-                    const changeEvent = document.createEvent("HTMLEvents");
-                    changeEvent.initEvent("change", false, true);
-                    select.dispatchEvent(changeEvent);
-                }
+                return _.parentNode.previousSibling
+                && _.parentNode.previousSibling.hasChildNodes()
+                && _.parentNode.previousSibling.childNodes[0].hasChildNodes()
+                && _.parentNode.previousSibling.childNodes[0].childNodes[0].nodeType === Node.TEXT_NODE
+                && _.parentNode.previousSibling.childNodes[0].childNodes[0].nodeValue.includes('Anzahl Datensätze');
+            }).forEach(
+            select => {
+                select.value = -1; // -1 = Alle
+                const changeEvent = document.createEvent("HTMLEvents");
+                changeEvent.initEvent("change", false, true);
+                select.dispatchEvent(changeEvent);
             }
         );
 
@@ -54,8 +50,8 @@ chrome.runtime.onMessage.addListener(
         }
 
         // this is not enough for the date fields. need to trigger them via datepicker as well.
-        dateFields[0].value = ' ' + new Date(new Date().getFullYear(), 0, 1).toLocaleDateString("de-DE", DD_MM_YYYY);
-        dateFields[1].value = ' ' + new Date(new Date().getFullYear(), 11, 31).toLocaleDateString("de-DE", DD_MM_YYYY);
+        dateFields[0].value = new Date(new Date().getFullYear(), 0, 1).toLocaleDateString("de-DE", DD_MM_YYYY);
+        dateFields[1].value = new Date(new Date().getFullYear(), 11, 31).toLocaleDateString("de-DE", DD_MM_YYYY);
 
 
         // picking dates via datepicker because weird jsp stuff doesn't recognize the set values
@@ -87,12 +83,10 @@ chrome.runtime.onMessage.addListener(
                 const buttons = document.getElementsByClassName('tm-Component-Button-Save-Background');
                 [...buttons].forEach(
                     button => {
-                        if (!button.textContent.includes('SUCHE STARTEN')) {
-                            return;
+                        if (button.textContent.includes('SUCHE STARTEN')) {
+                            button.click();
                         }
-
-                        button.click();
                     });
             });
-
-    });
+    }
+);

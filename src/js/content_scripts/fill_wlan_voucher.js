@@ -32,14 +32,9 @@ chrome.runtime.onMessage.addListener(
         const data_fields = {};
         const text_to_data_field = JSON.parse(JSON.stringify(TEXT_TO_DATA_FIELD));
 
-        // find input fields / selects
-        [...tdTags].forEach(
+        // find input fields / selects, skip if no textNode as first child
+        [...tdTags].filter(_ => _.hasChildNodes() && _.childNodes[0].nodeType === Node.TEXT_NODE).forEach(
             td => {
-
-                // skip if no textNode as first child
-                if (!td.hasChildNodes() || td.childNodes[0].nodeType !== Node.TEXT_NODE) {
-                    return;
-                }
                 const textNode = td.childNodes[0];
                 for (const [text, data_field] of Object.entries(text_to_data_field)) {
 
@@ -56,19 +51,20 @@ chrome.runtime.onMessage.addListener(
         console.log(request.data);
 
         // set value and trigger change event
-        data_fields["hotspot"].value = HOTSPOT_TO_VALUE[request.data.hotspot];
+        data_fields.hotspot.value = HOTSPOT_TO_VALUE[request.data.hotspot];
         const changeEvent_hotspot = document.createEvent("HTMLEvents");
         changeEvent_hotspot.initEvent("change", false, true);
-        data_fields["hotspot"].dispatchEvent(changeEvent_hotspot);
+        data_fields.hotspot.dispatchEvent(changeEvent_hotspot);
         
         // set value and trigger change event
-        data_fields["gueltigkeit"].value = GUELTIGKEIT_TO_VALUE[request.data.gueltigkeit];
+        data_fields.gueltigkeit.value = GUELTIGKEIT_TO_VALUE[request.data.gueltigkeit];
         const changeEvent_gueltigkeit = document.createEvent("HTMLEvents");
         changeEvent_gueltigkeit.initEvent("change", false, true);
-        data_fields["hotspot"].dispatchEvent(changeEvent_gueltigkeit);
+        data_fields.hotspot.dispatchEvent(changeEvent_gueltigkeit);
 
         // just setting value is enough here
-        data_fields["anzahl"].value = 2;
-        data_fields["drucken"].checked = true;
-        data_fields["kommentar"].value = request.data.kommentar;
-    });
+        data_fields.anzahl.value = 2;
+        data_fields.drucken.checked = true;
+        data_fields.kommentar.value = request.data.kommentar;
+    }
+);
