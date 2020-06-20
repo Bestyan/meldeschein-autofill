@@ -81,12 +81,7 @@ chrome.runtime.onMessage.addListener(
             .then(() => {
                 // Suche starten
                 const buttons = document.getElementsByClassName('tm-Component-Button-Save-Background');
-                [...buttons].forEach(
-                    button => {
-                        if (button.textContent.includes('SUCHE STARTEN')) {
-                            button.click();
-                        }
-                    });
+                [...buttons].filter(_ => _.textContent.includes('SUCHE STARTEN')).forEach(button => button.click());
             });
     }
 );
