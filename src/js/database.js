@@ -32,6 +32,7 @@ export default {
         if (DB.tableExists(TABLE_NAME_TO_GENDER)) {
             DB.dropTable(TABLE_NAME_TO_GENDER);
         }
+        DB.commit();
     },
 
     /**
