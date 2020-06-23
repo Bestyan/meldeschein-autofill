@@ -2,13 +2,38 @@
     styles that are consistent between pages
 */
 
-html{
+html {
     display: flex;
     flex-direction: column;
     padding: 5px;
 }
 
-button, label.button {
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-bottom: .5rem;
+    font-family: inherit;
+    font-weight: bold;
+    line-height: 1.2;
+    color: inherit;
+}
+
+.h1,
+h1 {
+    font-size: 1.5rem;
+}
+
+button,
+label.button {
     display: inline-block;
     font-weight: 400;
     text-align: center;
@@ -24,39 +49,52 @@ button, label.button {
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
-button.neutral, label.button.neutral {
+button.neutral,
+label.button.neutral {
     color: #fff;
     background-color: #007bff;
     border-color: #007bff;
 }
 
-button.good, label.button.good  {
+button.good,
+label.button.good {
     color: #fff;
     background-color: #28a745;
     border-color: #28a745;
 }
 
-button.bad, label.button.bad  {
+button.bad,
+label.button.bad {
     color: #fff;
     background-color: #dc3545;
     border-color: #dc3545;
+}
+
+button.settings {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.bold{
+    font-weight: bold;
 }
 
 .hide {
     display: none;
 }
 
-.flex{
+.flex {
     display: flex;
 }
 
-.hide-input-file{
+.hide-input-file {
     width: 0.1px;
-	height: 0.1px;
-	opacity: 0;
-	overflow: hidden;
-	position: absolute;
-	z-index: -1;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
 }
 
 .row {
@@ -74,6 +112,6 @@ button.bad, label.button.bad  {
     flex-direction: column;
 }
 
-.row > *{
+.row>* {
     margin: 0 2px;
 }
