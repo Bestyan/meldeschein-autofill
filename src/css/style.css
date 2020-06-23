@@ -1,0 +1,79 @@
+/*
+    styles that are consistent between pages
+*/
+
+html{
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+}
+
+button, label.button {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    user-select: none;
+    border: 1px solid transparent;
+    font-size: 1rem;
+    line-height: 1rem;
+    border-radius: .25rem;
+    padding: 2px 6px;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+button.neutral, label.button.neutral {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+button.good, label.button.good  {
+    color: #fff;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+button.bad, label.button.bad  {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.hide {
+    display: none;
+}
+
+.flex{
+    display: flex;
+}
+
+.hide-input-file{
+    width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    margin: 2px 0;
+}
+
+.space-between {
+    justify-content: space-between;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+}
+
+.row > *{
+    margin: 0 2px;
+}
