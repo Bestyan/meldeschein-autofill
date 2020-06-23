@@ -1,15 +1,13 @@
 
+@import "reset.css";
 @import url('~tabulator-tables/dist/css/tabulator.min.css');
+@import "style.css";
 
-body{
-    width: 98vw;
-}
-
-.bad{
+span.bad{
     color: red;
 }
 
-.good{
+span.good{
     color: green;
 }
 
@@ -17,22 +15,15 @@ body{
     font-weight: bold;
 }
 
-.hide{
-    display: none;
-}
-
-.flex{
-    display: flex;
-}
-
 #loading_screen{
-    height: 100vh;
-    width: 98vw;
+    height: 100%;
+    width: 100%;
     position: absolute;
     background: lightpink;
     justify-content: center;
     align-items: center;
     opacity: 0.6;
+    margin: -5px 0 0 -5px; /* offset padding */
 }
 
 #loading_message{
