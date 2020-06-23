@@ -1,59 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="col">
 
 <head>
   <meta charset="UTF-8">
   <title></title>
 </head>
 
-<body>
+<body class="col">
   <div id="loading_screen" class="hide">
     <div id="loading_message">lädt ...</div>
   </div>
-  <h2>Meldeschein Autofill</h2>
 
-  <div>
-    Status: <span id="status" class="status bad">no data</span><button id="delete">Daten löschen</button>
+  <div class="col">
+    <div class="row">
+      <h2>Meldeschein Autofill</h2>
+    </div>
+
+    <div class="row">
+      <span>Status: </span><span id="status" class="status bad">no data</span>
+    </div>
+
+    <div class="row">
+      <input type="file" id="upload" class="hide-input-file"></input>
+      <label for="upload" class="button neutral">xls hochladen</label>
+      <button id="delete" class="bad">Daten löschen</button>
+    </div>
+
+    <!-- search fields anreise/abreise nachname/etc -->
+    <form id="search" class="col">
+
+      <div class="row">
+        <select id="search1"></select><input type="date" step="1" id="search1_input" />
+        <button id="date_plus_one" type="button" class="good">+1</button>
+        <button id="date_minus_one" type="button" class="bad">-1</button>
+      </div>
+
+      <div class="row">
+        <select id="search2"></select><input type="text" id="search2_input" />
+      </div class="row">
+
+      <div class="row">
+        <button type="submit" class="neutral">suchen</button>
+      </div>
+
+    </form>
+
+    <!-- search result table -->
+    <div class="row">
+      <div id="search_results">
+      </div>
+    </div>
+    <!-- buttons for fill actions -->
+    <div class="row">
+      <button id="meldeschein_fill" class="neutral">Meldeschein ausfüllen</button>
+      <button id="wlan_voucher_fill" class="neutral">WLAN Voucher ausfüllen</button>
+      <button id="tmanager_fill" class="neutral">TManager ausfüllen</button>
+    </div>
   </div>
 
-  <div>
-    <input type="file" id="upload" value="xls hochladen" />
-  </div>
+  <!-- email generation -->
+  <div class="col">
 
-  <form id="search">
-    <div>
-      <select id="search1"></select><input type="date" step="1" id="search1_input" />
-      <button id="date_plus_one" type="button">+1</button>
-      <button id="date_minus_one" type="button">-1</button>
+    <div class="row">
+      <h2>Bewertungs-Email</h2>
     </div>
-    <div>
-      <select id="search2"></select><input type="text" id="search2_input" />
-    </div>
-    <div>
-      <button type="submit">suchen</button>
-    </div>
-  </form>
 
-  <div id="search_container">
-    <div id="search_results">
-    </div>
-    <button id="meldeschein_fill">Meldeschein ausfüllen</button>
-    <button id="wlan_voucher_fill">WLAN Voucher ausfüllen</button>
-    <button id="tmanager_fill">TManager ausfüllen</button>
-  </div>
+    <div class="row">
+      <select id="anrede">
+        <option value="Familie">Familie</option>
+        <option value="Herr">Herr</option>
+        <option value="Frau">Frau</option>
+      </select>
 
-  <div>
-    <h2>Bewertungs-Email</h2>
-    <select id="anrede">
-      <option value="Familie">Familie</option>
-      <option value="Herr">Herr</option>
-      <option value="Frau">Frau</option>
-    </select>
-    <select id="is_first_visit">
-      <option value="true">war zum ersten Mal da</option>
-      <option value="false">war zum wiederholten Mal da</option>
-    </select>
-    <button id="generate">erstellen</button>
+      <select id="is_first_visit">
+        <option value="true">war zum ersten Mal da</option>
+        <option value="false">war zum wiederholten Mal da</option>
+      </select>
+
+      <button id="generate" class="neutral">erstellen</button>
+    </div>
   </div>
 </body>
 
