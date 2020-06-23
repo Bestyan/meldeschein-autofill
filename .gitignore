@@ -3,3 +3,4 @@ build
 secrets.*.js
 *.zip
 *.xls
+utils/email.js
