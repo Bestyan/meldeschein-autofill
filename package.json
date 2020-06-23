@@ -6,7 +6,8 @@
     "build": "node utils/build.js",
     "start": "node utils/webserver.js",
     "zip": "node utils/zip.js",
-    "firstnames": "node utils/make_firstname_json.js"
+    "firstnames": "node utils/make_firstname_json.js",
+    "email": "node utils/email.js"
   },
   "devDependencies": {
     "archiver": "^4.0.1",
@@ -23,7 +24,9 @@
     "write-file-webpack-plugin": "4.5.1"
   },
   "dependencies": {
+    "imap": "^0.8.19",
     "localstoragedb": "^2.3.2",
+    "mailparser": "^2.7.7",
     "tabulator-tables": "^4.6.3",
     "xlsx": "^0.16.2"
   }
