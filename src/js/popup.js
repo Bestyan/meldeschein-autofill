@@ -3,7 +3,7 @@ import "../css/popup.css";
 
 import XLSX from 'xlsx';
 import Tabulator from 'tabulator-tables';
-import mail from './mail';
+import mail from './mail_generator';
 import db from './database';
 import util from './data_utils';
 import constants from './constants';
