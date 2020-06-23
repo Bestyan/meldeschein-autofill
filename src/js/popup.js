@@ -50,18 +50,21 @@ function handleFile(e) {
 
 function refreshStatus() {
     const NO_DATA = "keine Daten";
-    let status = document.getElementById("status");
-    status.classList.remove("good");
-    status.classList.remove("bad");
+    const status = document.getElementById("status");
+    status.classList.remove("good", "bad");
 
-    if (!db.hasData()) {
+    if (db.hasData()) {
+
+        status.classList.add("good");
+        status.innerHTML = `Daten vom ${db.xls_upload_datetime}`;
+
+    } else{
+
         status.classList.add("bad");
         status.innerHTML = NO_DATA;
         return;
+        
     }
-
-    status.classList.add("good");
-    status.innerHTML = `Daten vom ${db.xls_upload_datetime}`;
 }
 
 function setupSearchDropDowns() {
