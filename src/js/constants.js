@@ -16,5 +16,7 @@ export default {
 
     ANREDE_HERR: 1,
     ANREDE_FRAU: 4,
-    ANREDE_GAST: 48
+    ANREDE_GAST: 48,
+
+    SETTINGS_EMAIL: "settings_email"
 };
