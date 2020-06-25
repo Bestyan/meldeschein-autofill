@@ -1,12 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="col">
+
 <head>
   <meta charset="UTF-8">
-  <title>Einstellungen</title>
+  <title>Einstellungen Meldeschein Autofill</title>
 </head>
-<body>
-  <div class="row">
-    
+
+<body class="col">
+
+  <div class="row space-between">
+    <h1>Mail Server</h1>
+    <span id="status" class="bad">test</span>
   </div>
+
+  <div class="row skewered">
+    <div>
+      <label for="email_user">E-Mail</label>
+    </div>
+    <div>
+      <input type="text" id="email_user" />
+    </div>
+  </div>
+
+  <div class="row skewered">
+    <div>
+      <label for="email_password">Passwort</label>
+    </div>
+    <div>
+      <input type="password" id="email_password" />
+    </div>
+  </div>
+
+  <div class="row skewered">
+    <div>
+      <label for="email_host">Server</label>
+    </div>
+    <div>
+      <input type="text" id="email_host" />
+    </div>
+  </div>
+
+  <div class="row skewered">
+    <div>
+      <label for="email_port">Port</label>
+    </div>
+    <div>
+      <input type="text" id="email_port" />
+    </div>
+  </div>
+
+  <div class="row skewered">
+    <div>
+      <input type="checkbox" id="email_tls" />
+    </div>
+    <div>
+      <label for="email_tls">TLS</label>
+    </div>
+  </div>
+
+  <div class="row center">
+    <div>
+      <button class="good" id="save">speichern</button>
+    </div>
+    <div>
+      <button class="bad" id="reset">zurücksetzen</button>
+    </div>
+    <div>
+      <button class="bad" id="wipe">alles, wirklich alles löschen</button>
+    </div>
+  </div>
+
+
 </body>
+
 </html>

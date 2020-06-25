@@ -12,11 +12,6 @@ import constants from './constants';
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
 const COLUMNS_FILTER = ["nachname", "strasse", "plz", "ort", "apartment", "personen", "vermerk", "email"];
 
-// Tabulator table
-let result_table = null;
-
-db.setup(refreshStatus);
-
 /**
  * reads xls to json
  * @param {Event} e
@@ -290,6 +285,15 @@ function fillMeldeschein() {
 function buildUI() {
     refreshStatus();
 
+    // Button Einstellungen (Zahnrad)
+    document.getElementById('settings').addEventListener('click', event => {
+        if (chrome.runtime.openOptionsPage) {
+            chrome.runtime.openOptionsPage();
+        } else {
+            window.open(chrome.runtime.getURL('options.html'));
+        }
+    });
+
     // Button "Daten löschen"
     document.getElementById('delete').addEventListener('click', event => {
         db.resetBookingsTables();
@@ -386,5 +390,10 @@ function buildUI() {
             }
         });
 }
+
+// Tabulator table
+let result_table = null;
+
+db.setup(refreshStatus);
 
 buildUI();

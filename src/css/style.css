@@ -115,3 +115,16 @@ button.settings {
 .row>* {
     margin: 0 2px;
 }
+
+.center{
+    justify-content: center;
+    align-items: center;
+}
+
+span.bad {
+    color: red;
+}
+
+span.good {
+    color: green;
+}

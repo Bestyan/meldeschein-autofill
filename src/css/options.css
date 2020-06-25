@@ -1,0 +1,29 @@
+@import "reset.css";
+@import "style.css";
+
+.row.skewered>div:first-child {
+    justify-content: flex-end;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 1px;
+}
+
+.row.skewered>div:last-child {
+    justify-content: flex-start;
+    flex-grow: 3;
+    flex-shrink: 3;
+    flex-basis: 1px;
+}
+
+.row.skewered>div:last-child>input {
+    flex-grow: 1;
+}
+
+.row.skewered>div {
+    align-items: center;
+    display: flex;
+}
+
+#email_port {
+    max-width: 40px;
+}
