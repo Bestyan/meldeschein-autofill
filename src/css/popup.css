@@ -2,14 +2,6 @@
 @import url('~tabulator-tables/dist/css/tabulator.min.css');
 @import "style.css";
 
-span.bad {
-    color: red;
-}
-
-span.good {
-    color: green;
-}
-
 .status {
     font-weight: bold;
 }
