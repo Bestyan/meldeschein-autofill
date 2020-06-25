@@ -3,7 +3,7 @@ export default {
     cleanColumnNames: sheet => {
         for (let i = 65; i < 100; i++) {
             let cell = sheet[`${String.fromCharCode(i)}1`]; // A1, B1, C1, ...
-            if (cell === undefined) {
+            if (typeof cell === 'undefined') {
                 break;
             }
             cell.w = cell.w.replace(/ä/g, "ae")
