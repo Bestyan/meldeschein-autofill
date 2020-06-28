@@ -20,17 +20,12 @@ export default {
         this.refreshStatus = refreshStatusFunc;
     },
 
-    resetDB() {
+    resetBookingsTables() {
         if (DB.tableExists(TABLE_RAW)) {
             DB.dropTable(TABLE_RAW);
         }
         if (DB.tableExists(TABLE_SEARCH)) {
             DB.dropTable(TABLE_SEARCH);
-        }
-
-        // TEMPORARY
-        if (DB.tableExists(TABLE_NAME_TO_GENDER)) {
-            DB.dropTable(TABLE_NAME_TO_GENDER);
         }
         DB.commit();
     },
@@ -43,7 +38,7 @@ export default {
         /*
         clear old data and create table
         */
-        this.resetDB();
+        this.resetBookingsTables();
         DB.createTableWithData(TABLE_RAW, rows);
         DB.createTable(TABLE_SEARCH, COLUMNS_SEARCH);
 
