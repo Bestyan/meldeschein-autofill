@@ -81,7 +81,7 @@ button.settings {
 }
 
 .hide {
-    display: none;
+    display: none !important;
 }
 
 .flex {
