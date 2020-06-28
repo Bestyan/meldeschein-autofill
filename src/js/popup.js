@@ -112,7 +112,7 @@ function searchDB(event) {
 
     console.log(rows);
     result_table = new Tabulator("#search_results", {
-        layout: "fitDataStretch",
+        layout: "fitDataFill",
         data: rows,
         selectableRollingSelection: true,
         selectable: 1,
@@ -292,7 +292,7 @@ function buildUI() {
 
     // Button "Daten löschen"
     document.getElementById('delete').addEventListener('click', event => {
-        db.resetDB();
+        db.resetBookingsTables();
         alert("Daten gelöscht");
         refreshStatus();
     });
