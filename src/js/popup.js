@@ -58,12 +58,12 @@ function refreshStatus() {
         status.classList.add("good");
         status.innerHTML = `Daten vom ${db.xls_upload_datetime}`;
 
-    } else{
+    } else {
 
         status.classList.add("bad");
         status.innerHTML = NO_DATA;
         return;
-        
+
     }
 }
 
@@ -139,12 +139,8 @@ function searchDB(event) {
                 field: "apartment"
             },
             {
-                title: "Personen",
-                field: "personen"
-            },
-            {
-                title: "Vermerk",
-                field: "vermerk"
+                title: "Email",
+                field: "email"
             }
         ]
     });
@@ -185,6 +181,112 @@ function setLoadingScreenVisible(visible) {
     }
 }
 
+function sendToContentScript(data) {
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+            data: data
+        });
+    });
+}
+
+function getSelectedTableRow() {
+    if (result_table == null) {
+        return null;
+    }
+
+    return result_table.getSelectedData()[0];
+}
+
+function fillMeldeschein() {
+    const data = getSelectedTableRow();
+    if (!data) {
+        alert("keine Tabellenzeile ausgewählt");
+        return;
+    }
+
+    let form_data = {
+        "anreise_input": data.anreise,
+        "abreise_input": data.abreise,
+        "nachname0": data.nachname, //Nachname Gast
+        "nachname1_input": data.nachname, // Nachname Begl. 1
+        "vorname0": data.vorname,
+        "strasse0": data.strasse || data.anschrift,
+        "plz0_input": data.plz,
+        "ort0_input": data.ort
+    };
+
+    if (data.land !== "") {
+        form_data.land0_input = data.land; // Land in Adresse (vorausgefüllt Deutschland)
+        form_data.staat0_input = data.land; // Staatsangehörigkeit Gast
+        form_data.staat1_input = data.land; // Staatsangehörigkeit Begl. 1
+    }
+
+    const vorname = data.vorname.split(" ")[0];
+    const anrede = db.getAnrede(vorname);
+    if (anrede) { // firstname has an entry in the firstname table
+
+        form_data.anrede0 = anrede;
+        // Anrede der Begleitperson != Anrede des Buchenden
+        form_data.anrede1 = anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
+
+        // send data to content script fill_meldeschein.js
+        sendToContentScript(form_data);
+
+    } else { // firstname does not have an entry in the firstname table => query the user for its gender
+        const genderPopup = document.getElementById("firstname_gender");
+
+        document.getElementById("firstname_male").addEventListener("click", function handler(event) {
+            genderPopup.classList.add("hide");
+            // add firstname entry to db
+            db.addFirstName(vorname, "M");
+            
+            // send firstname dependent data
+            sendToContentScript({
+                anrede0: constants.ANREDE_HERR,
+                anrede1: constants.ANREDE_FRAU,
+            });
+            
+            // remove event listener
+            event.target.removeEventListener(event.type, handler);
+        });
+        
+        document.getElementById("firstname_female").addEventListener("click", function handler(event) {
+            genderPopup.classList.add("hide");
+            // add firstname entry to db
+            db.addFirstName(vorname, "F");
+            
+            // send firstname dependent data
+            sendToContentScript({
+                anrede0: constants.ANREDE_FRAU,
+                anrede1: constants.ANREDE_HERR,
+            });
+
+            // remove event listener
+            event.target.removeEventListener(event.type, handler);
+        });
+        
+        document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
+            genderPopup.classList.add("hide");
+            // send firstname dependent data
+            sendToContentScript({
+                anrede0: constants.ANREDE_GAST,
+                anrede1: constants.ANREDE_GAST,
+            });
+
+            // remove event listener
+            event.target.removeEventListener(event.type, handler);
+        });
+
+        genderPopup.classList.remove("hide");
+
+        // send available data now, firstname data will be sent in a second message
+        sendToContentScript(form_data);
+    }
+}
+
 function buildUI() {
     refreshStatus();
 
@@ -205,51 +307,7 @@ function buildUI() {
     document.getElementById('search').addEventListener('submit', searchDB);
 
     // Button "Meldeschein ausfüllen"
-    document.getElementById('meldeschein_fill').addEventListener("click", event => {
-        if (result_table == null) {
-            alert("keine Tabellenzeile ausgewählt");
-            return;
-        }
-
-        let data = result_table.getSelectedData()[0];
-        if (data == null) {
-            alert("keine Tabellenzeile ausgewählt");
-            return;
-        }
-        console.log(data);
-        let form_data = {
-            "anreise_input": data.anreise,
-            "abreise_input": data.abreise,
-            "nachname0": data.nachname, //Nachname Gast
-            "nachname1_input": data.nachname, // Nachname Begl. 1
-            "vorname0": data.vorname,
-            "strasse0": data.strasse || data.anschrift,
-            "plz0_input": data.plz,
-            "ort0_input": data.ort
-        };
-
-        const anrede = db.getAnrede(data.vorname);
-        form_data.anrede0 = anrede;
-        // Anrede der Begleitperson != Anrede des Buchenden
-        form_data.anrede1 = anrede === constants.ANREDE_GAST ? constants.ANREDE_GAST : anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
-
-
-        if (data.land !== "") {
-            form_data.land0_input = data.land; // Land in Adresse (vorausgefüllt Deutschland)
-            form_data.staat0_input = data.land; // Staatsangehörigkeit Gast
-            form_data.staat1_input = data.land; // Staatsangehörigkeit Begl. 1
-        }
-
-        // send data to content script fill_meldeschein.js
-        chrome.tabs.query({
-            active: true,
-            currentWindow: true
-        }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                data: form_data
-            });
-        });
-    });
+    document.getElementById('meldeschein_fill').addEventListener("click", event => fillMeldeschein());
 
     // Button "WLAN Voucher ausfüllen"
     document.getElementById('wlan_voucher_fill').addEventListener('click', event => {

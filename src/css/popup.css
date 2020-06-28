@@ -30,3 +30,18 @@ span.good {
     font-size: 24pt;
     font-weight: bold;
 }
+
+#firstname_male{
+    background-color: lightskyblue;
+    color: black;
+}
+
+#firstname_female{
+    background-color: lightpink;
+    color: black;
+}
+
+#firstname_unknown{
+    background-color: lightgray;
+    color: black;
+}

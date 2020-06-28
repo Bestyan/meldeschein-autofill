@@ -76,7 +76,6 @@ export default {
             return;
         }
         const name_to_gender_json = require("./firstnames.json");
-        console.log(name_to_gender_json);
         DB.createTableWithData(TABLE_NAME_TO_GENDER, name_to_gender_json);
         DB.commit();
     },
@@ -124,9 +123,17 @@ export default {
         });
 
         if (result.length === 0) {
-            return constants.ANREDE_GAST;
+            return null;
         }
 
         return result[0].gender === 'M' ? constants.ANREDE_HERR : constants.ANREDE_FRAU;
+    },
+
+    addFirstName(name, gender){
+        DB.insert(TABLE_NAME_TO_GENDER, {
+            gender: gender,
+            name: name
+        });
+        DB.commit();
     }
 }
