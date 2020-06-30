@@ -32,6 +32,10 @@ h1 {
     font-size: 1.5rem;
 }
 
+textarea {
+    resize: none;
+}
+
 button,
 label.button {
     display: inline-block;
@@ -76,7 +80,7 @@ button.settings {
     border-color: #6c757d;
 }
 
-.bold{
+.bold {
     font-weight: bold;
 }
 
@@ -116,9 +120,13 @@ button.settings {
     margin: 0 2px;
 }
 
-.center{
+.center {
     justify-content: center;
     align-items: center;
+}
+
+.flex-grow {
+    flex-grow: 1;
 }
 
 span.bad {

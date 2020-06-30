@@ -20,7 +20,29 @@ export default {
 
     SETTINGS_EMAIL: "settings_email",
 
-    getServerURL(){
+    BIRTHDATE_FIELDS: [
+        "geburtsdatum1_input",
+        "geburtsdatum2_input",
+        "geburtsdatum3_input",
+        "geburtsdatum4_input",
+        "geburtsdatum5_input"
+    ],
+
+    FIRSTNAME_FIELDS: [
+        "vorname1",
+        "vorname2",
+        "vorname3",
+        "vorname4",
+        "vorname5",
+    ],
+
+    BIRTHDATE_FIELD_GUEST: "geburtsdatum0_input",
+    FIELDS_BEGL1: {
+        birthdate: "geburtsdatum1_input",
+        lastname: "nachname1_input"
+    },
+
+    getServerURL() {
         const server_url = {
             production: "https://floating-hamlet-48922.herokuapp.com",
             development: "http://localhost:8000"

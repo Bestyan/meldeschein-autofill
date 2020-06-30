@@ -3,10 +3,12 @@ import "../css/popup.css";
 
 import XLSX from 'xlsx';
 import Tabulator from 'tabulator-tables';
-import mail from './mail_generator';
+import mail_generator from './mail_generator';
 import db from './database';
 import util from './data_utils';
 import constants from './constants';
+import email from './email';
+import data_utils from "./data_utils";
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
@@ -142,12 +144,7 @@ function searchDB(event) {
 }
 
 function generateMail() {
-    if (result_table == null) {
-        alert("keine Tabellenzeile ausgewählt");
-        return;
-    }
-
-    let data = result_table.getSelectedData()[0];
+    let data = getSelectedTableRow();
     if (data == null) {
         alert("keine Tabellenzeile ausgewählt");
         return;
@@ -163,7 +160,7 @@ function generateMail() {
     data.anrede = document.getElementById('anrede').value;
     const isFirstVisit = document.getElementById('is_first_visit').value == 'true';
 
-    mail.generate(data, isFirstVisit);
+    mail_generator.generate(data, isFirstVisit);
 }
 
 function setLoadingScreenVisible(visible) {
@@ -219,6 +216,7 @@ function fillMeldeschein() {
         form_data.staat1_input = data.land; // Staatsangehörigkeit Begl. 1
     }
 
+    console.log("firstname detection");
     const vorname = data.vorname.split(" ")[0];
     const anrede = db.getAnrede(vorname);
     if (anrede) { // firstname has an entry in the firstname table
@@ -237,22 +235,22 @@ function fillMeldeschein() {
             genderPopup.classList.add("hide");
             // add firstname entry to db
             db.addFirstName(vorname, "M");
-            
+
             // send firstname dependent data
             sendToContentScript({
                 anrede0: constants.ANREDE_HERR,
                 anrede1: constants.ANREDE_FRAU,
             });
-            
+
             // remove event listener
             event.target.removeEventListener(event.type, handler);
         });
-        
+
         document.getElementById("firstname_female").addEventListener("click", function handler(event) {
             genderPopup.classList.add("hide");
             // add firstname entry to db
             db.addFirstName(vorname, "F");
-            
+
             // send firstname dependent data
             sendToContentScript({
                 anrede0: constants.ANREDE_FRAU,
@@ -262,7 +260,7 @@ function fillMeldeschein() {
             // remove event listener
             event.target.removeEventListener(event.type, handler);
         });
-        
+
         document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
             genderPopup.classList.add("hide");
             // send firstname dependent data
@@ -280,6 +278,78 @@ function fillMeldeschein() {
         // send available data now, firstname data will be sent in a second message
         sendToContentScript(form_data);
     }
+
+    console.log("building email UI..")
+    buildMailUI(data.email);
+}
+
+function buildMailUI(emails_from) {
+    const statusText = document.getElementById("birthdates_status");
+    const emailContent = document.getElementById("email_content");
+    const emailDisplay = document.getElementById("email_display");
+
+    // reset potentially previously existing UI
+    emailContent.value = "";
+    document.getElementById("email_selection").innerHTML = "";
+    document.getElementById("birthdates_relevant_text").value = "";
+    document.getElementById("birthdates").classList.remove("hide");
+    emailDisplay.classList.remove("hide");
+    emailDisplay.classList.add("hide");
+    statusText.classList.remove("hide");
+
+    statusText.textContent = "E-Mails werden abgefragt ...";
+
+    email.fetchMails(emails_from, responseBody => {
+        const {
+            status,
+            error,
+            data
+        } = responseBody;
+
+        if (status !== "ok") {
+            statusText.textContent = error;
+            return;
+        } else if (!data.mails || data.mails.length === 0) {
+            statusText.textContent = `keine Emails von ${emails_from} gefunden`;
+            emailDisplay.classList.remove("hide");
+            emailDisplay.classList.add("hide");
+        } else {
+            statusText.textContent = "";
+            statusText.classList.add("hide");
+            emailDisplay.classList.remove("hide");
+        }
+
+
+
+        const mail_table = new Tabulator("#email_selection", {
+            layout: "fitDataFill",
+            data: data.mails,
+            selectableRollingSelection: true,
+            selectable: 1,
+            pagination: "local",
+            paginationSize: 5,
+            initialSort: [{
+                column: "date",
+                dir: "desc"
+            }],
+            columns: [{
+                    title: "Betreff",
+                    field: "subject",
+                    widthGrow: 1
+                },
+                {
+                    title: "Datum",
+                    field: "date",
+                    formatter: (cell, formatterParams, onRendered) => {
+                        return new Date(cell.getValue()).toLocaleDateString("de-DE", constants.STATUS_DATE_FORMAT).replace(",", "");
+                    }
+                }
+            ],
+            rowClick: function (event, rowComponent) {
+                emailContent.value = rowComponent._row.data.text;
+            }
+        });
+    });
 }
 
 function buildUI() {
@@ -315,12 +385,7 @@ function buildUI() {
 
     // Button "WLAN Voucher ausfüllen"
     document.getElementById('wlan_voucher_fill').addEventListener('click', event => {
-        if (result_table == null) {
-            alert("keine Tabellenzeile ausgewählt");
-            return;
-        }
-
-        let data = result_table.getSelectedData()[0];
+        const data = getSelectedTableRow();
         if (data == null) {
             alert("keine Tabellenzeile ausgewählt");
             return;
@@ -351,6 +416,19 @@ function buildUI() {
                 hello: 'go do your stuff' // message content doesn't matter at all here, just sending a message is important
             });
         });
+    });
+
+    // Button "Geburtsdaten ausfüllen"
+    document.getElementById("birthdates_fill").addEventListener('click', event => {
+        const data = getSelectedTableRow();
+        if (data == null) {
+            alert("keine Tabellenzeile ausgewählt");
+            return;
+        }
+
+        const relevantText = document.getElementById("birthdates_relevant_text").value;
+        const birthdates = data_utils.getBirthdatesForMeldeschein(relevantText, data);
+        sendToContentScript(birthdates);
     });
 
     // Button [Mail] "erstellen"

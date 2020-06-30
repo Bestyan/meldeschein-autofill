@@ -37,3 +37,7 @@
     background-color: lightgray;
     color: black;
 }
+
+#birthdates_relevant_text{
+    min-height: 300px;
+}

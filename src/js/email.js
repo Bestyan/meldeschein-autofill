@@ -2,9 +2,9 @@ import constants from './constants';
 
 export default {
 
-    getEmailSettings(){
+    getEmailSettings() {
         const email_settings_string = window.localStorage.getItem(constants.SETTINGS_EMAIL);
-        if(!email_settings_string){
+        if (!email_settings_string) {
             alert("Email Zugangsdaten fehlen. Siehe Einstellungen");
             return null;
         }
@@ -29,7 +29,7 @@ export default {
      */
     fetchMails(from, callback) {
         const email_settings = this.getEmailSettings();
-        if(!email_settings){
+        if (!email_settings) {
             return;
         }
 
@@ -46,9 +46,12 @@ export default {
             })
             .then(response => response.json())
             .then(json => callback(json))
-            .catch(error => console.log(error));
-
-        imap.connect();
+            .catch(error => {
+                callback({
+                    status: "error",
+                    error: error
+                });
+            });
     },
 
     /**
@@ -58,7 +61,7 @@ export default {
      */
     testConnection(callback) {
         const email_settings = this.getEmailSettings();
-        if(!email_settings){
+        if (!email_settings) {
             return;
         }
 
@@ -74,6 +77,11 @@ export default {
             })
             .then(response => response.json())
             .then(json => callback(json))
-            .catch(error => console.log(error));
+            .catch(error => {
+                callback({
+                    status: "error",
+                    error: error
+                });
+            });
     }
 };
