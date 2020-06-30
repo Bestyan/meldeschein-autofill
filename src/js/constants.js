@@ -18,5 +18,15 @@ export default {
     ANREDE_FRAU: 4,
     ANREDE_GAST: 48,
 
-    SETTINGS_EMAIL: "settings_email"
+    SETTINGS_EMAIL: "settings_email",
+
+    getServerURL(){
+        const server_url = {
+            production: "https://floating-hamlet-48922.herokuapp.com",
+            development: "http://localhost:8000"
+        };
+        console.log(process.env.NODE_ENV);
+
+        return server_url[process.env.NODE_ENV];
+    }
 };

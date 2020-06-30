@@ -1,8 +1,16 @@
 import "../css/options.css";
 import constants from "./constants";
+import email from "./email";
 
 alert = chrome.extension.getBackgroundPage().alert;
 confirm = chrome.extension.getBackgroundPage().confirm;
+
+function setStatus(text, cssClass){
+    const status = document.getElementById("status");
+    status.classList.remove("good", "bad");
+    status.textContent = text;
+    status.classList.add(cssClass);
+}
 
 function buildUI() {
 
@@ -64,6 +72,18 @@ function buildUI() {
 
         // save settings to local storage
         window.localStorage.setItem(constants.SETTINGS_EMAIL, JSON.stringify(settings));
+        const test = window.localStorage.getItem(constants.SETTINGS_EMAIL);
+        console.log(test);
+
+        // test connection
+        setStatus("Login testen ...", "bad");
+        email.testConnection(responseBody => {
+            if(responseBody.status === "ok"){
+                setStatus("Login erfolgreich", "good");
+            } else{
+                setStatus(responseBody.error, "bad");
+            }
+        });
     });
 
     // Button zurücksetzen
@@ -74,8 +94,8 @@ function buildUI() {
     document.getElementById("wipe").addEventListener("click", event => {
         if (confirm(`Folgende Daten werden gelöscht:
 
-        - Buchungs-DB (importiertes xls)
-        - Vornamen-DB
+        - Buchungs-Tabelle (importiertes xls)
+        - Vornamens-Tabelle
         - E-Mail-Einstellungen
 
                                     Fortfahren?`)) {
