@@ -230,6 +230,8 @@ function fillMeldeschein() {
 
     } else { // firstname does not have an entry in the firstname table => query the user for its gender
         const genderPopup = document.getElementById("firstname_gender");
+        genderPopup.classList.remove("hide");
+        document.getElementById("firstname").textContent = `"${vorname}"`;
 
         document.getElementById("firstname_male").addEventListener("click", function handler(event) {
             genderPopup.classList.add("hide");
@@ -272,8 +274,6 @@ function fillMeldeschein() {
             // remove event listener
             event.target.removeEventListener(event.type, handler);
         });
-
-        genderPopup.classList.remove("hide");
 
         // send available data now, firstname data will be sent in a second message
         sendToContentScript(form_data);
