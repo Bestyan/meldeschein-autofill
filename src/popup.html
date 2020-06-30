@@ -68,6 +68,31 @@
         <button id="firstname_unknown">weiß nicht</button>
       </div>
     </div>
+
+    <!-- email selection for birth dates -->
+    <div class="col hide" id="birthdates">
+      <div id="birthdates_status"></div>
+      <!-- tabulator table for subject and date of email -->
+      <div id="email_selection"></div>
+
+      <!-- display email content and textarea for relevant text -->
+      <div id="email_display" class="row hide">
+        <textarea id="email_content" readonly="readonly" class="flex-grow"></textarea>
+        <div class="col">
+
+          <div class="row">
+            <h2>Relevanter Text</h2>
+          </div class="row">
+
+          <textarea id="birthdates_relevant_text" class="flex-grow"></textarea>
+
+          <div class="row">
+            <button id="birthdates_fill" class="neutral">Geburtsdaten ausfüllen</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- email generation -->

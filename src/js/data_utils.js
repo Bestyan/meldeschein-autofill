@@ -1,3 +1,6 @@
+
+import constants from "./constants";
+
 export default {
 
     cleanColumnNames: sheet => {
@@ -129,5 +132,102 @@ export default {
 
     getKommentar: table_data => {
         return `${table_data.nachname} ${table_data.apartment} ${table_data.anreise} bis ${table_data.abreise}`;
+    },
+
+    getBirthdatesForMeldeschein: (text, data) => {
+        // keine vorangestellte zahl, 1-2 Zahlen, Punkt, 1-2 Zahlen, Punkt, 4 Zahlen, keine nachgestellte Zahl
+        const regexDate = /((?<!\d)[0-9]{1,2}[.][0-9]{1,2}[.]\d{4}(?!\d))/gi;
+        // 2+ Zeichen (keine Zahl/Whitespace), Leerzeichen, 2+ Zeichen (keine Zahl/Whitespace)
+        const regexName = /\p{Lu}((?=[^0-9]).)+ \p{Lu}((?=[^0-9])\S)+/ugi;
+        // 2+ Zeichen (keine Zahl/Whitespace), Leerzeichen (optional), Komma, Leerzeichen (optional), 2+ Zeichen (keine Zahl/Whitespace)
+        const regexName2 = /\p{Lu}((?=[^0-9]).)+ ?, ?\p{Lu}((?=[^0-9])\S)+/ugi;
+
+        // preparing the text by removing unnecessary stuff
+        text = text.toString().replace("Dr.", "").replace("geboren", "").replace("*", "").replace(" am", "");
+
+        let dates = text.match(regexDate);
+        let names = text.match(regexName);
+
+        if (!dates || dates.length === 0) {
+            console.log(`could not find any dates in text: "${text}"`)
+            return null;
+        }
+
+        if (!names || names.length === 0) {
+            names = text.match(regexName2);
+            if (!names || names.length === 0) {
+                console.log(`could not find any names in text: "${text}"`)
+                return null;
+            }
+        }
+
+        if (dates.length !== names.length) {
+            console.log(`number of dates (${JSON.stringify(dates)}) does not match the number of names (${JSON.stringify(names)})`)
+            return null;
+        }
+
+        // sort both arrays ascending by their dates so the oldest people come first
+        const dateObjects = dates.map(dateString => {
+            const parts = dateString.split(".");
+            const day = parts[0],
+                month = parts[1],
+                year = parts[2];
+            return new Date(year, month - 1, day);
+        });
+        const mapNamesToDates = names.reduce((map, _, index) => {
+            map[_] = dateObjects[index].toString();
+            return map;
+        }, {});
+        const namesSorted = dateObjects.sort().map(date => {
+            let toBeRemoved;
+            for (const [name, dateString] of Object.entries(mapNamesToDates)) {
+                if (dateString === date.toString()) {
+                    toBeRemoved = name;
+                    break;
+                }
+            }
+            delete mapNamesToDates[toBeRemoved];
+            return toBeRemoved;
+        });
+        const datesSorted = dateObjects.sort().map(date => date.toLocaleDateString("de-DE"));
+
+        const result = {};
+        const birthdate_fields = JSON.parse(JSON.stringify(constants.BIRTHDATE_FIELDS));
+        const firstname_fields = JSON.parse(JSON.stringify(constants.FIRSTNAME_FIELDS));
+        for (let i = 0; i < namesSorted.length; i++) {
+            const name = namesSorted[i];
+            const date = datesSorted[i];
+            let firstname, lastname;
+
+            if (name.includes(",")) {
+                firstname = name.substring(0, name.indexOf(",")).trim();
+                lastname = name.substring(name.indexOf(","), name.length).trim();
+            } else {
+                firstname = name.substring(0, name.lastIndexOf(" ")).trim();
+                lastname = name.substring(name.lastIndexOf(" "), name.length).trim();
+            }
+
+            if (firstname.trim() === data.vorname.trim()) {
+                result[constants.BIRTHDATE_FIELD_GUEST] = {
+                    value: date,
+                    event: "blur"
+                };
+            } else {
+                // set birthdate field value and blur event (will be executed by content script)
+                const birthdate_field = birthdate_fields.shift();
+                result[birthdate_field] = {
+                    value: date,
+                    event: "blur"
+                };
+                // set firstname
+                result[firstname_fields.shift()] = firstname;
+
+                // if it's the Begl1 field, also set the last name (it might differ)
+                if(birthdate_field === constants.FIELDS_BEGL1.birthdate){
+                    result[constants.FIELDS_BEGL1.lastname] = lastname;
+                }
+            }
+        }
+        return result;
     }
 };
