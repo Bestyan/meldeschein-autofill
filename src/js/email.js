@@ -33,7 +33,7 @@ export default {
             return;
         }
 
-        fetch(`${constants.getServerURL()}/fetch-mail`, {
+        fetch(constants.getServerURL() + constants.SERVER_FETCH_MAILS, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
@@ -65,7 +65,7 @@ export default {
             return;
         }
 
-        fetch(`${constants.getServerURL()}/test-connection`, {
+        fetch(constants.getServerURL() + constants.SERVER_TEST_CONNECTION, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'

@@ -183,6 +183,22 @@ function sendToContentScript(data) {
     });
 }
 
+/**
+ * send a single request to the server
+ */
+function wakeServer(){
+    fetch(constants.getServerURL() + constants.SERVER_WAKE_UP)
+    .then(response => response.json())
+    .then(json => {
+        // set server status here
+        console.log(json);
+    })
+    .catch(error => {
+        // set server status here
+        console.log(error);
+    });
+}
+
 function getSelectedTableRow() {
     if (result_table == null) {
         return null;
@@ -466,11 +482,12 @@ function buildUI() {
         });
 }
 
+wakeServer();
 console.log(`environment: ${process.env.NODE_ENV}`);
 
 // Tabulator table
 let result_table = null;
 
 db.setup(refreshStatus);
-
 buildUI();
+

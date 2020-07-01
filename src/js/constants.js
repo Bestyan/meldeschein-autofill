@@ -49,5 +49,9 @@ export default {
         };
 
         return server_url[process.env.NODE_ENV];
-    }
+    },
+
+    SERVER_WAKE_UP: "/wake-up",
+    SERVER_FETCH_MAILS: "/fetch-mail",
+    SERVER_TEST_CONNECTION: "/test-connection"
 };
