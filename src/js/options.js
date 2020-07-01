@@ -22,7 +22,6 @@ function buildUI() {
 
     const loadSettingsFromStorage = () => {
         const settings_string = window.localStorage.getItem(constants.SETTINGS_EMAIL);
-        console.log(settings_string);
 
         if (!settings_string) {
 
@@ -72,8 +71,6 @@ function buildUI() {
 
         // save settings to local storage
         window.localStorage.setItem(constants.SETTINGS_EMAIL, JSON.stringify(settings));
-        const test = window.localStorage.getItem(constants.SETTINGS_EMAIL);
-        console.log(test);
 
         // test connection
         setStatus("Login testen ...", "bad");

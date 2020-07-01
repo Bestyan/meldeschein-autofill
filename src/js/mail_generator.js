@@ -107,7 +107,6 @@ e-mail: <a id="mailto" href="mailto:info@inzell-ferien.de">info@inzell-ferien.de
         let link = document.createElement('a');
         link.href = makeTextFile(emlContent);
         link.download = "bewertung.eml";
-        console.log(link.href);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -107,7 +107,6 @@ function searchDB(event) {
     // query DB
     let rows = db.search(searchParams);
 
-    console.log(rows);
     result_table = new Tabulator("#search_results", {
         layout: "fitDataFill",
         data: rows,
@@ -216,7 +215,6 @@ function fillMeldeschein() {
         form_data.staat1_input = data.land; // Staatsangehörigkeit Begl. 1
     }
 
-    console.log("firstname detection");
     const vorname = data.vorname.split(" ")[0];
     const anrede = db.getAnrede(vorname);
     if (anrede) { // firstname has an entry in the firstname table
@@ -279,7 +277,6 @@ function fillMeldeschein() {
         sendToContentScript(form_data);
     }
 
-    console.log("building email UI..")
     buildMailUI(data.email);
 }
 
@@ -468,6 +465,8 @@ function buildUI() {
             }
         });
 }
+
+console.log(`environment: ${process.env.NODE_ENV}`);
 
 // Tabulator table
 let result_table = null;
