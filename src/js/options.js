@@ -5,7 +5,7 @@ import email from "./email";
 alert = chrome.extension.getBackgroundPage().alert;
 confirm = chrome.extension.getBackgroundPage().confirm;
 
-function setStatus(text, cssClass){
+function setStatus(text, cssClass) {
     const status = document.getElementById("status");
     status.classList.remove("good", "bad");
     status.textContent = text;
@@ -74,13 +74,16 @@ function buildUI() {
 
         // test connection
         setStatus("Login testen ...", "bad");
-        email.testConnection(responseBody => {
-            if(responseBody.status === "ok"){
-                setStatus("Login erfolgreich", "good");
-            } else{
-                setStatus(responseBody.error, "bad");
-            }
-        });
+        email.testConnection()
+            .then(
+                responseBody => {
+                    if (responseBody.status === "ok") {
+                        setStatus("Login erfolgreich", "good");
+                    } else {
+                        setStatus(responseBody.error, "bad");
+                    }
+                })
+            .catch(error => alert(error));
     });
 
     // Button zurücksetzen
@@ -92,7 +95,6 @@ function buildUI() {
         if (confirm(`Folgende Daten werden gelöscht:
 
         - Buchungs-Tabelle (importiertes xls)
-        - Vornamens-Tabelle
         - E-Mail-Einstellungen
 
                                     Fortfahren?`)) {

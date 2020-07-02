@@ -186,17 +186,17 @@ function sendToContentScript(data) {
 /**
  * send a single request to the server
  */
-function wakeServer(){
+function wakeServer() {
     fetch(constants.getServerURL() + constants.SERVER_WAKE_UP)
-    .then(response => response.json())
-    .then(json => {
-        // set server status here
-        console.log(json);
-    })
-    .catch(error => {
-        // set server status here
-        console.log(error);
-    });
+        .then(response => response.json())
+        .then(json => {
+            // set server status here
+            console.log(json);
+        })
+        .catch(error => {
+            // set server status here
+            console.log(error);
+        });
 }
 
 function getSelectedTableRow() {
@@ -233,80 +233,80 @@ function fillMeldeschein() {
 
     const vorname = data.vorname.split(" ")[0];
     db.getGender(vorname)
-    .then(
-        // onFulfilled
-        gender => {
+        .then(
+            // onFulfilled
+            gender => {
 
-            if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
-                const anrede = constants.getAnrede(gender);
+                if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
+                    const anrede = constants.getAnrede(gender);
 
-                form_data.anrede0 = anrede;
-                // Anrede der Begleitperson != Anrede des Buchenden
-                form_data.anrede1 = anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
-        
-                // send data to content script fill_meldeschein.js
-                sendToContentScript(form_data);
-        
-            } else { // firstname does not have an entry in the firstname table => query the user for its gender
-                const genderPopup = document.getElementById("firstname_gender");
-                genderPopup.classList.remove("hide");
-                document.getElementById("firstname").textContent = `"${vorname}"`;
-        
-                document.getElementById("firstname_male").addEventListener("click", function handler(event) {
-                    genderPopup.classList.add("hide");
-                    // add firstname entry to db
-                    db.addFirstName(vorname, "M");
-        
-                    // send firstname dependent data
-                    sendToContentScript({
-                        anrede0: constants.ANREDE_HERR,
-                        anrede1: constants.ANREDE_FRAU,
+                    form_data.anrede0 = anrede;
+                    // Anrede der Begleitperson != Anrede des Buchenden
+                    form_data.anrede1 = anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
+
+                    // send data to content script fill_meldeschein.js
+                    sendToContentScript(form_data);
+
+                } else { // firstname does not have an entry in the firstname table => query the user for its gender
+                    const genderPopup = document.getElementById("firstname_gender");
+                    genderPopup.classList.remove("hide");
+                    document.getElementById("firstname").textContent = `"${vorname}"`;
+
+                    document.getElementById("firstname_male").addEventListener("click", function handler(event) {
+                        genderPopup.classList.add("hide");
+                        // add firstname entry to db
+                        db.addFirstName(vorname, "M");
+
+                        // send firstname dependent data
+                        sendToContentScript({
+                            anrede0: constants.ANREDE_HERR,
+                            anrede1: constants.ANREDE_FRAU,
+                        });
+
+                        // remove event listener
+                        event.target.removeEventListener(event.type, handler);
                     });
-        
-                    // remove event listener
-                    event.target.removeEventListener(event.type, handler);
-                });
-        
-                document.getElementById("firstname_female").addEventListener("click", function handler(event) {
-                    genderPopup.classList.add("hide");
-                    // add firstname entry to db
-                    db.addFirstName(vorname, "F");
-        
-                    // send firstname dependent data
-                    sendToContentScript({
-                        anrede0: constants.ANREDE_FRAU,
-                        anrede1: constants.ANREDE_HERR,
+
+                    document.getElementById("firstname_female").addEventListener("click", function handler(event) {
+                        genderPopup.classList.add("hide");
+                        // add firstname entry to db
+                        db.addFirstName(vorname, "F");
+
+                        // send firstname dependent data
+                        sendToContentScript({
+                            anrede0: constants.ANREDE_FRAU,
+                            anrede1: constants.ANREDE_HERR,
+                        });
+
+                        // remove event listener
+                        event.target.removeEventListener(event.type, handler);
                     });
-        
-                    // remove event listener
-                    event.target.removeEventListener(event.type, handler);
-                });
-        
-                document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
-                    genderPopup.classList.add("hide");
-                    // send firstname dependent data
-                    sendToContentScript({
-                        anrede0: constants.ANREDE_GAST,
-                        anrede1: constants.ANREDE_GAST,
+
+                    document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
+                        genderPopup.classList.add("hide");
+                        // send firstname dependent data
+                        sendToContentScript({
+                            anrede0: constants.ANREDE_GAST,
+                            anrede1: constants.ANREDE_GAST,
+                        });
+
+                        // remove event listener
+                        event.target.removeEventListener(event.type, handler);
                     });
-        
-                    // remove event listener
-                    event.target.removeEventListener(event.type, handler);
-                });
-        
-                // send available data now, firstname data will be sent in a second message
-                sendToContentScript(form_data);
+
+                    // send available data now, firstname data will be sent in a second message
+                    sendToContentScript(form_data);
+                }
+            },
+
+            // onRejected
+            reason => {
+
+                console.log(`db.getGender(${vorname}) rejected with reason "${reason}"`);
+
             }
-        },
-
-        // onRejected
-        reason => {
-
-            console.log(`db.getGender(${vorname}) rejected with reason "${reason}"`);
-
-        }
-    )
-    .catch(error => console.log(error));
+        )
+        .catch(error => console.log(error));
 
     buildMailUI(data.email);
 }
@@ -327,57 +327,70 @@ function buildMailUI(emails_from) {
 
     statusText.textContent = "E-Mails werden abgefragt ...";
 
-    email.fetchMails(emails_from, responseBody => {
-        const {
-            status,
-            error,
-            data
-        } = responseBody;
+    email.fetchMails(emails_from)
+        .then(responseBody => {
+            const {
+                status,
+                error,
+                data
+            } = responseBody;
 
-        if (status !== "ok") {
-            statusText.textContent = error;
-            return;
-        } else if (!data.mails || data.mails.length === 0) {
-            statusText.textContent = `keine Emails von ${emails_from} gefunden`;
-            emailDisplay.classList.remove("hide");
-            emailDisplay.classList.add("hide");
-        } else {
-            statusText.textContent = "";
-            statusText.classList.add("hide");
-            emailDisplay.classList.remove("hide");
-        }
-
-
-
-        const mail_table = new Tabulator("#email_selection", {
-            layout: "fitDataFill",
-            data: data.mails,
-            selectableRollingSelection: true,
-            selectable: 1,
-            pagination: "local",
-            paginationSize: 5,
-            initialSort: [{
-                column: "date",
-                dir: "desc"
-            }],
-            columns: [{
-                    title: "Betreff",
-                    field: "subject",
-                    widthGrow: 1
-                },
-                {
-                    title: "Datum",
-                    field: "date",
-                    formatter: (cell, formatterParams, onRendered) => {
-                        return new Date(cell.getValue()).toLocaleDateString("de-DE", constants.STATUS_DATE_FORMAT).replace(",", "");
-                    }
-                }
-            ],
-            rowClick: function (event, rowComponent) {
-                emailContent.value = rowComponent._row.data.text;
+            if (status !== "ok") {
+                statusText.textContent = error;
+                return;
             }
-        });
-    });
+
+            // update email fetch status
+            if (!data.mails || data.mails.length === 0) {
+                // no emails found
+                statusText.textContent = `keine Emails von ${emails_from} gefunden`;
+
+                // hide textareas for displaying email contents
+                emailDisplay.classList.remove("hide");
+                emailDisplay.classList.add("hide");
+
+            } else {
+                // hide status
+                statusText.textContent = "";
+                statusText.classList.add("hide");
+
+                // show textareas for displaying email contents
+                emailDisplay.classList.remove("hide");
+            }
+
+
+            // create tabulator table for email selection
+            const mail_table = new Tabulator("#email_selection", {
+                layout: "fitDataFill",
+                data: data.mails,
+                selectableRollingSelection: true,
+                selectable: 1,
+                pagination: "local",
+                paginationSize: 5,
+                initialSort: [{
+                    column: "date",
+                    dir: "desc"
+                }],
+                columns: [{
+                        title: "Betreff",
+                        field: "subject",
+                        widthGrow: 1
+                    },
+                    {
+                        title: "Datum",
+                        field: "date",
+                        formatter: (cell, formatterParams, onRendered) => {
+                            return new Date(cell.getValue()).toLocaleDateString("de-DE", constants.STATUS_DATE_FORMAT).replace(",", "");
+                        }
+                    }
+                ],
+                rowClick: function (event, rowComponent) {
+                    // textarea displays plaintext email
+                    emailContent.value = rowComponent._row.data.text;
+                }
+            });
+        })
+        .catch(error => statusText.textContent = error);
 }
 
 function buildUI() {
@@ -505,4 +518,3 @@ let result_table = null;
 
 db.setup(refreshStatus);
 buildUI();
-
