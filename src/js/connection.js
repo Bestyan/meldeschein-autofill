@@ -5,12 +5,28 @@ const JSON_HEADERS = {
     'Content-Type': 'application/json'
 };
 
+function getParameterString(url_parameters) {
+    let parameters = url_parameters.reduce((parameter_string, parameter) => {
+        return [parameter_string, "&", encodeURIComponent(parameter.key), "=", encodeURIComponent(parameter.value)].join("");
+    }, "");
+    parameters = "?" + parameters.substring(1, parameters.length);
+    return parameters;
+}
+
 export default {
 
-    get(path, headers) {
+    /**
+     * @param {*} path 
+     * @param {Array} url_parameters 
+     * @param {*} headers 
+     */
+    get(path, url_parameters, headers) {
 
         const fetch_headers = headers ? headers : JSON_HEADERS;
-        return fetch(constants.getServerURL() + path, {
+
+        const parameters = getParameterString(url_parameters);
+
+        return fetch(constants.getServerURL() + path + parameters, {
             headers: fetch_headers
         });
 
@@ -49,5 +65,13 @@ export default {
             method: "DELETE"
         });
 
+    },
+
+    isOk(responseJSON){
+        if(responseJSON && responseJSON.status === "ok"){
+            return true;
+        }
+
+        return false;
     }
 };
