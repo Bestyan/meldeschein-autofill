@@ -1,4 +1,5 @@
 import constants from './constants';
+import connection from './connection';
 
 export default {
 
@@ -33,16 +34,9 @@ export default {
             return;
         }
 
-        fetch(constants.getServerURL() + constants.SERVER_FETCH_MAILS, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                method: "POST",
-                body: JSON.stringify({
-                    settings: email_settings,
-                    from: from
-                })
+        connection.post(constants.SERVER_FETCH_MAILS, {
+                settings: email_settings,
+                from: from
             })
             .then(response => response.json())
             .then(json => callback(json))
@@ -65,15 +59,8 @@ export default {
             return;
         }
 
-        fetch(constants.getServerURL() + constants.SERVER_TEST_CONNECTION, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                method: "POST",
-                body: JSON.stringify({
-                    settings: email_settings
-                })
+        connection.post(constants.SERVER_TEST_CONNECTION, {
+                settings: email_settings
             })
             .then(response => response.json())
             .then(json => callback(json))
