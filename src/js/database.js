@@ -1,12 +1,12 @@
 import localStorageDB from 'localstoragedb';
 import util from './data_utils';
 import constants from './constants';
+import connection from './connection';
 
 const LOCALSTORAGE_LAST_UPLOAD = "xls_upload_datetime";
 
 const TABLE_RAW = "raw_data";
 const TABLE_SEARCH = "clean_data";
-const TABLE_NAME_TO_GENDER = "name_to_gender";
 
 // columns of the SEARCH table
 const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email"];
@@ -62,17 +62,6 @@ export default {
 
         });
         this.setUploadTime();
-
-        this.initGenderTable();
-    },
-
-    initGenderTable() {
-        if (DB.tableExists(TABLE_NAME_TO_GENDER)) {
-            return;
-        }
-        const name_to_gender_json = require("./firstnames.json");
-        DB.createTableWithData(TABLE_NAME_TO_GENDER, name_to_gender_json);
-        DB.commit();
     },
 
     /**
@@ -109,26 +98,57 @@ export default {
         }
     },
 
-    getAnrede(vorname) {
-        const result = DB.queryAll(TABLE_NAME_TO_GENDER, {
-            query: {
-                name: vorname
-            },
-            limit: 1
+    /**
+     * stub for server
+     * Promise resolves into "M", "F" or "not in db"
+     * @param {*} firstname 
+     * @returns {Promise}
+     */
+    getGender(firstname) {
+
+        return new Promise((resolve, reject) => {
+            connection.get(
+                    constants.SERVER_GET_VORNAME,
+                    [{
+                        key: "name",
+                        value: firstname
+                    }]
+                )
+                .then(response => response.json())
+                .then(json => {
+
+                    if (connection.isOk(json)) {
+                        if (json.data && json.data.gender) {
+                            resolve(json.data.gender);
+                        } else {
+                            resolve(json.data);
+                        }
+                    } else {
+                        reject(json.error);
+                    }
+
+                })
+                .catch(error => reject(error.toString()));
         });
-
-        if (result.length === 0) {
-            return null;
-        }
-
-        return result[0].gender === 'M' ? constants.ANREDE_HERR : constants.ANREDE_FRAU;
     },
 
-    addFirstName(name, gender){
-        DB.insert(TABLE_NAME_TO_GENDER, {
-            gender: gender,
-            name: name
-        });
-        DB.commit();
+    /**
+     * stub for server
+     * @param {*} name 
+     * @param {*} gender 
+     */
+    addFirstName(name, gender) {
+        connection.put(constants.SERVER_PUT_VORNAME, {
+                name: name,
+                gender: gender
+            })
+            .then(response => response.json())
+            .then(json => {
+                // we don't really care about the outcome as long as it's not an error
+                if (!connection.isOk(json)) {
+                    console.log(json.error);
+                }
+            })
+            .catch(error => console.log(error));
     }
 }

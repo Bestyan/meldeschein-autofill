@@ -17,6 +17,17 @@ export default {
     ANREDE_HERR: 1,
     ANREDE_FRAU: 4,
     ANREDE_GAST: 48,
+    getAnrede(gender){
+        if(gender === "F"){
+            return this.ANREDE_FRAU;
+        }
+
+        if (gender === "M") {
+            return this.ANREDE_HERR;
+        }
+
+        return this.ANREDE_GAST;
+    },
 
     SETTINGS_EMAIL: "settings_email",
 
@@ -53,5 +64,7 @@ export default {
 
     SERVER_WAKE_UP: "/wake-up",
     SERVER_FETCH_MAILS: "/fetch-mail",
-    SERVER_TEST_CONNECTION: "/test-connection"
+    SERVER_TEST_CONNECTION: "/test-connection",
+    SERVER_GET_VORNAME: "/db/get-firstname",
+    SERVER_PUT_VORNAME: "/db/put-firstname"
 };

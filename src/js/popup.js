@@ -232,66 +232,81 @@ function fillMeldeschein() {
     }
 
     const vorname = data.vorname.split(" ")[0];
-    const anrede = db.getAnrede(vorname);
-    if (anrede) { // firstname has an entry in the firstname table
+    db.getGender(vorname)
+    .then(
+        // onFulfilled
+        gender => {
 
-        form_data.anrede0 = anrede;
-        // Anrede der Begleitperson != Anrede des Buchenden
-        form_data.anrede1 = anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
+            if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
+                const anrede = constants.getAnrede(gender);
 
-        // send data to content script fill_meldeschein.js
-        sendToContentScript(form_data);
+                form_data.anrede0 = anrede;
+                // Anrede der Begleitperson != Anrede des Buchenden
+                form_data.anrede1 = anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
+        
+                // send data to content script fill_meldeschein.js
+                sendToContentScript(form_data);
+        
+            } else { // firstname does not have an entry in the firstname table => query the user for its gender
+                const genderPopup = document.getElementById("firstname_gender");
+                genderPopup.classList.remove("hide");
+                document.getElementById("firstname").textContent = `"${vorname}"`;
+        
+                document.getElementById("firstname_male").addEventListener("click", function handler(event) {
+                    genderPopup.classList.add("hide");
+                    // add firstname entry to db
+                    db.addFirstName(vorname, "M");
+        
+                    // send firstname dependent data
+                    sendToContentScript({
+                        anrede0: constants.ANREDE_HERR,
+                        anrede1: constants.ANREDE_FRAU,
+                    });
+        
+                    // remove event listener
+                    event.target.removeEventListener(event.type, handler);
+                });
+        
+                document.getElementById("firstname_female").addEventListener("click", function handler(event) {
+                    genderPopup.classList.add("hide");
+                    // add firstname entry to db
+                    db.addFirstName(vorname, "F");
+        
+                    // send firstname dependent data
+                    sendToContentScript({
+                        anrede0: constants.ANREDE_FRAU,
+                        anrede1: constants.ANREDE_HERR,
+                    });
+        
+                    // remove event listener
+                    event.target.removeEventListener(event.type, handler);
+                });
+        
+                document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
+                    genderPopup.classList.add("hide");
+                    // send firstname dependent data
+                    sendToContentScript({
+                        anrede0: constants.ANREDE_GAST,
+                        anrede1: constants.ANREDE_GAST,
+                    });
+        
+                    // remove event listener
+                    event.target.removeEventListener(event.type, handler);
+                });
+        
+                // send available data now, firstname data will be sent in a second message
+                sendToContentScript(form_data);
+            }
+        },
 
-    } else { // firstname does not have an entry in the firstname table => query the user for its gender
-        const genderPopup = document.getElementById("firstname_gender");
-        genderPopup.classList.remove("hide");
-        document.getElementById("firstname").textContent = `"${vorname}"`;
+        // onRejected
+        reason => {
 
-        document.getElementById("firstname_male").addEventListener("click", function handler(event) {
-            genderPopup.classList.add("hide");
-            // add firstname entry to db
-            db.addFirstName(vorname, "M");
+            console.log(`db.getGender(${vorname}) rejected with reason "${reason}"`);
 
-            // send firstname dependent data
-            sendToContentScript({
-                anrede0: constants.ANREDE_HERR,
-                anrede1: constants.ANREDE_FRAU,
-            });
-
-            // remove event listener
-            event.target.removeEventListener(event.type, handler);
-        });
-
-        document.getElementById("firstname_female").addEventListener("click", function handler(event) {
-            genderPopup.classList.add("hide");
-            // add firstname entry to db
-            db.addFirstName(vorname, "F");
-
-            // send firstname dependent data
-            sendToContentScript({
-                anrede0: constants.ANREDE_FRAU,
-                anrede1: constants.ANREDE_HERR,
-            });
-
-            // remove event listener
-            event.target.removeEventListener(event.type, handler);
-        });
-
-        document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
-            genderPopup.classList.add("hide");
-            // send firstname dependent data
-            sendToContentScript({
-                anrede0: constants.ANREDE_GAST,
-                anrede1: constants.ANREDE_GAST,
-            });
-
-            // remove event listener
-            event.target.removeEventListener(event.type, handler);
-        });
-
-        // send available data now, firstname data will be sent in a second message
-        sendToContentScript(form_data);
-    }
+        }
+    )
+    .catch(error => console.log(error));
 
     buildMailUI(data.email);
 }
