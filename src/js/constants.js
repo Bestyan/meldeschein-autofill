@@ -6,6 +6,12 @@ export default {
         day: '2-digit'
     },
 
+    BIRTHDAY_DATE_FORMAT : {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    },
+
     STATUS_DATE_FORMAT: {
         year: 'numeric',
         month: '2-digit',

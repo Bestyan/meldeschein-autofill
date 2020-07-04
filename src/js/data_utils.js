@@ -189,7 +189,7 @@ export default {
             delete mapNamesToDates[toBeRemoved];
             return toBeRemoved;
         });
-        const datesSorted = dateObjects.sort().map(date => date.toLocaleDateString("de-DE"));
+        const datesSorted = dateObjects.sort().map(date => date.toLocaleDateString("de-DE", constants.BIRTHDAY_DATE_FORMAT));
 
         const result = {};
         const birthdate_fields = JSON.parse(JSON.stringify(constants.BIRTHDATE_FIELDS));
