@@ -125,8 +125,13 @@ button.settings {
     align-items: center;
 }
 
-.flex-grow {
+.flex-grow,
+.flex-grow-1 {
     flex-grow: 1;
+}
+
+.flex-grow-2 {
+    flex-grow: 2;
 }
 
 span.bad {

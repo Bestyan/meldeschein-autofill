@@ -81,13 +81,25 @@
         <div class="col">
 
           <div class="row">
-            <h2>Relevanter Text</h2>
+            <h2>Geburtsdaten</h2>
           </div class="row">
 
-          <textarea id="birthdates_relevant_text" class="flex-grow"></textarea>
+          <textarea id="birthdates_relevant_text" class="flex-grow-2"></textarea>
 
           <div class="row">
-            <button id="birthdates_fill" class="neutral">Geburtsdaten ausfüllen</button>
+            <h2>Adresse</h2>
+          </div>
+
+          <div class="row">
+            <!-- when checked discard everything except the stay duration and fill the rest of the fields with the data given in the textareas -->
+            <input type="checkbox" id="make_own_meldeschein" />
+            <label for="make_own_meldeschein">eigener Meldeschein</label>
+          </div>
+
+          <textarea id="address_relevant_text" class="flex-grow-1"></textarea>
+
+          <div class="row">
+            <button id="birthdates_fill" class="neutral">Felder ausfüllen</button>
           </div>
 
         </div>
