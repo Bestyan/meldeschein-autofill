@@ -1,4 +1,3 @@
-
 import constants from "./constants";
 
 export default {
@@ -49,9 +48,9 @@ export default {
 
         try {
             let adressdaten = anschrift
-                .replace(/\#[0-9]+\#/g, "") // remove rebate patterns like #15# from the start
+                .replace(/\#\d+\#/g, "") // remove rebate patterns like #15# from the start
                 .trim()
-                .match(/(.{3,}) ([0-9]{4,5}) (.+)/m); // match '3+letters 4-5numbers 1+letters'
+                .match(/(.{3,}) (\d{4,5}) (.+)/m); // match '3+letters 4-5numbers 1+letters'
             if (adressdaten != null && adressdaten.length == 4) {
                 result.strasse = adressdaten[1];
                 result.plz = adressdaten[2];
@@ -135,18 +134,29 @@ export default {
     },
 
     getBirthdatesForMeldeschein: (text, data) => {
-        // keine vorangestellte zahl, 1-2 Zahlen, Punkt, 1-2 Zahlen, Punkt, 4 Zahlen, keine nachgestellte Zahl
-        const regexDate = /((?<!\d)[0-9]{1,2}[.][0-9]{1,2}[.]\d{4}(?!\d))/gi;
+        // keine vorangestellte zahl, 1-2 Zahlen, Punkt, 1-2 Zahlen, Punkt, 2 oder 4 Zahlen, keine nachgestellte Zahl
+        const regexDate = /((?<!\d)\d{1,2}[.]\d{1,2}[.]\d{2}(?:\d{2})?(?!\d))/g;
         // 2+ Zeichen (keine Zahl/Whitespace), Leerzeichen, 2+ Zeichen (keine Zahl/Whitespace)
-        const regexName = /\p{Lu}((?=[^0-9]).)+ \p{Lu}((?=[^0-9])\S)+/ugi;
+        const regexName = /\p{Lu}((?=[^\d]).)+ \p{Lu}((?=[^\d])(?=[^,.])\S)+/ug;
         // 2+ Zeichen (keine Zahl/Whitespace), Leerzeichen (optional), Komma, Leerzeichen (optional), 2+ Zeichen (keine Zahl/Whitespace)
-        const regexName2 = /\p{Lu}((?=[^0-9]).)+ ?, ?\p{Lu}((?=[^0-9])\S)+/ugi;
+        const regexName2 = /\p{Lu}((?=[^\d]).)+ ?, ?\p{Lu}((?=[^\d])(?=[^,.])\S)+/ug;
 
         // preparing the text by removing unnecessary stuff
-        text = text.toString().replace("Dr.", "").replace("geboren", "").replace("*", "").replace(" am", "");
+        text = text.toString()
+            .split("Dr.").join("")
+            .split(", geboren").join("")
+            .split(" geboren").join("")
+            .split("*").join("")
+            .split(" am").join("")
+            .split(", geb.").join("")
+            .split(" geb.").join("")
+            .split(" geb").join("");
 
         let dates = text.match(regexDate);
         let names = text.match(regexName);
+
+        console.log(dates);
+        console.log(names);
 
         if (!dates || dates.length === 0) {
             console.log(`could not find any dates in text: "${text}"`)
@@ -170,8 +180,17 @@ export default {
         const dateObjects = dates.map(dateString => {
             const parts = dateString.split(".");
             const day = parts[0],
-                month = parts[1],
-                year = parts[2];
+                month = parts[1];
+            let year = parts[2];
+
+            // converts two-digit years into 4 digit ones
+            // if number > current year digits, e.g. 89 > 20 => 1989
+            // if number <= current year digits, e.g. 04 > 20 => 2004
+            if (year.length == 2) {
+                const currentYearOnes = new Date().getFullYear() % 100;
+                const currentYearHundreds = Math.floor(new Date().getFullYear() / 100);
+                year = year > currentYearOnes ? (currentYearHundreds - 1) * 100 + (+year) : currentYearHundreds * 100 + (+year);
+            }
             return new Date(year, month - 1, day);
         });
         const mapNamesToDates = names.reduce((map, _, index) => {
@@ -223,7 +242,7 @@ export default {
                 result[firstname_fields.shift()] = firstname;
 
                 // if it's the Begl1 field, also set the last name (it might differ)
-                if(birthdate_field === constants.FIELDS_BEGL1.birthdate){
+                if (birthdate_field === constants.FIELDS_BEGL1.birthdate) {
                     result[constants.FIELDS_BEGL1.lastname] = lastname;
                 }
             }
