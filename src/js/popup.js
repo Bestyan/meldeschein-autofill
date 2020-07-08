@@ -223,7 +223,6 @@ function fillMeldeschein() {
         anreise_input: data.anreise,
         abreise_input: data.abreise,
         nachname0: data.nachname, //Nachname Gast
-        nachname1_input: data.nachname, // Nachname Begl. 1
         vorname0: data.vorname,
         strasse0: data.strasse || data.anschrift,
         plz0_input: data.plz,
