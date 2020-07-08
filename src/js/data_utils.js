@@ -79,6 +79,8 @@ const utils = {
 
         // preparing the text by removing unnecessary stuff
         text = text.toString()
+            .split("\n").join(" ")
+            .split("\r").join(" ")
             .split("Dr.").join("")
             .split(", geboren").join("")
             .split(" geboren").join("")
@@ -474,5 +476,21 @@ export default {
             staat0_input: country,
             staat1_input: country
         };
+    },
+
+    cleanLocationText(text) {
+        return text.toString()
+            .split("\n").join(" ")
+            .split("\r").join(" ")
+            .replace(/(?<=\d) (?=\p{L} )/gu, "") // removes space between streetnumber and letter e.g. 16 a => 16a
+            .replace(/(?<=(?<!\d)\d{4}) (?=\p{Lu}{2}(?!\p{L}))/gu, "") // removes space between 4-digit postal code and 2 uppercase letter area code e.g. 1071 JL => 1071JL
+            .split("wohnhaft in").join("")
+            .split("wohnhaft").join("")
+            .split("wohnt in").join("")
+            .split("wohnt").join("")
+            .split("lebt in").join("")
+            .split("Adresse:").join("")
+            .split("Wohnort:").join("")
+            .split("ansässig in").join("");
     }
 };

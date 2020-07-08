@@ -483,7 +483,7 @@ function buildUI() {
         if (addressText) {
             connection.get(constants.SERVER_GET_LOCATION, [{
                     key: "location_string",
-                    value: addressText
+                    value: data_utils.cleanLocationText(addressText)
                 }])
                 .then(response => response.json())
                 .then(data => sendToContentScript(data_utils.getLocationForForm(data)))
