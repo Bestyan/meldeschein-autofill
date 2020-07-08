@@ -25,8 +25,11 @@ export default {
         const fetch_headers = headers ? headers : JSON_HEADERS;
 
         const parameters = getParameterString(url_parameters);
+        const query_path = constants.getServerURL() + path + parameters;
+        
+        console.log(`querying ${query_path}`);
 
-        return fetch(constants.getServerURL() + path + parameters, {
+        return fetch(query_path, {
             headers: fetch_headers
         });
 

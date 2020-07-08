@@ -71,7 +71,7 @@
 
     <!-- email selection for birth dates -->
     <div class="col hide" id="birthdates">
-      <div id="birthdates_status"></div>
+      <div id="email_status"></div>
       <!-- tabulator table for subject and date of email -->
       <div id="email_selection"></div>
 
@@ -82,7 +82,7 @@
 
           <div class="row">
             <h2>Geburtsdaten</h2>
-          </div class="row">
+          </div>
 
           <textarea id="birthdates_relevant_text" class="flex-grow-2"></textarea>
 
@@ -99,35 +99,36 @@
           <textarea id="address_relevant_text" class="flex-grow-1"></textarea>
 
           <div class="row">
-            <button id="birthdates_fill" class="neutral">Felder ausfüllen</button>
+            <button id="email_data_fill" class="neutral">Felder ausfüllen</button>
           </div>
-
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- email generation -->
-  <div class="col">
+    <!-- email generation -->
+    <div class="col">
 
-    <div class="row">
-      <h1>Bewertungs-Email</h1>
+      <div class="row">
+        <h1>Bewertungs-Email</h1>
+      </div>
+
+      <div class="row">
+        <select id="anrede">
+          <option value="Familie">Familie</option>
+          <option value="Herr">Herr</option>
+          <option value="Frau">Frau</option>
+        </select>
+
+        <select id="is_first_visit">
+          <option value="true">war zum ersten Mal da</option>
+          <option value="false">war zum wiederholten Mal da</option>
+        </select>
+
+        <button id="generate" class="neutral">erstellen</button>
+      </div>
+
     </div>
 
-    <div class="row">
-      <select id="anrede">
-        <option value="Familie">Familie</option>
-        <option value="Herr">Herr</option>
-        <option value="Frau">Frau</option>
-      </select>
-
-      <select id="is_first_visit">
-        <option value="true">war zum ersten Mal da</option>
-        <option value="false">war zum wiederholten Mal da</option>
-      </select>
-
-      <button id="generate" class="neutral">erstellen</button>
-    </div>
   </div>
 </body>
 

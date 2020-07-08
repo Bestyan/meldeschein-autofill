@@ -38,6 +38,7 @@ export default {
     SETTINGS_EMAIL: "settings_email",
 
     BIRTHDATE_FIELDS: [
+        "geburtsdatum0_input",
         "geburtsdatum1_input",
         "geburtsdatum2_input",
         "geburtsdatum3_input",
@@ -46,6 +47,7 @@ export default {
     ],
 
     FIRSTNAME_FIELDS: [
+        "vorname0",
         "vorname1",
         "vorname2",
         "vorname3",
@@ -53,7 +55,16 @@ export default {
         "vorname5",
     ],
 
-    BIRTHDATE_FIELD_GUEST: "geburtsdatum0_input",
+    LASTNAME_FIELDS: [
+        "nachname0",
+        "nachname1_input"
+    ],
+
+    ANREDE_FIELDS: [
+        "anrede0",
+        "anrede1"
+    ],
+
     FIELDS_BEGL1: {
         birthdate: "geburtsdatum1_input",
         lastname: "nachname1_input"
@@ -72,5 +83,6 @@ export default {
     SERVER_FETCH_MAILS: "/fetch-mail",
     SERVER_TEST_CONNECTION: "/test-connection",
     SERVER_GET_VORNAME: "/db/get-firstname",
-    SERVER_PUT_VORNAME: "/db/put-firstname"
+    SERVER_PUT_VORNAME: "/db/put-firstname",
+    SERVER_GET_LOCATION: "/get-location"
 };

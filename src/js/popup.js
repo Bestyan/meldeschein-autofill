@@ -9,6 +9,7 @@ import util from './data_utils';
 import constants from './constants';
 import email from './email';
 import data_utils from "./data_utils";
+import connection from "./connection";
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
@@ -173,6 +174,10 @@ function setLoadingScreenVisible(visible) {
 }
 
 function sendToContentScript(data) {
+    if (data === null) {
+        return;
+    }
+
     chrome.tabs.query({
         active: true,
         currentWindow: true
@@ -215,14 +220,14 @@ function fillMeldeschein() {
     }
 
     let form_data = {
-        "anreise_input": data.anreise,
-        "abreise_input": data.abreise,
-        "nachname0": data.nachname, //Nachname Gast
-        "nachname1_input": data.nachname, // Nachname Begl. 1
-        "vorname0": data.vorname,
-        "strasse0": data.strasse || data.anschrift,
-        "plz0_input": data.plz,
-        "ort0_input": data.ort
+        anreise_input: data.anreise,
+        abreise_input: data.abreise,
+        nachname0: data.nachname, //Nachname Gast
+        nachname1_input: data.nachname, // Nachname Begl. 1
+        vorname0: data.vorname,
+        strasse0: data.strasse || data.anschrift,
+        plz0_input: data.plz,
+        ort0_input: data.ort
     };
 
     if (data.land !== "") {
@@ -297,13 +302,6 @@ function fillMeldeschein() {
                     // send available data now, firstname data will be sent in a second message
                     sendToContentScript(form_data);
                 }
-            },
-
-            // onRejected
-            reason => {
-
-                console.log(`db.getGender(${vorname}) rejected with reason "${reason}"`);
-
             }
         )
         .catch(error => console.log(error));
@@ -312,7 +310,7 @@ function fillMeldeschein() {
 }
 
 function buildMailUI(emails_from) {
-    const statusText = document.getElementById("birthdates_status");
+    const statusText = document.getElementById("email_status");
     const emailContent = document.getElementById("email_content");
     const emailDisplay = document.getElementById("email_display");
 
@@ -459,17 +457,38 @@ function buildUI() {
         });
     });
 
-    // Button "Geburtsdaten ausfüllen"
-    document.getElementById("birthdates_fill").addEventListener('click', event => {
+    // Button "Felder ausfüllen"
+    document.getElementById("email_data_fill").addEventListener('click', event => {
         const data = getSelectedTableRow();
         if (data == null) {
             alert("keine Tabellenzeile ausgewählt");
             return;
         }
 
-        const relevantText = document.getElementById("birthdates_relevant_text").value;
-        const birthdates = data_utils.getBirthdatesForMeldeschein(relevantText, data);
-        sendToContentScript(birthdates);
+        const makeNewMeldeschein = document.getElementById("make_own_meldeschein").checked;
+        const birthdatesText = document.getElementById("birthdates_relevant_text").value;
+        const addressText = document.getElementById("address_relevant_text").value;
+
+        if (makeNewMeldeschein) {
+            sendToContentScript(data_utils.getClearFormData());
+            // has to be async because server needs to be queried to get the gender for the title
+            data_utils.getDataForNewMeldeschein(birthdatesText, db.getGender)
+                .then(data => sendToContentScript(data))
+                .catch(error => console.log(error));
+        } else {
+            const birthdates = data_utils.getBirthdatesForMeldeschein(birthdatesText, data);
+            sendToContentScript(birthdates);
+        }
+
+        if (addressText) {
+            connection.get(constants.SERVER_GET_LOCATION, [{
+                    key: "location_string",
+                    value: addressText
+                }])
+                .then(response => response.json())
+                .then(data => sendToContentScript(data_utils.getLocationForForm(data)))
+                .catch(error => console.log(error));
+        }
     });
 
     // Button [Mail] "erstellen"
