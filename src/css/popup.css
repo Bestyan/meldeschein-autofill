@@ -16,6 +16,7 @@
     opacity: 0.6;
     margin: -5px 0 0 -5px;
     /* offset padding */
+    z-index: 100;
 }
 
 #loading_message {

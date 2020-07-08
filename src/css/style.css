@@ -5,7 +5,7 @@
 html {
     display: flex;
     flex-direction: column;
-    padding: 5px;
+    padding: 0 5px 5px 5px;
 }
 
 .h1,
@@ -105,6 +105,16 @@ button.settings {
     display: flex;
     flex-direction: row;
     margin: 2px 0;
+}
+
+.header {
+    position: sticky;
+    background: white;
+    padding: 5px 0;
+    top: 0;
+    margin-top: 0;
+    z-index: 99;
+    white-space: nowrap;
 }
 
 .space-between {

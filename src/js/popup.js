@@ -391,8 +391,38 @@ function buildMailUI(emails_from) {
         .catch(error => statusText.textContent = error);
 }
 
+function setContentVisibility(isVisible){
+    const div = document.getElementById("content_container");
+    div.classList.remove("hide");
+
+    if(!isVisible){
+        div.classList.add("hide");
+    }
+}
+
 function buildUI() {
     refreshStatus();
+
+    // Button minimieren
+    document.getElementById('minimize').addEventListener('click', event => {
+        setContentVisibility(false);
+
+        const minimize = document.getElementById('minimize');
+        minimize.classList.remove("hide");
+        minimize.classList.add("hide");
+
+        document.getElementById('maximize').classList.remove("hide");
+    });
+
+    // Button maximieren
+    document.getElementById('maximize').addEventListener('click', event => {
+        setContentVisibility(true);
+        const maximize = document.getElementById('maximize');
+        maximize.classList.remove("hide");
+        maximize.classList.add("hide");
+
+        document.getElementById('minimize').classList.remove("hide");
+    });
 
     // Button Einstellungen (Zahnrad)
     document.getElementById('settings').addEventListener('click', event => {

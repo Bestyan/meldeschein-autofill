@@ -11,11 +11,16 @@
     <div id="loading_message">lädt ...</div>
   </div>
 
-  <div class="col">
-    <div class="row space-between">
-      <h1>Meldeschein Autofill</h1>
+  <div class="row space-between header">
+    <h1>Meldeschein Autofill</h1>
+    <div>
+      <button id="minimize" class="neutral bold">&#128469;</button>
+      <button id="maximize" class="neutral bold hide">&#128470;</button>
       <button id="settings" class="settings bold">&#9881;</button>
     </div>
+  </div>
+
+  <div class="col" id="content_container">
 
     <div class="row">
       <span>Status: </span><span id="status" class="status bad">no data</span>
