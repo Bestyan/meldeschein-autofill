@@ -5,7 +5,7 @@ const utils = {
      * split a name text into a first name and a last name
      * text is either "firstname lastname" or "lastname, firstname"
      */
-    getNameParts: name => {
+    getNameParts(name) {
         let firstname, lastname;
         if (name.includes(",")) {
             firstname = name.substring(0, name.indexOf(",")).trim();
@@ -20,10 +20,16 @@ const utils = {
         };
     },
 
+    sortDatesAscending(dates) {
+        return dates.sort((a, b) => {
+            return a - b;
+        });
+    },
+
     /**
      * sort two arrays, one containing dates, the other containing names by the dates while keeping the names at the same index as their corresponding date
      */
-    sortNamesAndDates: (dates, names) => {
+    sortNamesAndDates(dates, names) {
         // sort both arrays ascending by their dates so the oldest people come first
         const dateObjects = dates.map(dateString => {
             const parts = dateString.split(".");
@@ -42,12 +48,17 @@ const utils = {
             return new Date(year, month - 1, day);
         });
 
+        // create a map {"John Doe" : "<dateIsoString>"}
         const mapNamesToDates = names.reduce((map, _, index) => {
             map[_] = dateObjects[index].toString();
             return map;
         }, {});
 
-        const namesSorted = dateObjects.sort().map(date => {
+        // sort dates
+        this.sortDatesAscending(dateObjects);
+
+        // create name array sorted by date
+        const namesSorted = dateObjects.map(date => {
             let toBeRemoved;
             for (const [name, dateString] of Object.entries(mapNamesToDates)) {
                 if (dateString === date.toString()) {
@@ -59,7 +70,8 @@ const utils = {
             return toBeRemoved;
         });
 
-        const datesSorted = dateObjects.sort().map(date => date.toLocaleDateString("de-DE", constants.BIRTHDAY_DATE_FORMAT));
+        // create sorted date array
+        const datesSorted = dateObjects.map(date => date.toLocaleDateString("de-DE", constants.BIRTHDAY_DATE_FORMAT));
         return {
             namesSorted: namesSorted,
             datesSorted: datesSorted
@@ -69,7 +81,7 @@ const utils = {
     /**
      * parse Text from email into an array of names and array of birthdates
      */
-    parseText: text => {
+    parseText(text) {
         // keine vorangestellte zahl, 1-2 Zahlen, Punkt, 1-2 Zahlen, Punkt, 2 oder 4 Zahlen, keine nachgestellte Zahl
         const regexDate = /((?<!\d)\d{1,2}[.]\d{1,2}[.]\d{2}(?:\d{2})?(?!\d))/g;
         // 2+ Zeichen (keine Zahl/Whitespace), Leerzeichen, 2+ Zeichen (keine Zahl/Whitespace)
@@ -92,9 +104,6 @@ const utils = {
 
         let dates = text.match(regexDate);
         let names = text.match(regexName);
-
-        console.log(dates);
-        console.log(names);
 
         if (!dates || dates.length === 0) {
             console.log(`could not find any dates in text: "${text}"`)
@@ -351,6 +360,9 @@ export default {
                 namesSorted,
                 datesSorted
             } = utils.sortNamesAndDates(dates, names);
+
+            console.log("names sorted: " + namesSorted.toString());
+            console.log("dates sorted: " + datesSorted.toString());
 
             const result = {};
             const birthdate_fields = JSON.parse(JSON.stringify(constants.BIRTHDATE_FIELDS));
