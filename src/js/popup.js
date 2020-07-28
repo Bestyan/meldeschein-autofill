@@ -150,12 +150,12 @@ function generateMail() {
         return;
     }
 
-    if (data.email.endsWith("booking.com") ||
+    /*if (data.email.endsWith("booking.com") ||
         data.email.endsWith("tomas.travel")) {
         alert(`Buchungsportal-Email erkannt: ${data.email}
             Mail wird nicht generiert.`);
         return;
-    }
+    }*/
 
     data.anrede = document.getElementById('anrede').value;
     const isFirstVisit = document.getElementById('is_first_visit').value == 'true';
