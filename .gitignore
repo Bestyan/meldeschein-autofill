@@ -4,3 +4,5 @@ secrets.*.js
 *.zip
 *.xls
 utils/email.js
+*.docx
+docx_as_base64.txt
