@@ -10,6 +10,7 @@ import constants from './constants';
 import email from './email';
 import data_utils from "./data_utils";
 import connection from "./connection";
+import check_in_generator from './check_in_generator';
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
@@ -116,29 +117,29 @@ function searchDB(event) {
         pagination: "local",
         paginationSize: 10,
         columns: [{
-                title: "Vorname",
-                field: "vorname"
-            },
-            {
-                title: "Nachname",
-                field: "nachname"
-            },
-            {
-                title: "Anreise",
-                field: "anreise"
-            },
-            {
-                title: "Abreise",
-                field: "abreise"
-            },
-            {
-                title: "Apartment",
-                field: "apartment"
-            },
-            {
-                title: "Email",
-                field: "email"
-            }
+            title: "Vorname",
+            field: "vorname"
+        },
+        {
+            title: "Nachname",
+            field: "nachname"
+        },
+        {
+            title: "Anreise",
+            field: "anreise"
+        },
+        {
+            title: "Abreise",
+            field: "abreise"
+        },
+        {
+            title: "Apartment",
+            field: "apartment"
+        },
+        {
+            title: "Email",
+            field: "email"
+        }
         ]
     });
 }
@@ -369,17 +370,17 @@ function buildMailUI(emails_from) {
                     dir: "desc"
                 }],
                 columns: [{
-                        title: "Betreff",
-                        field: "subject",
-                        widthGrow: 1
-                    },
-                    {
-                        title: "Datum",
-                        field: "date",
-                        formatter: (cell, formatterParams, onRendered) => {
-                            return new Date(cell.getValue()).toLocaleDateString("de-DE", constants.STATUS_DATE_FORMAT).replace(",", "");
-                        }
+                    title: "Betreff",
+                    field: "subject",
+                    widthGrow: 1
+                },
+                {
+                    title: "Datum",
+                    field: "date",
+                    formatter: (cell, formatterParams, onRendered) => {
+                        return new Date(cell.getValue()).toLocaleDateString("de-DE", constants.STATUS_DATE_FORMAT).replace(",", "");
                     }
+                }
                 ],
                 rowClick: function (event, rowComponent) {
                     // textarea displays plaintext email
@@ -390,11 +391,11 @@ function buildMailUI(emails_from) {
         .catch(error => statusText.textContent = error);
 }
 
-function setContentVisibility(isVisible){
+function setContentVisibility(isVisible) {
     const div = document.getElementById("content_container");
     div.classList.remove("hide");
 
-    if(!isVisible){
+    if (!isVisible) {
         div.classList.add("hide");
     }
 }
@@ -486,6 +487,13 @@ function buildUI() {
         });
     });
 
+    // Button "Check-in Dokument"
+    document.getElementById('checkin_download').addEventListener('click', event => {
+        check_in_generator.generate()
+            .then(() => console.log("docx download"))
+            .catch(error => alert(error));
+    })
+
     // Button "Felder ausfüllen"
     document.getElementById("email_data_fill").addEventListener('click', event => {
         const data = getSelectedTableRow();
@@ -511,9 +519,9 @@ function buildUI() {
 
         if (addressText) {
             connection.get(constants.SERVER_GET_LOCATION, [{
-                    key: "location_string",
-                    value: data_utils.cleanLocationText(addressText)
-                }])
+                key: "location_string",
+                value: data_utils.cleanLocationText(addressText)
+            }])
                 .then(response => response.json())
                 .then(data => sendToContentScript(data_utils.getLocationForForm(data)))
                 .catch(error => console.log(error));
@@ -525,9 +533,9 @@ function buildUI() {
 
     // Visibility of Buttons
     chrome.tabs.query({
-            currentWindow: true,
-            active: true
-        },
+        currentWindow: true,
+        active: true
+    },
         tabs => {
             let url = tabs[0].url;
 

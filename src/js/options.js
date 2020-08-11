@@ -5,41 +5,60 @@ import email from "./email";
 alert = chrome.extension.getBackgroundPage().alert;
 confirm = chrome.extension.getBackgroundPage().confirm;
 
-function setStatus(text, cssClass) {
+const setEmailStatus = (text, ...cssClasses) => {
     const status = document.getElementById("status");
     status.classList.remove("good", "bad");
     status.textContent = text;
-    status.classList.add(cssClass);
+    status.classList.add(cssClasses);
 }
 
-function buildUI() {
+const setCheckInDocStatus = (htmlContent, ...cssClasses) => {
+    const uploadStatus = document.getElementById("checkin_docx_status");
+    // remove all classes
+    uploadStatus.classList.remove(...uploadStatus.classList);
+    uploadStatus.innerHTML = htmlContent;
+    uploadStatus.classList.add("bold", cssClasses);
+};
 
-    const user = document.getElementById("email_user");
-    const password = document.getElementById("email_password");
-    const host = document.getElementById("email_host");
-    const port = document.getElementById("email_port");
-    const tls = document.getElementById("email_tls");
+const refreshCheckInDocStatus = () => {
+    // check for an existing checkin docx
+    let currentDocx = window.localStorage.getItem(constants.SETTINGS_CHECKIN_DOCX);
+    // set status accordingly
+    if (currentDocx === null) {
+        setCheckInDocStatus("fehlt &cross;", "bad");
+    } else {
+        setCheckInDocStatus("vorhanden &check;", "good");
+    }
+};
 
-    const loadSettingsFromStorage = () => {
+function buildMailSettingsUI() {
+
+    const userInput = document.getElementById("email_user");
+    const passwordInput = document.getElementById("email_password");
+    const hostInput = document.getElementById("email_host");
+    const portInput = document.getElementById("email_port");
+    const tlsCheckbox = document.getElementById("email_tls");
+
+    const loadEmailSettingsFromStorage = () => {
         const settings_string = window.localStorage.getItem(constants.SETTINGS_EMAIL);
 
         if (!settings_string) {
 
-            user.value = "";
-            password.value = "";
-            host.value = "";
-            port.value = "993";
-            tls.checked = true;
+            userInput.value = "";
+            passwordInput.value = "";
+            hostInput.value = "";
+            portInput.value = "993";
+            tlsCheckbox.checked = true;
 
         } else {
 
             const settings = JSON.parse(settings_string);
 
-            user.value = settings.user;
-            password.value = "";
-            host.value = settings.host;
-            port.value = settings.port;
-            tls.checked = settings.tls;
+            userInput.value = settings.user;
+            passwordInput.value = "";
+            hostInput.value = settings.host;
+            portInput.value = settings.port;
+            tlsCheckbox.checked = settings.tls;
 
         }
     };
@@ -47,40 +66,40 @@ function buildUI() {
     // Button speichern
     document.getElementById("save").addEventListener("click", event => {
         // check for empty inputs
-        if (!user.value ||
-            !password.value ||
-            !host.value ||
-            !port.value) {
+        if (!userInput.value ||
+            !passwordInput.value ||
+            !hostInput.value ||
+            !portInput.value) {
             alert("nicht alle Felder ausgefüllt");
             return;
         }
 
         // check if port is a number
-        if (!+port.value) {
+        if (!+portInput.value) {
             alert("Port muss eine Zahl sein");
             return;
         }
 
         const settings = {
-            user: user.value,
-            password: password.value,
-            host: host.value,
-            port: port.value,
-            tls: tls.checked
+            user: userInput.value,
+            password: passwordInput.value,
+            host: hostInput.value,
+            port: portInput.value,
+            tls: tlsCheckbox.checked
         };
 
         // save settings to local storage
         window.localStorage.setItem(constants.SETTINGS_EMAIL, JSON.stringify(settings));
 
         // test connection
-        setStatus("Login testen ...", "bad");
+        setEmailStatus("Login testen ...", "bad");
         email.testConnection()
             .then(
                 responseBody => {
                     if (responseBody.status === "ok") {
-                        setStatus("Login erfolgreich", "good");
+                        setEmailStatus("Login erfolgreich", "good");
                     } else {
-                        setStatus(responseBody.error, "bad");
+                        setEmailStatus(responseBody.error, "bad");
                     }
                 })
             .catch(error => alert(error));
@@ -88,7 +107,7 @@ function buildUI() {
 
     // Button zurücksetzen
     document.getElementById("reset").addEventListener("click", event => {
-        loadSettingsFromStorage();
+        loadEmailSettingsFromStorage();
     });
 
     document.getElementById("wipe").addEventListener("click", event => {
@@ -96,13 +115,49 @@ function buildUI() {
 
         - Buchungs-Tabelle (importiertes xls)
         - E-Mail-Einstellungen
+        - Check-in Dokument (importiertes docx)
 
                                     Fortfahren?`)) {
             window.localStorage.clear();
+            refreshCheckInDocStatus();
         }
     })
 
-    loadSettingsFromStorage();
+    loadEmailSettingsFromStorage();
+}
+
+function buildCheckinDocumentUI() {
+    const uploadButton = document.getElementById("upload_checkin");
+
+    refreshCheckInDocStatus();
+
+    uploadButton.addEventListener("change", event => {
+
+        setCheckInDocStatus("lädt...", "bad");
+
+        const toBinaryString = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsBinaryString(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        const file = event.target.files[0];
+
+        toBinaryString(file)
+            .then(binaryString => {
+                // save to local storage
+                window.localStorage.setItem(constants.SETTINGS_CHECKIN_DOCX, binaryString);
+                refreshCheckInDocStatus();
+            })
+            .catch(error => setCheckInDocStatus(error.toString(), "bad"));
+    });
+
+}
+
+function buildUI() {
+    buildMailSettingsUI();
+    buildCheckinDocumentUI();
 }
 
 buildUI();
