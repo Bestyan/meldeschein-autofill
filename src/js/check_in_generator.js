@@ -6,12 +6,11 @@ import constants from './constants';
 const EMPTY_TEMPLATE = {
     apartment: "__________________",
     aufenthaltszeit: "_______________________________",
-    name1: "_________________________________________________________",
-    name2: "_________________________________________________________"
+    name: "_________________________________________________________"
 }
 
 export default {
-    generate() {
+    generate(placeholderData) {
         return new Promise((resolve, reject) => {
 
             // load base64 encoded docx from local storage
@@ -21,12 +20,16 @@ export default {
                 return;
             }
 
-            // replace placeholders
+            // add a tabulator to short apartment names
+            if(placeholderData && placeholderData.apartment.length < 8){
+                placeholderData.apartment += "\t";
+            }
+
             const zip = new PizZip().load(docxBinaryString);
             try {
                 const docx = new Docxtemplater(zip);
                 // replace placeholders
-                docx.setData(EMPTY_TEMPLATE);
+                docx.setData(placeholderData ? placeholderData : EMPTY_TEMPLATE);
                 docx.render();
                 const docxBlob = docx.getZip().generate({
                     type: "blob",
@@ -37,7 +40,7 @@ export default {
                 const docxUrl = window.URL.createObjectURL(docxBlob);
                 const link = document.createElement('a');
                 link.href = docxUrl;
-                link.download = `check_in_NAME`;
+                link.download = `check_in_${placeholderData ? placeholderData.name.slice(placeholderData.name.lastIndexOf(' ') + 1) : "leer"}`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

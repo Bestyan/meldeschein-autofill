@@ -489,8 +489,19 @@ function buildUI() {
 
     // Button "Check-in Dokument"
     document.getElementById('checkin_download').addEventListener('click', event => {
-        check_in_generator.generate()
-            .then(() => console.log("docx download"))
+        const tableData = getSelectedTableRow();
+        // create placeholder mappings from selected table row. if no row is selected, blank lines will be generated instead
+        let placeholderData = null;
+        if(tableData != null){
+            placeholderData = {
+                apartment: tableData.apartment,
+                aufenthaltszeit: `${tableData.anreise} ‒ ${tableData.abreise}`,
+                name: `${tableData.vorname} ${tableData.nachname}`
+            };
+        }
+        
+        check_in_generator.generate(placeholderData)
+            .then(() => console.log("docx generated"))
             .catch(error => alert(error));
     })
 
