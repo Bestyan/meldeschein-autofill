@@ -20,11 +20,6 @@ export default {
                 return;
             }
 
-            // add a tabulator to short apartment names
-            if(placeholderData && placeholderData.apartment.length < 8){
-                placeholderData.apartment += "\t";
-            }
-
             const zip = new PizZip().load(docxBinaryString);
             try {
                 const docx = new Docxtemplater(zip);
