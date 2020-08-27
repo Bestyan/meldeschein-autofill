@@ -342,19 +342,14 @@ function buildMailUI(emails_from) {
             if (!data.mails || data.mails.length === 0) {
                 // no emails found
                 statusText.textContent = `keine Emails von ${emails_from} gefunden`;
-
-                // hide textareas for displaying email contents
-                emailDisplay.classList.remove("hide");
-                emailDisplay.classList.add("hide");
-
             } else {
                 // hide status
                 statusText.textContent = "";
                 statusText.classList.add("hide");
-
-                // show textareas for displaying email contents
-                emailDisplay.classList.remove("hide");
             }
+            
+            // show textareas for displaying email contents
+            emailDisplay.classList.remove("hide");
 
 
             // create tabulator table for email selection
