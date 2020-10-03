@@ -151,17 +151,11 @@ function generateMail() {
         return;
     }
 
-    /*if (data.email.endsWith("booking.com") ||
-        data.email.endsWith("tomas.travel")) {
-        alert(`Buchungsportal-Email erkannt: ${data.email}
-            Mail wird nicht generiert.`);
-        return;
-    }*/
-
     data.anrede = document.getElementById('anrede').value;
+    const pronomen = document.getElementById('pronomen').value;
     const isFirstVisit = document.getElementById('is_first_visit').value == 'true';
 
-    mail_generator.generate(data, isFirstVisit);
+    mail_generator.generate(data, pronomen, isFirstVisit);
 }
 
 function setLoadingScreenVisible(visible) {
@@ -347,7 +341,7 @@ function buildMailUI(emails_from) {
                 statusText.textContent = "";
                 statusText.classList.add("hide");
             }
-            
+
             // show textareas for displaying email contents
             emailDisplay.classList.remove("hide");
 
@@ -487,14 +481,14 @@ function buildUI() {
         const tableData = getSelectedTableRow();
         // create placeholder mappings from selected table row. if no row is selected, blank lines will be generated instead
         let placeholderData = null;
-        if(tableData != null){
+        if (tableData != null) {
             placeholderData = {
                 apartment: tableData.apartment,
                 aufenthaltszeit: `${tableData.anreise} ‒ ${tableData.abreise}`,
                 name: `${tableData.vorname} ${tableData.nachname}`
             };
         }
-        
+
         check_in_generator.generate(placeholderData)
             .then(() => console.log("docx generated"))
             .catch(error => alert(error));
@@ -533,6 +527,25 @@ function buildUI() {
                 .catch(error => console.log(error));
         }
     });
+
+    // Dropdown "Sie"/"Du"
+    document.getElementById('pronomen').addEventListener('change', event => {
+        const pronomen = document.getElementById('pronomen');
+        const anrede = document.getElementById('anrede');
+        const firstVisit = document.getElementById('is_first_visit');
+
+        if (pronomen.value === "Sie") {
+
+            anrede.removeAttribute("disabled");
+            firstVisit.removeAttribute("disabled");
+
+        } else if (pronomen.value === "Du") {
+
+            anrede.setAttribute("disabled", "disabled");
+            firstVisit.setAttribute("disabled", "disabled");
+
+        }
+    })
 
     // Button [Mail] "erstellen"
     document.getElementById('generate').addEventListener('click', generateMail, false);
