@@ -199,6 +199,17 @@ function wakeServer() {
         });
 }
 
+// initialize default settings in localStorage
+const initLocalStorage = () => {
+
+    // catchall für chiemgaukarten mails
+    const catchAll = window.localStorage.getItem(constants.SETTINGS_CATCHALL_EMAIL);
+    if(catchAll === null){
+        window.localStorage.setItem(constants.SETTINGS_CATCHALL_EMAIL, "@inzell.online");
+    }
+
+};
+
 function getSelectedTableRow() {
     if (result_table == null) {
         return null;
@@ -214,6 +225,18 @@ function fillMeldeschein() {
         return;
     }
 
+    // modified customer email like this:
+    // customer@example.com => customer|at|example.com@catchall.domain
+    let modifiedEmail = "";
+    if (!data.email.includes("bitte_email_eintragen@tomas.travel")) {
+        let catchAll = window.localStorage.getItem(constants.SETTINGS_CATCHALL_EMAIL);
+
+        if(!catchAll.startsWith("@")){
+            catchAll = "@" + catchAll;
+        }
+        modifiedEmail = data.email.replace("@", "|at|") + catchAll;
+    }
+
     let form_data = {
         anreise_input: data.anreise,
         abreise_input: data.abreise,
@@ -221,7 +244,8 @@ function fillMeldeschein() {
         vorname0: data.vorname,
         strasse0: data.strasse || data.anschrift,
         plz0_input: data.plz,
-        ort0_input: data.ort
+        ort0_input: data.ort,
+        email: modifiedEmail
     };
 
     if (data.land !== "") {
@@ -229,6 +253,9 @@ function fillMeldeschein() {
         form_data.staat0_input = data.land; // Staatsangehörigkeit Gast
         form_data.staat1_input = data.land; // Staatsangehörigkeit Begl. 1
     }
+
+    // send available data now, firstname data will be sent in a second message
+    sendToContentScript(form_data);
 
     const vorname = data.vorname.split(" ")[0];
     db.getGender(vorname)
@@ -239,12 +266,12 @@ function fillMeldeschein() {
                 if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
                     const anrede = constants.getAnrede(gender);
 
-                    form_data.anrede0 = anrede;
-                    // Anrede der Begleitperson != Anrede des Buchenden
-                    form_data.anrede1 = anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR;
-
                     // send data to content script fill_meldeschein.js
-                    sendToContentScript(form_data);
+                    sendToContentScript({
+                        anrede0: anrede,
+                        // Anrede der Begleitperson != Anrede des Buchenden
+                        anrede1: anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR
+                    });
 
                 } else { // firstname does not have an entry in the firstname table => query the user for its gender
                     const genderPopup = document.getElementById("firstname_gender");
@@ -292,9 +319,6 @@ function fillMeldeschein() {
                         // remove event listener
                         event.target.removeEventListener(event.type, handler);
                     });
-
-                    // send available data now, firstname data will be sent in a second message
-                    sendToContentScript(form_data);
                 }
             }
         )
@@ -592,4 +616,6 @@ console.log(`environment: ${process.env.NODE_ENV}`);
 let result_table = null;
 
 db.setup(refreshStatus);
+initLocalStorage();
+
 buildUI();

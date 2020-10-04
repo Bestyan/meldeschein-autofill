@@ -126,6 +126,40 @@ function buildMailSettingsUI() {
     loadEmailSettingsFromStorage();
 }
 
+const buildCatchAllSettingsUI = () => {
+    const saveButton = document.getElementById("save_catchall");
+    const catchAllInput = document.getElementById("email_catchall");
+    const status = document.getElementById("catchall_status");
+
+    // init from localStorage
+    const catchAll = window.localStorage.getItem(constants.SETTINGS_CATCHALL_EMAIL);
+    catchAllInput.value = catchAll;
+
+    const setStatus = (message, ...cssClasses) => {
+        status.innerHTML = message;
+        status.classList.remove(...status.classList);
+        console.log(cssClasses);
+        if(cssClasses.length > 0){
+            status.classList.add(cssClasses);
+        }
+    };
+
+    saveButton.addEventListener("click", event => {
+
+        if (catchAllInput.value === "") {
+            setStatus("darf nicht leer sein", "bad");
+            return;
+        } else {
+            setStatus("");
+        }
+
+        window.localStorage.setItem(constants.SETTINGS_CATCHALL_EMAIL, catchAllInput.value);
+
+        setStatus("gespeichert", "good");
+
+    });
+};
+
 function buildCheckinDocumentUI() {
     const uploadButton = document.getElementById("upload_checkin");
 
@@ -157,6 +191,7 @@ function buildCheckinDocumentUI() {
 
 function buildUI() {
     buildMailSettingsUI();
+    buildCatchAllSettingsUI();
     buildCheckinDocumentUI();
 }
 
