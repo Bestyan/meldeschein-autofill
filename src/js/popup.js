@@ -204,7 +204,7 @@ const initLocalStorage = () => {
 
     // catchall für chiemgaukarten mails
     const catchAll = window.localStorage.getItem(constants.SETTINGS_CATCHALL_EMAIL);
-    if(catchAll === null){
+    if (catchAll === null) {
         window.localStorage.setItem(constants.SETTINGS_CATCHALL_EMAIL, "@inzell.online");
     }
 
@@ -231,7 +231,7 @@ function fillMeldeschein() {
     if (!data.email.includes("bitte_email_eintragen@tomas.travel")) {
         let catchAll = window.localStorage.getItem(constants.SETTINGS_CATCHALL_EMAIL);
 
-        if(!catchAll.startsWith("@")){
+        if (!catchAll.startsWith("@")) {
             catchAll = "@" + catchAll;
         }
         modifiedEmail = data.email.replace("@", "|at|") + catchAll;
@@ -343,7 +343,16 @@ function buildMailUI(emails_from) {
 
     statusText.textContent = "E-Mails werden abgefragt ...";
 
-    email.fetchMails(emails_from)
+    // extract additional email addresses from the field vermerk
+    const user_data = getSelectedTableRow();
+    const emails = [user_data.email];
+    if(user_data.vermerk){
+        // regex from http://emailregex.com/
+        const vermerk_mails = [...user_data.vermerk.matchAll(/(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/gm)].map(match_array => match_array[0]);
+        emails.push(...vermerk_mails);
+    }
+
+    email.fetchAllMails(user_data.vorname, user_data.nachname, emails)
         .then(responseBody => {
             const {
                 status,

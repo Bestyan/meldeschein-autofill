@@ -30,15 +30,12 @@ export default {
         });
     },
 
-    /**
-     * fetch all mails with the specified sender address
-     * returns the response body { status, error, data: {mails} }
-     */
-    fetchMails(from) {
-
+    fetchAllMails(firstname, lastname, from) {
         return this.getEmailSettings()
-            .then(email_settings => connection.post(constants.SERVER_FETCH_MAILS, {
+            .then(email_settings => connection.post(constants.SERVER_FETCH_ALL_MAILS, {
                 settings: email_settings,
+                firstname: firstname,
+                lastname: lastname,
                 from: from
             }))
             .then(response => response.json());
@@ -52,8 +49,8 @@ export default {
         return this.getEmailSettings()
             .then(email_settings => connection.post(
                 constants.SERVER_TEST_CONNECTION, {
-                    settings: email_settings
-                }
+                settings: email_settings
+            }
             ))
             .then(response => response.json());
     }
