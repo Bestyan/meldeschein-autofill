@@ -20,7 +20,7 @@ export default {
      * @param {Array} url_parameters 
      * @param {*} headers 
      */
-    get(path, url_parameters, headers) {
+    get(path, url_parameters = [], headers) {
 
         const fetch_headers = headers ? headers : JSON_HEADERS;
 

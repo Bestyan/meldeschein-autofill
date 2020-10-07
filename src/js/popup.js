@@ -346,7 +346,7 @@ function buildMailUI(emails_from) {
     // extract additional email addresses from the field vermerk
     const user_data = getSelectedTableRow();
     const emails = [user_data.email];
-    if(user_data.vermerk){
+    if (user_data.vermerk) {
         // regex from http://emailregex.com/
         const vermerk_mails = [...user_data.vermerk.matchAll(/(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/gm)].map(match_array => match_array[0]);
         emails.push(...vermerk_mails);
@@ -526,6 +526,20 @@ function buildUI() {
             .then(() => console.log("docx generated"))
             .catch(error => alert(error));
     })
+
+    // Button "Chiemgaukarte Mails erstellen"
+    document.getElementById("process_emails").addEventListener('click', event => {
+        connection.get(constants.SERVER_PROCESS_MAILS)
+            .then(response => response.json())
+            .then(responseData => {
+                if (connection.isOk(responseData)) {
+                    alert(responseData.data);
+                } else {
+                    alert(responseData.error);
+                }
+            })
+            .catch(error => console.log(error));
+    });
 
     // Button "Felder ausfüllen"
     document.getElementById("email_data_fill").addEventListener('click', event => {
