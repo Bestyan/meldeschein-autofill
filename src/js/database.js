@@ -9,7 +9,7 @@ const TABLE_RAW = "raw_data";
 const TABLE_SEARCH = "clean_data";
 
 // columns of the SEARCH table
-const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email"];
+const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email", "namen"];
 
 const DB = new localStorageDB("meldeschein", localStorage);
 
@@ -45,10 +45,10 @@ export default {
         let raw_rows = DB.queryAll(TABLE_RAW);
         raw_rows.forEach(row => {
 
-            try{
+            try {
                 row.Anreise.toLocaleDateString("de-DE", constants.SEARCH_RESULT_DATE_FORMAT);
                 row.Abreise.toLocaleDateString("de-DE", constants.SEARCH_RESULT_DATE_FORMAT);
-            } catch(error){
+            } catch (error) {
                 alert(`one of the data sets in the uploaded xls is invalid: 
 
                 Kunde ${row.Kunde}
@@ -68,7 +68,8 @@ export default {
                 apartment: util.processApartment(row.Name_der_gebuchten_Leistung),
                 personen: row.Personen,
                 vermerk: row.Interner_Vermerk,
-                email: row.EMail
+                email: row.EMail,
+                namen: []
             };
 
             // insert row
@@ -123,12 +124,12 @@ export default {
 
         return new Promise((resolve, reject) => {
             connection.get(
-                    constants.SERVER_GET_VORNAME,
-                    [{
-                        key: "name",
-                        value: firstname
-                    }]
-                )
+                constants.SERVER_GET_VORNAME,
+                [{
+                    key: "name",
+                    value: firstname
+                }]
+            )
                 .then(response => response.json())
                 .then(json => {
 
@@ -154,9 +155,9 @@ export default {
      */
     addFirstName(name, gender) {
         connection.put(constants.SERVER_PUT_VORNAME, {
-                name: name,
-                gender: gender
-            })
+            name: name,
+            gender: gender
+        })
             .then(response => response.json())
             .then(json => {
                 // we don't really care about the outcome as long as it's not an error
@@ -165,5 +166,51 @@ export default {
                 }
             })
             .catch(error => console.log(error));
+    },
+
+    /**
+     * 
+     * @param {*} row 
+     * @param {*} names array of names
+     */
+    setNames(row, names) {
+        DB.update(TABLE_SEARCH, {
+            vorname: row.vorname,
+            nachname: row.nachname,
+            anschrift: row.anschrift,
+            anreise: row.anreise,
+            abreise: row.abreise,
+            apartment: row.apartment,
+            email: row.email
+        }, rowToBeUpdated => {
+            rowToBeUpdated.namen = names;
+            return rowToBeUpdated;
+        });
+        DB.commit();
+    },
+
+    /**
+     * 
+     * @param {*} row 
+     */
+    getNames(row) {
+        delete row.namen;
+        const rows = DB.queryAll(TABLE_SEARCH, {
+            query: {
+                vorname: row.vorname,
+                nachname: row.nachname,
+                anschrift: row.anschrift,
+                anreise: row.anreise,
+                abreise: row.abreise,
+                apartment: row.apartment,
+                email: row.email
+            }
+        });
+
+        if (rows.length == 0 || rows.length >= 2) {
+            return null;
+        }
+
+        return rows[0].namen;
     }
 }

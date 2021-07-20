@@ -278,6 +278,20 @@ export default {
     },
 
     /**
+     * 
+     * @param {*} text birthdate textarea input
+     * @returns array of names
+     */
+    getNames: (text) => {
+        const parsed = utils.parseText(text);
+        if (parsed == null) {
+            return null;
+        }
+
+        return parsed.names;
+    },
+
+    /**
      * fill birthdates in a form that has already been partially filled
      */
     getBirthdatesForMeldeschein: (text, data) => {

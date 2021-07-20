@@ -11,6 +11,7 @@ import email from './email';
 import data_utils from "./data_utils";
 import connection from "./connection";
 import check_in_generator from './check_in_generator';
+import database from "./database";
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
@@ -517,9 +518,19 @@ function buildUI() {
         if (tableData != null) {
             placeholderData = {
                 apartment: tableData.apartment,
-                aufenthaltszeit: `${tableData.anreise} ‒ ${tableData.abreise}`,
-                name: `${tableData.vorname} ${tableData.nachname}`
+                aufenthaltszeit: `${tableData.anreise} ‒ ${tableData.abreise}`
             };
+            
+            // name placeholders are name1, name2, name3 etc
+            // if no names have been found, only the name of the person who booked will appear as name1
+            const names = database.getNames(tableData);
+            if(names && names.length > 0){
+                names.forEach((name, i) => {
+                    placeholderData[`name${i+1}`] = name;
+                })
+            } else {
+                placeholderData.name1 = `${tableData.vorname} ${tableData.nachname}`;
+            }
         }
 
         check_in_generator.generate(placeholderData)
@@ -549,10 +560,19 @@ function buildUI() {
             return;
         }
 
+        
         const makeNewMeldeschein = document.getElementById("make_own_meldeschein").checked;
         const birthdatesText = document.getElementById("birthdates_relevant_text").value;
         const addressText = document.getElementById("address_relevant_text").value;
 
+        // set names in database
+        if(birthdatesText){
+            const names = data_utils.getNames(birthdatesText);
+            database.setNames(data, names);
+        }
+
+        // if the adress of a group member is different, they need their own Meldeschein
+        // to achieve this, all the fields are reset and only the person's data will be entered
         if (makeNewMeldeschein) {
             sendToContentScript(data_utils.getClearFormData());
             // has to be async because server needs to be queried to get the gender for the title
