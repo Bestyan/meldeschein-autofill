@@ -205,7 +205,7 @@ const initLocalStorage = () => {
     // catchall für chiemgaukarten mails
     const catchAll = window.localStorage.getItem(constants.SETTINGS_CATCHALL_EMAIL);
     if (catchAll === null) {
-        window.localStorage.setItem(constants.SETTINGS_CATCHALL_EMAIL, "@inzell.online");
+        window.localStorage.setItem(constants.SETTINGS_CATCHALL_EMAIL, "@inzell-ferien.de");
     }
 
 };
