@@ -225,14 +225,12 @@ export default {
     },
 
     getHotspot: apartment => {
-        if (apartment.includes("Krokus") ||
-            apartment.includes("Lilien")) {
-            return "02-14-21 Fruehling";
-        }
-        if (apartment.includes("Enzian")) {
+        if (apartment.includes("Enzian") ||
+            apartment.includes("Krokus")) {
             return "12 Enzian";
         }
-        if (apartment.includes("Lavendel")) {
+        if (apartment.includes("Lavendel") ||
+            apartment.includes("Lilien")) {
             return "22 Lavendel";
         }
         if (apartment.includes("Rosen")) {
