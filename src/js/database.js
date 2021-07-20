@@ -44,6 +44,21 @@ export default {
 
         let raw_rows = DB.queryAll(TABLE_RAW);
         raw_rows.forEach(row => {
+
+            try{
+                row.Anreise.toLocaleDateString("de-DE", constants.SEARCH_RESULT_DATE_FORMAT);
+                row.Abreise.toLocaleDateString("de-DE", constants.SEARCH_RESULT_DATE_FORMAT);
+            } catch(error){
+                alert(`one of the data sets in the uploaded xls is invalid: 
+
+                Kunde ${row.Kunde}
+                Anreise ${row.Anreise}
+                Abreise ${row.Abreise}
+                
+                Please fix and try again!`);
+                return;
+            }
+
             let data = {
                 ...util.processKunde(row.Kunde), // extract vorname, nachname from Kunde
                 anschrift: row.Anschrift,
