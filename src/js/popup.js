@@ -518,7 +518,8 @@ function buildUI() {
         if (tableData != null) {
             placeholderData = {
                 apartment: tableData.apartment,
-                aufenthaltszeit: `${tableData.anreise} ‒ ${tableData.abreise}`
+                aufenthaltszeit: `${tableData.anreise} ‒ ${tableData.abreise}`,
+                anreise: tableData.anreise
             };
             
             // name placeholders are name1, name2, name3 etc
