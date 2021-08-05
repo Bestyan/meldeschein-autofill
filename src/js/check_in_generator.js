@@ -10,7 +10,10 @@ const EMPTY_TEMPLATE_DATA = {
     name2: "_________________________________________________________",
     name3: "_________________________________________________________",
     name4: "_________________________________________________________",
-    name5: "_________________________________________________________"
+    name5: "_________________________________________________________",
+    anreise: "_________",
+    anzahlSchluessel: "_____",
+    schluessel: "________________________________"
 }
 
 export default {
@@ -36,6 +39,13 @@ export default {
                             templateData[`name${i}`] = EMPTY_TEMPLATE_DATA[`name${i}`];
                         }
                     }
+
+                    // if there was an error with the keys, fill with blanks
+                    if(!templateData.anzahlSchluessel){
+                        templateData.anzahlSchluessel = EMPTY_TEMPLATE_DATA.anzahlSchluessel;
+                        templateData.schluessel = EMPTY_TEMPLATE_DATA.schluessel;
+                    }
+
                 } else{
                     templateData = EMPTY_TEMPLATE_DATA;
                 }

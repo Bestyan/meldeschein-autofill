@@ -38,6 +38,7 @@ export default {
     SETTINGS_EMAIL: "settings_email",
     SETTINGS_CATCHALL_EMAIL: "settings_catchall_email",
     SETTINGS_CHECKIN_DOCX: "settings_checkin_docx",
+    SETTINGS_KEYS_XLS: "settings_keys_xls",
 
     BIRTHDATE_FIELDS: [
         "geburtsdatum0_input",

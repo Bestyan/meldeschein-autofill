@@ -11,7 +11,6 @@ import email from './email';
 import data_utils from "./data_utils";
 import connection from "./connection";
 import check_in_generator from './check_in_generator';
-import database from "./database";
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
@@ -159,6 +158,7 @@ function generateMail() {
     mail_generator.generate(data, pronomen, isFirstVisit);
 }
 
+// set visibility of the "loading..." layer that blocks interaction with any elements
 function setLoadingScreenVisible(visible) {
     const loadingScreen = document.getElementById('loading_screen');
     loadingScreen.classList.remove('hide', 'flex');
@@ -519,18 +519,26 @@ function buildUI() {
             placeholderData = {
                 apartment: tableData.apartment,
                 aufenthaltszeit: `${tableData.anreise} ‒ ${tableData.abreise}`,
-                anreise: tableData.anreise
+                anreise: tableData.anreise,
             };
-            
+
             // name placeholders are name1, name2, name3 etc
             // if no names have been found, only the name of the person who booked will appear as name1
-            const names = database.getNames(tableData);
-            if(names && names.length > 0){
+            const names = db.getNames(tableData);
+            if (names && names.length > 0) {
                 names.forEach((name, i) => {
-                    placeholderData[`name${i+1}`] = name;
+                    placeholderData[`name${i + 1}`] = name;
                 })
             } else {
                 placeholderData.name1 = `${tableData.vorname} ${tableData.nachname}`;
+            }
+
+            // placeholders schluessel and anzahlSchluessel
+            const numberOfKeys = db.getNumberOfKeys(tableData);
+            if(numberOfKeys > 0){
+                const keys = db.getKeys(tableData.apartment, numberOfKeys).join(", ");
+                placeholderData.anzahlSchluessel = numberOfKeys;
+                placeholderData.schluessel = keys;
             }
         }
 
@@ -555,21 +563,22 @@ function buildUI() {
 
     // Button "Felder ausfüllen"
     document.getElementById("email_data_fill").addEventListener('click', event => {
-        const data = getSelectedTableRow();
-        if (data == null) {
+        const tableRow = getSelectedTableRow();
+        if (tableRow == null) {
             alert("keine Tabellenzeile ausgewählt");
             return;
         }
 
-        
+
         const makeNewMeldeschein = document.getElementById("make_own_meldeschein").checked;
         const birthdatesText = document.getElementById("birthdates_relevant_text").value;
         const addressText = document.getElementById("address_relevant_text").value;
 
         // set names in database
-        if(birthdatesText){
-            const names = data_utils.getNames(birthdatesText);
-            database.setNames(data, names);
+        if (birthdatesText) {
+            const { names, numberOfKeys } = data_utils.getNamesAndKeys(birthdatesText, tableRow.anreise);
+            db.setNames(tableRow, names);
+            db.setNumberOfKeys(tableRow, numberOfKeys);
         }
 
         // if the adress of a group member is different, they need their own Meldeschein
@@ -581,7 +590,7 @@ function buildUI() {
                 .then(data => sendToContentScript(data))
                 .catch(error => console.log(error));
         } else {
-            const birthdates = data_utils.getBirthdatesForMeldeschein(birthdatesText, data);
+            const birthdates = data_utils.getBirthdatesForMeldeschein(birthdatesText, tableRow);
             sendToContentScript(birthdates);
         }
 

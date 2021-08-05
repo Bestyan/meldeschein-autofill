@@ -142,6 +142,16 @@ const utils = {
                 resolve
             };
         })();
+    },
+
+    /**
+     * 
+     * @param {string} dateText 
+     * @returns 
+     */
+    parseDate(dateText) {
+        const parts = dateText.match(/(\d+)/g);
+        return new Date(parts[2], parts[1] - 1, parts[0]);
     }
 }
 
@@ -279,16 +289,31 @@ export default {
 
     /**
      * 
-     * @param {*} text birthdate textarea input
-     * @returns array of names
+     * @param {string} text birthdate textarea input
+     * @param {Date} anreise birthdate textarea input
+     * @returns {Object{names: string[], numberOfKeys: number}
      */
-    getNames: (text) => {
+    getNamesAndKeys: (text, anreise) => {
         const parsed = utils.parseText(text);
         if (parsed == null) {
             return null;
         }
 
-        return parsed.names;
+        // every person above the age of 16 gets their own key
+        const birthdates = parsed.dates;
+        let keys = 0;
+        birthdates.forEach(birthdate => {
+            const ageDate = new Date(utils.parseDate(anreise) - utils.parseDate(birthdate));
+            const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+            if (age >= 16) {
+                keys++;
+            }
+        });
+
+        return {
+            names: parsed.names,
+            numberOfKeys: keys
+        };
     },
 
     /**

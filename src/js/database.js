@@ -5,11 +5,15 @@ import connection from './connection';
 
 const LOCALSTORAGE_LAST_UPLOAD = "xls_upload_datetime";
 
+// bookings tables
 const TABLE_RAW = "raw_data";
 const TABLE_SEARCH = "clean_data";
 
+// apartment to key number mappings
+const TABLE_KEYS = "keys";
+
 // columns of the SEARCH table
-const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email", "namen"];
+const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email", "namen", "anzahl_schluessel"];
 
 const DB = new localStorageDB("meldeschein", localStorage);
 
@@ -30,8 +34,15 @@ export default {
         DB.commit();
     },
 
+    resetKeysTable() {
+        if (DB.tableExists(TABLE_KEYS)) {
+            DB.dropTable(TABLE_KEYS);
+        }
+        DB.commit();
+    },
+
     /**
-     * sets up db for use
+     * sets up bookings tables for use
      * @param {JSON} rows 
      */
     initDB(rows) {
@@ -208,9 +219,101 @@ export default {
         });
 
         if (rows.length == 0 || rows.length >= 2) {
+            console.log(`found ${rows.length} rows. result is potentially ambiguous`)
             return null;
         }
 
         return rows[0].namen;
+    },
+
+    /**
+     * 
+     * @param {*} row 
+     * @param {*} names array of names
+     */
+    setNumberOfKeys(row, numberOfKeys) {
+        DB.update(TABLE_SEARCH, {
+            vorname: row.vorname,
+            nachname: row.nachname,
+            anschrift: row.anschrift,
+            anreise: row.anreise,
+            abreise: row.abreise,
+            apartment: row.apartment,
+            email: row.email
+        }, rowToBeUpdated => {
+            rowToBeUpdated.anzahl_schluessel = numberOfKeys;
+            return rowToBeUpdated;
+        });
+        DB.commit();
+    },
+
+    /**
+     * 
+     * @param {*} row 
+     */
+    getNumberOfKeys(row) {
+        const rows = DB.queryAll(TABLE_SEARCH, {
+            query: {
+                vorname: row.vorname,
+                nachname: row.nachname,
+                anschrift: row.anschrift,
+                anreise: row.anreise,
+                abreise: row.abreise,
+                apartment: row.apartment,
+                email: row.email
+            }
+        });
+
+        if (rows.length == 0 || rows.length >= 2) {
+            console.log(`found ${rows.length} rows. result is potentially ambiguous`)
+            return null;
+        }
+
+        return rows[0].anzahl_schluessel;
+    },
+
+    /**
+     * 
+     * @param {JSON} rows 
+     */
+    initKeys(rows) {
+        this.resetKeysTable();
+        try {
+            DB.createTableWithData(TABLE_KEYS, rows);
+            DB.commit();
+        } catch (error) {
+            alert(error.toString());
+        }
+    },
+
+    /**
+     * get all key numbers belonging to the given apartment
+     * @param {string} apartment 
+     * @param {number} maxKeys 
+     * @returns {string[]}
+     */
+    getKeys(apartment, maxKeys) {
+        const rows = DB.queryAll(TABLE_KEYS, {
+            query: {
+                apartment: apartment
+            }
+        });
+
+        if (rows.length == 0 || rows.length >= 2) {
+            console.log(`found ${rows.length} rows. result is potentially ambiguous`)
+            return null;
+        }
+
+        // convert json structure {apartment: "lilien", key1: "a1", key2: "a2", key3: "a2"} to ["a1", "a2", "a3"]
+        const row = rows[0];
+        const keys = [];
+        for (let i = 1; i <= maxKeys; i++) {
+            const key = row[`key${i}`];
+            if (key != null &&
+                key.length > 0) {
+                keys.push(key);
+            }
+        }
+        return keys;
     }
 }

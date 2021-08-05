@@ -1,6 +1,8 @@
 import "../css/options.css";
 import constants from "./constants";
 import email from "./email";
+import XLSX from 'xlsx';
+import db from './database';
 
 alert = chrome.extension.getBackgroundPage().alert;
 confirm = chrome.extension.getBackgroundPage().confirm;
@@ -20,6 +22,14 @@ const setCheckInDocStatus = (htmlContent, ...cssClasses) => {
     uploadStatus.classList.add("bold", cssClasses);
 };
 
+const setKeysXlsStatus = (htmlContent, ...cssClasses) => {
+    const uploadStatus = document.getElementById("keys_xls_status");
+    // remove all classes
+    uploadStatus.classList.remove(...uploadStatus.classList);
+    uploadStatus.innerHTML = htmlContent;
+    uploadStatus.classList.add("bold", cssClasses);
+};
+
 const refreshCheckInDocStatus = () => {
     // check for an existing checkin docx
     let currentDocx = window.localStorage.getItem(constants.SETTINGS_CHECKIN_DOCX);
@@ -31,6 +41,18 @@ const refreshCheckInDocStatus = () => {
     }
 };
 
+const refreshKeysXlsStatus = () => {
+    // check for an existing checkin docx
+    let currentDocx = window.localStorage.getItem(constants.SETTINGS_KEYS_XLS);
+    // set status accordingly
+    if (currentDocx === null) {
+        setKeysXlsStatus("fehlt &cross;", "bad");
+    } else {
+        setKeysXlsStatus("vorhanden &check;", "good");
+    }
+};
+
+// initialize the email settings section
 function buildMailSettingsUI() {
 
     const userInput = document.getElementById("email_user");
@@ -126,6 +148,7 @@ function buildMailSettingsUI() {
     loadEmailSettingsFromStorage();
 }
 
+// initialize the catch-all email section
 const buildCatchAllSettingsUI = () => {
     const saveButton = document.getElementById("save_catchall");
     const catchAllInput = document.getElementById("email_catchall");
@@ -139,7 +162,7 @@ const buildCatchAllSettingsUI = () => {
         status.innerHTML = message;
         status.classList.remove(...status.classList);
         console.log(cssClasses);
-        if(cssClasses.length > 0){
+        if (cssClasses.length > 0) {
             status.classList.add(cssClasses);
         }
     };
@@ -160,6 +183,7 @@ const buildCatchAllSettingsUI = () => {
     });
 };
 
+// initialize the check-in document section
 function buildCheckinDocumentUI() {
     const uploadButton = document.getElementById("upload_checkin");
 
@@ -189,10 +213,50 @@ function buildCheckinDocumentUI() {
 
 }
 
+// initialize the keys section
+function buildKeysUI() {
+    const uploadButton = document.getElementById("upload_keys");
+
+    refreshKeysXlsStatus();
+
+    uploadButton.addEventListener("change", event => {
+
+        setKeysXlsStatus("lädt...", "bad");
+
+        let files = event.target.files,
+            f = files[0];
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+
+                let data = new Uint8Array(e.target.result);
+                let workbook = XLSX.read(data, {
+                    type: 'array'
+                });
+
+                // get first sheet
+                let sheet = workbook.Sheets[workbook.SheetNames[0]];
+                let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
+
+                // save keys to database
+                db.initKeys(sheet_as_json);
+                window.localStorage.setItem(constants.SETTINGS_KEYS_XLS, "saved");
+                refreshKeysXlsStatus();
+
+            } catch (error) {
+                alert(error.toString());
+            }
+        };
+        reader.readAsArrayBuffer(f);
+    });
+
+}
+
 function buildUI() {
     buildMailSettingsUI();
     buildCatchAllSettingsUI();
     buildCheckinDocumentUI();
+    buildKeysUI();
 }
 
 buildUI();
