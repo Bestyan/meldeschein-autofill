@@ -185,7 +185,7 @@ function sendToContentScript(data) {
 }
 
 /**
- * send a single request to the server
+ * send a single request to wake the server from its sleep
  */
 function wakeServer() {
     fetch(constants.getServerURL() + constants.SERVER_WAKE_UP)
