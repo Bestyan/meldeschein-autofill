@@ -535,7 +535,7 @@ function buildUI() {
 
             // placeholders schluessel and anzahlSchluessel
             const numberOfKeys = db.getNumberOfKeys(tableData);
-            if(numberOfKeys > 0){
+            if (numberOfKeys > 0) {
                 const keys = db.getKeys(tableData.apartment, numberOfKeys).join(", ");
                 placeholderData.anzahlSchluessel = numberOfKeys;
                 placeholderData.schluessel = keys;
@@ -576,9 +576,14 @@ function buildUI() {
 
         // set names in database
         if (birthdatesText) {
-            const { names, numberOfKeys } = data_utils.getNamesAndKeys(birthdatesText, tableRow.anreise);
-            db.setNames(tableRow, names);
-            db.setNumberOfKeys(tableRow, numberOfKeys);
+            const namesAndKeys = data_utils.getNamesAndKeys(birthdatesText, tableRow.anreise);
+            if (namesAndKeys) {
+                const { names, numberOfKeys } = namesAndKeys;
+                db.setNames(tableRow, names);
+                db.setNumberOfKeys(tableRow, numberOfKeys);
+            } else{
+                console.log("could not determine names and keys")
+            }
         }
 
         // if the adress of a group member is different, they need their own Meldeschein
