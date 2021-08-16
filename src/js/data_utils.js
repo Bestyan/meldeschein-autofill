@@ -8,11 +8,11 @@ const utils = {
     getNameParts(name) {
         let firstname, lastname;
         if (name.includes(",")) {
-            firstname = name.substring(0, name.indexOf(",")).trim();
-            lastname = name.substring(name.indexOf(","), name.length).trim();
+            lastname = name.substring(0, name.indexOf(",")).trim();
+            firstname = name.substring(name.indexOf(",") + 1, name.length).trim();
         } else {
-            firstname = name.substring(0, name.lastIndexOf(" ")).trim();
-            lastname = name.substring(name.lastIndexOf(" "), name.length).trim();
+            firstname = name.substring(0, name.indexOf(" ")).trim();
+            lastname = name.substring(name.indexOf(" ") + 1, name.length).trim();
         }
         return {
             firstname: firstname,
