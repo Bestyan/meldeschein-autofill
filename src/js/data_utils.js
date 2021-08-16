@@ -310,6 +310,11 @@ export default {
             }
         });
 
+        // minimum amount of 2 keys is enforced
+        if (keys < 2) {
+            keys = 2;
+        }
+
         return {
             names: parsed.names,
             numberOfKeys: keys
