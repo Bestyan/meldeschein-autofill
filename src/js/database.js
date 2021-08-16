@@ -219,7 +219,8 @@ export default {
         });
 
         if (rows.length == 0 || rows.length >= 2) {
-            console.log(`found ${rows.length} rows. result is potentially ambiguous`)
+            console.log(`found ${rows.length} rows. result is potentially ambiguous`);
+            console.log(JSON.stringify(rows));
             return null;
         }
 
@@ -265,7 +266,8 @@ export default {
         });
 
         if (rows.length == 0 || rows.length >= 2) {
-            console.log(`found ${rows.length} rows. result is potentially ambiguous`)
+            console.log(`found ${rows.length} rows. result is potentially ambiguous`);
+            console.log(JSON.stringify(rows));
             return null;
         }
 
@@ -300,7 +302,8 @@ export default {
         });
 
         if (rows.length == 0 || rows.length >= 2) {
-            console.log(`found ${rows.length} rows. result is potentially ambiguous`)
+            console.log(`found ${rows.length} rows. result is potentially ambiguous`);
+            console.log(JSON.stringify(rows));
             return null;
         }
 
