@@ -534,7 +534,13 @@ function buildUI() {
             }
 
             // placeholders schluessel and anzahlSchluessel
-            const numberOfKeys = db.getNumberOfKeys(tableData);
+            let numberOfKeys = db.getNumberOfKeys(tableData);
+
+            // if there are no entries, default to 2 keys
+            if(numberOfKeys === null || numberOfKeys === undefined){
+                numberOfKeys = 2;
+            }
+
             if (numberOfKeys > 0) {
                 const keys = db.getKeys(tableData.apartment, numberOfKeys).join(", ");
                 placeholderData.anzahlSchluessel = numberOfKeys;
