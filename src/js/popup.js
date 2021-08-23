@@ -524,23 +524,19 @@ function buildUI() {
 
             // name placeholders are name1, name2, name3 etc
             // if no names have been found, only the name of the person who booked will appear as name1
-            const names = db.getNames(tableData);
-            if (names && names.length > 0) {
-                names.forEach((name, i) => {
-                    placeholderData[`name${i + 1}`] = name;
+            const namesAndBirthdates = db.getBirthdates(tableData);
+            // TODO remove
+            console.log(JSON.stringify(namesAndBirthdates));
+            if (namesAndBirthdates && namesAndBirthdates.length > 0) {
+                namesAndBirthdates.forEach((element, i) => {
+                    placeholderData[`name${i + 1}`] = element.name;
                 })
             } else {
                 placeholderData.name1 = `${tableData.vorname} ${tableData.nachname}`;
             }
 
             // placeholders schluessel and anzahlSchluessel
-            let numberOfKeys = db.getNumberOfKeys(tableData);
-
-            // if there are no entries, default to 2 keys
-            if(numberOfKeys === null || numberOfKeys === undefined){
-                numberOfKeys = 2;
-            }
-
+            let numberOfKeys = data_utils.getNumberOfKeys(namesAndBirthdates, tableData.anreise);
             if (numberOfKeys > 0) {
                 const keys = db.getKeys(tableData.apartment, numberOfKeys).join(", ");
                 placeholderData.anzahlSchluessel = numberOfKeys;
@@ -550,6 +546,15 @@ function buildUI() {
             // placeholders testdatum2 to testdatum7
             const testDates = data_utils.getCovidTestDates(tableData.anreise, tableData.abreise);
             placeholderData = {...placeholderData, ...testDates};
+
+            // placeholders nameTestpflicht1 to nameTestpflicht5
+            // if no names have been found, only the name of the person who booked will appear as nameTestpflicht1
+            if (namesAndBirthdates && namesAndBirthdates.length > 0) {
+                const testNames = data_utils.getCovidTestNames(namesAndBirthdates, tableData.anreise, tableData.abreise);
+                placeholderData = {...placeholderData, ...testNames};
+            } else{
+                placeholderData.nameTestpflicht1 = `${tableData.vorname} ${tableData.nachname}`;
+            }
         }
 
         check_in_generator.generate(placeholderData)
@@ -586,13 +591,11 @@ function buildUI() {
 
         // set names in database
         if (birthdatesText) {
-            const namesAndKeys = data_utils.getNamesAndKeys(birthdatesText, tableRow.anreise);
-            if (namesAndKeys) {
-                const { names, numberOfKeys } = namesAndKeys;
-                db.setNames(tableRow, names);
-                db.setNumberOfKeys(tableRow, numberOfKeys);
+            const namesAndBirthdates = data_utils.getNamesAndBirthdates(birthdatesText);
+            if (namesAndBirthdates && namesAndBirthdates.length > 0) {
+                db.setBirthdates(tableRow, namesAndBirthdates);
             } else{
-                console.log("could not determine names and keys")
+                console.log("could not determine names and keys");
             }
         }
 

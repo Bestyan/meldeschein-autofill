@@ -11,6 +11,11 @@ const EMPTY_TEMPLATE_DATA = {
     name3: "_________________________________________________________",
     name4: "_________________________________________________________",
     name5: "_________________________________________________________",
+    nameTestpflicht1: "_________________________________________________________",
+    nameTestpflicht2: "_________________________________________________________",
+    nameTestpflicht3: "_________________________________________________________",
+    nameTestpflicht4: "_________________________________________________________",
+    nameTestpflicht5: "_________________________________________________________",
     anreise: "_________",
     anzahlSchluessel: "_____",
     schluessel: "________________________________",
@@ -19,7 +24,7 @@ const EMPTY_TEMPLATE_DATA = {
     testdatum4: "_________",
     testdatum5: "_________",
     testdatum6: "_________",
-    testdatum7: "_________"
+    testdatum7: "_________",
 }
 
 export default {
@@ -43,6 +48,13 @@ export default {
                     for(let i = 1; i <= 5; i++){
                         if(!templateData[`name${i}`]){
                             templateData[`name${i}`] = EMPTY_TEMPLATE_DATA[`name${i}`];
+                        }
+                    }
+
+                    // if there's fewer than 5 people, fill the rest with underscores
+                    for(let i = 1; i <= 5; i++){
+                        if(!templateData[`nameTestpflicht${i}`]){
+                            templateData[`nameTestpflicht${i}`] = EMPTY_TEMPLATE_DATA[`nameTestpflicht${i}`];
                         }
                     }
 

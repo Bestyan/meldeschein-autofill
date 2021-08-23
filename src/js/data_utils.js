@@ -153,11 +153,32 @@ const utils = {
         const parts = dateText.match(/(\d+)/g);
         return new Date(parts[2], parts[1] - 1, parts[0]);
     },
-    
+
     addDays(date, days) {
         const newDate = new Date(date.valueOf());
         newDate.setDate(newDate.getDate() + days);
         return newDate;
+    },
+
+    /**
+     * 
+     * @param {string} birthdate 
+     * @param {string} date day of the age check
+     * @returns {number} age
+     */
+    getAgeOnDate(birthdate, date) {
+        try {
+            const ageDate = new Date(utils.parseDate(date) - utils.parseDate(birthdate));
+            const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+            return age;
+        } catch (error) {
+            console.log(`getAgeOnDate("${birthdate}", "${date}") threw an exception`);
+            console.log(error.toString());
+            alert(`Geburtsdatum oder Tag der Anreise sind ungültig.
+Geburtsdatum: ${birthdate}
+Anreise: ${date}`);
+            return -1;
+        }
     }
 }
 
@@ -294,37 +315,62 @@ export default {
     },
 
     /**
-     * 
+     * converts the textarea input into a list of person objects, each with a name and birthdate attribute
      * @param {string} text birthdate textarea input
-     * @param {Date} anreise birthdate textarea input
-     * @returns {Object{names: string[], numberOfKeys: number}
+     * @returns {Array<{name: string, birthdate: string}>}
      */
-    getNamesAndKeys: (text, anreise) => {
+    getNamesAndBirthdates: (text) => {
         const parsed = utils.parseText(text);
         if (parsed == null) {
             return null;
         }
 
-        // every person above the age of 16 gets their own key
-        const birthdates = parsed.dates;
-        let keys = 0;
-        birthdates.forEach(birthdate => {
-            const ageDate = new Date(utils.parseDate(anreise) - utils.parseDate(birthdate));
-            const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+        const { names, dates } = parsed;
+        const namesAndBirthdates = [];
+        try {
+            for (let i = 0; i < names.length; i++) {
+                const element = {
+                    name: names[i],
+                    birthdate: dates[i]
+                };
+                namesAndBirthdates.push(element);
+            }
+        } catch (error) {
+            console.log(error.toString());
+            console.log(JSON.stringify(names));
+            console.log(JSON.stringify(birthdates));
+            alert("Anzahl an Namen und Geburtsdaten ist nicht gleich");
+            return [];
+        }
+
+        return namesAndBirthdates;
+    },
+
+    /**
+     * 
+     * @param {Array<{name: string, birthdate: string}>} namesAndBirthdates 
+     * @param {string} anreise 
+     * @returns 
+     */
+    getNumberOfKeys: (namesAndBirthdates, anreise) => {
+        if (!namesAndBirthdates || namesAndBirthdates.length === 0) {
+            return 2;
+        }
+
+        let numberOfKeys = 0;
+        namesAndBirthdates.forEach(({ birthdate }) => {
+            const age = utils.getAgeOnDate(birthdate, anreise);
             if (age >= 16) {
-                keys++;
+                numberOfKeys++;
             }
         });
 
-        // minimum amount of 2 keys is enforced
-        if (keys < 2) {
-            keys = 2;
+        // enforce 2 key minimum
+        if (numberOfKeys < 2) {
+            numberOfKeys = 2;
         }
 
-        return {
-            names: parsed.names,
-            numberOfKeys: keys
-        };
+        return numberOfKeys;
     },
 
     /**
@@ -348,7 +394,7 @@ export default {
         for (let i = 2; i <= 7; i++) {
             // add 3 days to the last testDate
             const testDate = utils.addDays(lastTestDate, daysBetweenTests);
-            if(testDate >= abreiseDate){
+            if (testDate >= abreiseDate) {
                 break;
             }
             // format to dd.mm.yyyy
@@ -358,6 +404,31 @@ export default {
         }
 
         return testDates;
+    },
+
+    /**
+     * names for the covid test date paper. if a child is younger than 6, they are exempt
+     * @param {Array<{name: string, birthdate: string}>} namesAndBirthdates 
+     * @param {string} anreise 
+     * @param {string} abreise 
+     */
+    getCovidTestNames: (namesAndBirthdates, anreise, abreise) => {
+        const testNames = {};
+        for (let i = 0; i < namesAndBirthdates.length; i++) {
+            let { name, birthdate } = namesAndBirthdates[i];
+            const ageOnArrival = utils.getAgeOnDate(birthdate, anreise);
+            const ageOnDeparture = utils.getAgeOnDate(birthdate, abreise);
+
+            // add age to the name if child is exempt bc its younger than 6
+            if(ageOnDeparture === 6 && ageOnArrival === 5){
+                name += " (5 Jahre, wird 6)";
+            } else if(ageOnArrival < 6){
+                name += ` (${ageOnArrival} Jahre)`;
+            }
+
+            testNames[`nameTestpflicht${i+1}`] = name;
+        }
+        return testNames;
     },
 
     /**

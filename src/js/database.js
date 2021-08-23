@@ -13,7 +13,7 @@ const TABLE_SEARCH = "clean_data";
 const TABLE_KEYS = "keys";
 
 // columns of the SEARCH table
-const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email", "namen", "anzahl_schluessel"];
+const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email", "geburtsdaten"];
 
 const DB = new localStorageDB("meldeschein", localStorage);
 
@@ -182,9 +182,9 @@ export default {
     /**
      * 
      * @param {*} row 
-     * @param {*} names array of names
+     * @param {Array<{name: string, birthdate: string}>} birthdates array of Objectsnames
      */
-    setNames(row, names) {
+    setBirthdates(row, birthdates) {
         DB.update(TABLE_SEARCH, {
             vorname: row.vorname,
             nachname: row.nachname,
@@ -194,7 +194,7 @@ export default {
             apartment: row.apartment,
             email: row.email
         }, rowToBeUpdated => {
-            rowToBeUpdated.namen = names;
+            rowToBeUpdated.geburtsdaten = birthdates;
             return rowToBeUpdated;
         });
         DB.commit();
@@ -204,7 +204,7 @@ export default {
      * 
      * @param {*} row 
      */
-    getNames(row) {
+    getBirthdates(row) {
         delete row.namen;
         const rows = DB.queryAll(TABLE_SEARCH, {
             query: {
@@ -224,54 +224,7 @@ export default {
             return null;
         }
 
-        return rows[0].namen;
-    },
-
-    /**
-     * 
-     * @param {*} row 
-     * @param {*} names array of names
-     */
-    setNumberOfKeys(row, numberOfKeys) {
-        DB.update(TABLE_SEARCH, {
-            vorname: row.vorname,
-            nachname: row.nachname,
-            anschrift: row.anschrift,
-            anreise: row.anreise,
-            abreise: row.abreise,
-            apartment: row.apartment,
-            email: row.email
-        }, rowToBeUpdated => {
-            rowToBeUpdated.anzahl_schluessel = numberOfKeys;
-            return rowToBeUpdated;
-        });
-        DB.commit();
-    },
-
-    /**
-     * 
-     * @param {*} row 
-     */
-    getNumberOfKeys(row) {
-        const rows = DB.queryAll(TABLE_SEARCH, {
-            query: {
-                vorname: row.vorname,
-                nachname: row.nachname,
-                anschrift: row.anschrift,
-                anreise: row.anreise,
-                abreise: row.abreise,
-                apartment: row.apartment,
-                email: row.email
-            }
-        });
-
-        if (rows.length == 0 || rows.length >= 2) {
-            console.log(`found ${rows.length} rows. result is potentially ambiguous`);
-            console.log(JSON.stringify(rows));
-            return null;
-        }
-
-        return rows[0].anzahl_schluessel;
+        return rows[0].geburtsdaten;
     },
 
     /**
