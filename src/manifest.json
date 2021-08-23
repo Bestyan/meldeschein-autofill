@@ -1,6 +1,6 @@
 {
   "name": "Meldeschein Autofill",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "options_ui": {
     "page": "options.html",
     "open_in_tab": false
