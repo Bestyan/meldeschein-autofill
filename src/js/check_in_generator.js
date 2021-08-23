@@ -13,7 +13,13 @@ const EMPTY_TEMPLATE_DATA = {
     name5: "_________________________________________________________",
     anreise: "_________",
     anzahlSchluessel: "_____",
-    schluessel: "________________________________"
+    schluessel: "________________________________",
+    testdatum2: "_________",
+    testdatum3: "_________",
+    testdatum4: "_________",
+    testdatum5: "_________",
+    testdatum6: "_________",
+    testdatum7: "_________"
 }
 
 export default {
@@ -33,10 +39,17 @@ export default {
 
                 let templateData = placeholderData;
                 if(templateData){
-                    // if there's less than 5 people, fill the rest with underscores
+                    // if there's fewer than 5 people, fill the rest with underscores
                     for(let i = 1; i <= 5; i++){
                         if(!templateData[`name${i}`]){
                             templateData[`name${i}`] = EMPTY_TEMPLATE_DATA[`name${i}`];
+                        }
+                    }
+
+                    // if there's fewer than 7 testDates, fill the rest with underscores 
+                    for(let i = 2; i <= 7; i++){
+                        if(!templateData[`testdatum${i}`]){
+                            templateData[`testdatum${i}`] = EMPTY_TEMPLATE_DATA[`testdatum${i}`];
                         }
                     }
 

@@ -152,6 +152,12 @@ const utils = {
     parseDate(dateText) {
         const parts = dateText.match(/(\d+)/g);
         return new Date(parts[2], parts[1] - 1, parts[0]);
+    },
+    
+    addDays(date, days) {
+        const newDate = new Date(date.valueOf());
+        newDate.setDate(newDate.getDate() + days);
+        return newDate;
     }
 }
 
@@ -319,6 +325,39 @@ export default {
             names: parsed.names,
             numberOfKeys: keys
         };
+    },
+
+    /**
+     * creates a map of covid testdates, keys are testdatum2 to testdatum7. each date is set 3 days apart
+     * @param {string} anreise 
+     * @param {string} abreise 
+     */
+    getCovidTestDates: (anreise, abreise) => {
+        const anreiseDate = utils.parseDate(anreise);
+        const abreiseDate = utils.parseDate(abreise);
+        const testDates = {};
+        const daysBetweenTests = 3;
+        // dd.mm.yyyy
+        const dateFormat = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        };
+
+        let lastTestDate = anreiseDate;
+        for (let i = 2; i <= 7; i++) {
+            // add 3 days to the last testDate
+            const testDate = utils.addDays(lastTestDate, daysBetweenTests);
+            if(testDate >= abreiseDate){
+                break;
+            }
+            // format to dd.mm.yyyy
+            testDates[`testdatum${i}`] = testDate.toLocaleDateString("de-DE", dateFormat);
+
+            lastTestDate = testDate;
+        }
+
+        return testDates;
     },
 
     /**

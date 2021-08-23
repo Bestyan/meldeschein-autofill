@@ -540,6 +540,10 @@ function buildUI() {
                 placeholderData.anzahlSchluessel = numberOfKeys;
                 placeholderData.schluessel = keys;
             }
+
+            // placeholders testdatum2 to testdatum7
+            const testDates = data_utils.getCovidTestDates(tableData.anreise, tableData.abreise);
+            placeholderData = {...placeholderData, ...testDates};
         }
 
         check_in_generator.generate(placeholderData)
