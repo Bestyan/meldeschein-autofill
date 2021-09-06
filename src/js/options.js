@@ -7,6 +7,12 @@ import db from './database';
 alert = chrome.extension.getBackgroundPage().alert;
 confirm = chrome.extension.getBackgroundPage().confirm;
 
+/**
+ * set the text and the css of the email status field  
+ * removes all css classes from the field before setting new ones
+ * @param {string} text 
+ * @param  {...string} cssClasses 
+ */
 const setEmailStatus = (text, ...cssClasses) => {
     const status = document.getElementById("status");
     status.classList.remove("good", "bad");
@@ -14,6 +20,12 @@ const setEmailStatus = (text, ...cssClasses) => {
     status.classList.add(cssClasses);
 }
 
+/**
+ * set the html content and the css classes of the checkin doc status field  
+ * removes all css classes from the field before setting new ones
+ * @param {string} htmlContent 
+ * @param  {...string} cssClasses 
+ */
 const setCheckInDocStatus = (htmlContent, ...cssClasses) => {
     const uploadStatus = document.getElementById("checkin_docx_status");
     // remove all classes
@@ -22,6 +34,12 @@ const setCheckInDocStatus = (htmlContent, ...cssClasses) => {
     uploadStatus.classList.add("bold", cssClasses);
 };
 
+/**
+ * set the html content and the css classes of the keys xls status field  
+ * removes all css classes from the field before setting new ones
+ * @param {string} htmlContent 
+ * @param  {...string} cssClasses 
+ */
 const setKeysXlsStatus = (htmlContent, ...cssClasses) => {
     const uploadStatus = document.getElementById("keys_xls_status");
     // remove all classes
@@ -30,6 +48,23 @@ const setKeysXlsStatus = (htmlContent, ...cssClasses) => {
     uploadStatus.classList.add("bold", cssClasses);
 };
 
+/**
+ * set the html content and the css classes of the invoice xlsx status field  
+ * removes all css classes from the field before setting new ones
+ * @param {string} htmlContent 
+ * @param  {...string} cssClasses 
+ */
+const setInvoiceXlsxStatus = (htmlContent, ...cssClasses) => {
+    const uploadStatus = document.getElementById("invoice_xlsx_status");
+    // remove all classes
+    uploadStatus.classList.remove(...uploadStatus.classList);
+    uploadStatus.innerHTML = htmlContent;
+    uploadStatus.classList.add("bold", cssClasses);
+};
+
+/**
+ * check local storage for existing checkin docx and set status field accordingly
+ */
 const refreshCheckInDocStatus = () => {
     // check for an existing checkin docx
     let currentDocx = window.localStorage.getItem(constants.SETTINGS_CHECKIN_DOCX);
@@ -41,14 +76,31 @@ const refreshCheckInDocStatus = () => {
     }
 };
 
+/**
+ * check local storage for existing keys xls and set status field accordingly
+ */
 const refreshKeysXlsStatus = () => {
-    // check for an existing checkin docx
-    let currentDocx = window.localStorage.getItem(constants.SETTINGS_KEYS_XLS);
+    // check for an existing keys xls
+    let currentXls = window.localStorage.getItem(constants.SETTINGS_KEYS_XLS);
     // set status accordingly
-    if (currentDocx === null) {
+    if (currentXls === null) {
         setKeysXlsStatus("fehlt &cross;", "bad");
     } else {
         setKeysXlsStatus("vorhanden &check;", "good");
+    }
+};
+
+/**
+ * check local storage for existing invoice xlsx and set status field accordingly
+ */
+const refreshInvoiceXlsxStatus = () => {
+    // check for an existing invoice xslx
+    let currentInvoiceXlsx = window.localStorage.getItem(constants.SETTINGS_INVOICE_XLSX);
+    // set status accordingly
+    if (currentInvoiceXlsx === null) {
+        setInvoiceXlsxStatus("fehlt &cross;", "bad");
+    } else {
+        setInvoiceXlsxStatus("vorhanden &check;", "good");
     }
 };
 
@@ -252,11 +304,47 @@ function buildKeysUI() {
 
 }
 
+/**
+ * initialize the invoice section
+ */ 
+function buildInvoiceUI() {
+    const uploadButton = document.getElementById("upload_invoice");
+
+    refreshInvoiceXlsxStatus();
+
+    uploadButton.addEventListener("change", event => {
+
+        setInvoiceXlsxStatus("lädt...", "bad");
+
+        const toBinaryString = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsBinaryString(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        const file = event.target.files[0];
+
+        toBinaryString(file)
+            .then(binaryString => {
+                // save to local storage
+                window.localStorage.setItem(constants.SETTINGS_INVOICE_XLSX, binaryString);
+                refreshInvoiceXlsxStatus();
+            })
+            .catch(error => setCheckInDocStatus(error.toString(), "bad"));
+    });
+
+}
+
+/**
+ * initialize all the sections
+ */
 function buildUI() {
     buildMailSettingsUI();
     buildCatchAllSettingsUI();
     buildCheckinDocumentUI();
     buildKeysUI();
+    buildInvoiceUI();
 }
 
 buildUI();
