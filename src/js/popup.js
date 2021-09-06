@@ -11,6 +11,7 @@ import email from './email';
 import data_utils from "./data_utils";
 import connection from "./connection";
 import check_in_generator from './check_in_generator';
+import invoice_generator from './invoice_generator';
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
@@ -545,20 +546,20 @@ function buildUI() {
 
             // placeholders testdatum2 to testdatum7
             const testDates = data_utils.getCovidTestDates(tableData.anreise, tableData.abreise);
-            placeholderData = {...placeholderData, ...testDates};
+            placeholderData = { ...placeholderData, ...testDates };
 
             // placeholders nameTestpflicht1 to nameTestpflicht5
             // if no names have been found, only the name of the person who booked will appear as nameTestpflicht1
             if (namesAndBirthdates && namesAndBirthdates.length > 0) {
                 const testNames = data_utils.getCovidTestNames(namesAndBirthdates, tableData.anreise, tableData.abreise);
-                placeholderData = {...placeholderData, ...testNames};
-            } else{
+                placeholderData = { ...placeholderData, ...testNames };
+            } else {
                 placeholderData.nameTestpflicht1 = `${tableData.vorname} ${tableData.nachname}`;
             }
         }
 
         check_in_generator.generate(placeholderData)
-            .then(() => console.log("docx generated"))
+            .then(() => console.log("checkin docx generated"))
             .catch(error => alert(error));
     })
 
@@ -575,6 +576,13 @@ function buildUI() {
             })
             .catch(error => console.log(error));
     });
+
+    // Button "Rechnung erstellen"
+    document.getElementById("invoice_download").addEventListener('click', event => {
+        invoice_generator.generate({})
+            .then(() => console.log("invoice xlsx generated"))
+            .catch(error => alert(error));
+    })
 
     // Button "Felder ausfüllen"
     document.getElementById("email_data_fill").addEventListener('click', event => {
@@ -594,7 +602,7 @@ function buildUI() {
             const namesAndBirthdates = data_utils.getNamesAndBirthdates(birthdatesText);
             if (namesAndBirthdates && namesAndBirthdates.length > 0) {
                 db.setBirthdates(tableRow, namesAndBirthdates);
-            } else{
+            } else {
                 console.log("could not determine names and keys");
             }
         }
