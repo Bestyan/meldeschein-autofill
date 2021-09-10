@@ -666,5 +666,19 @@ export default {
             .split("Adresse:").join("")
             .split("Wohnort:").join("")
             .split("ansässig in").join("");
+    },
+
+    /**
+     * string parameters are in the european date format [d]d.[m]m.yyyy
+     * @param {string} startDateString 
+     * @param {string} endDateString 
+     * @returns 
+     */
+     getNumberOfNights: (startDateString, endDateString) => {
+        const start = utils.parseDate(startDateString);
+        const end = utils.parseDate(endDateString);
+        const timeDiff = Math.abs(end.getTime() - start.getTime());
+        const numberOfNights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        return numberOfNights;
     }
 };
