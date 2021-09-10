@@ -306,7 +306,7 @@ function buildKeysUI() {
 
 /**
  * initialize the invoice section
- */ 
+ */
 function buildInvoiceUI() {
     const uploadButton = document.getElementById("upload_invoice");
 
@@ -316,19 +316,34 @@ function buildInvoiceUI() {
 
         setInvoiceXlsxStatus("lädt...", "bad");
 
-        const toBinaryString = file => new Promise((resolve, reject) => {
+        // convert binary buffer to base64
+        const arrayBufferToBase64 = buffer => {
+            const bytes = new Uint8Array(buffer);
+            const chars = [];
+            const length = bytes.byteLength;
+            for (let i = 0; i < length; i++) {
+                chars.push(String.fromCharCode(bytes[i]))
+            }
+            const binary = chars.join('');
+            return window.btoa(binary);
+        }
+
+        // function to read file to base64
+        const toArrayBuffer = file => new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.readAsBinaryString(file);
-            reader.onload = () => resolve(reader.result);
+            reader.readAsArrayBuffer(file);
+            reader.onload = () => resolve(arrayBufferToBase64(reader.result));
             reader.onerror = error => reject(error);
         });
 
+        
+
         const file = event.target.files[0];
 
-        toBinaryString(file)
-            .then(binaryString => {
+        toArrayBuffer(file)
+            .then(buffer => {
                 // save to local storage
-                window.localStorage.setItem(constants.SETTINGS_INVOICE_XLSX, binaryString);
+                window.localStorage.setItem(constants.SETTINGS_INVOICE_XLSX, buffer);
                 refreshInvoiceXlsxStatus();
             })
             .catch(error => setCheckInDocStatus(error.toString(), "bad"));
