@@ -226,8 +226,18 @@ export default {
             strasse: "",
             plz: "",
             ort: "",
-            land: ""
+            land: "",
+            rabatt: 0
         };
+
+        // extract rebate (if there is one, the field anschrift starts with it e.g. #15#herecomestheadress)
+        if (anschrift.startsWith("#")) {
+            // extract the part between the first two hashtags
+            const rebateString = anschrift.substring(1, anschrift.slice(1).indexOf("#") + 1);
+            // replace commas with points and convert to number
+            const rebate = +rebateString.replace(",", ".");
+            result.rabatt = rebate;
+        }
 
         try {
             let adressdaten = anschrift
@@ -420,13 +430,13 @@ export default {
             const ageOnDeparture = utils.getAgeOnDate(birthdate, abreise);
 
             // add age to the name if child is exempt bc its younger than 6
-            if(ageOnDeparture === 6 && ageOnArrival === 5){
+            if (ageOnDeparture === 6 && ageOnArrival === 5) {
                 name += " (5 Jahre, wird 6)";
-            } else if(ageOnArrival < 6){
+            } else if (ageOnArrival < 6) {
                 name += ` (${ageOnArrival} Jahre)`;
             }
 
-            testNames[`nameTestpflicht${i+1}`] = name;
+            testNames[`nameTestpflicht${i + 1}`] = name;
         }
         return testNames;
     },

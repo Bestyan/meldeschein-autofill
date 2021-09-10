@@ -13,7 +13,7 @@ const TABLE_SEARCH = "clean_data";
 const TABLE_KEYS = "keys";
 
 // columns of the SEARCH table
-const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email", "geburtsdaten"];
+const COLUMNS_SEARCH = ["vorname", "nachname", "anschrift", "strasse", "plz", "ort", "land", "anreise", "abreise", "apartment", "personen", "vermerk", "email", "geburtsdaten", "preis", "rabatt"];
 
 const DB = new localStorageDB("meldeschein", localStorage);
 
@@ -80,7 +80,7 @@ export default {
                 personen: row.Personen,
                 vermerk: row.Interner_Vermerk,
                 email: row.EMail,
-                namen: []
+                preis: row.Gesamtpreis
             };
 
             // insert row
