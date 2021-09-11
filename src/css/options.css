@@ -1,6 +1,10 @@
 @import "reset.css";
 @import "style.css";
 
+html{
+    width: 420px;
+}
+
 .row.skewered>div:first-child {
     justify-content: flex-end;
     flex-grow: 1;

@@ -179,17 +179,14 @@ function buildMailSettingsUI() {
             .catch(error => alert(error));
     });
 
-    // Button zurücksetzen
-    document.getElementById("reset").addEventListener("click", event => {
-        loadEmailSettingsFromStorage();
-    });
-
     document.getElementById("wipe").addEventListener("click", event => {
         if (confirm(`Folgende Daten werden gelöscht:
 
         - Buchungs-Tabelle (importiertes xls)
         - E-Mail-Einstellungen
         - Check-in Dokument (importiertes docx)
+        - Schlüssel.xlsx
+        - Rechnungstemplate
 
                                     Fortfahren?`)) {
             window.localStorage.clear();
