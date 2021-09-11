@@ -8,6 +8,7 @@
 
 <body class="col">
 
+  <!-- Mail Server -->
   <div class="row space-between">
     <h1>Mail Server</h1>
     <span id="status" class="bad"></span>
@@ -72,6 +73,7 @@
 
   <hr />
 
+  <!-- Catch-all -->
   <div class="row space-between">
     <h1>Catchall für Chiemgaukarten-Mails</h1>
     <span id="catchall_status" class="bad"></span>
@@ -94,7 +96,7 @@
   </div>
 
   <hr />
-
+  <!-- Check-in Dokument -->
   <div class="row space-between">
     <h1>Check-in Dokument</h1>
   </div>
@@ -109,6 +111,7 @@
     </div>
   </div>
 
+  <!-- Schlüssel -->
   <div class="row space-between">
     <h1>Schlüsselkennungen</h1>
   </div>
@@ -123,10 +126,11 @@
     </div>
   </div>
 
+  <!-- Rechnung -->
   <div class="row space-between">
     <h1>Rechnungstemplate</h1>
   </div>
-
+  
   <div class="row skewered">
     <div>
       <span id="invoice_xlsx_status" class="bad bold">this text will be replaced by js</span>
@@ -136,7 +140,43 @@
       <label for="upload_invoice" class="button neutral">Rechnung xlsx hochladen</label>
     </div>
   </div>
+  
+  <!-- Kurbeitragsberechnung -->
+  <div class="row space-between">
+    <h1>Kurbeitrag</h1>
+  </div>
 
+  <div class="row skewered">
+    <div>
+      <input type="text" min="0.00" step="0.01" id="kurbeitrag_erwachsene" class="currency" value="2,10" />
+    </div>
+    <div>
+      <label for="kurbeitrag_erwachsene">Erwachsene (16+)</label>
+    </div>
+  </div>
+  <div class="row skewered">
+    <div>
+      <input type="text" min="0.00" step="0.01" id="kurbeitrag_kinder" class="currency" value="1,00" />
+    </div>
+    <div>
+      <label for="kurbeitrag_kinder">Kinder (6-15)</label>
+    </div>
+  </div>
+  <div class="row skewered">
+    <div>
+      <input type="text" min="0.00" step="0.01" id="kurbeitrag_kleinkinder" class="currency" value="0,00" />
+    </div>
+    <div>
+      <label for="kurbeitrag_kleinkinder">Kinder (0-5)</label>
+    </div>
+  </div>
+
+  <div class="row skewered">
+    <div></div>
+    <div>
+      <button class="good" id="save_kurbeitrag">speichern</button>
+    </div>
+  </div>
 
 </body>
 

@@ -40,6 +40,7 @@ export default {
     SETTINGS_CHECKIN_DOCX: "settings_checkin_docx",
     SETTINGS_KEYS_XLS: "settings_keys_xls",
     SETTINGS_INVOICE_XLSX: "settings_invoice_xlsx",
+    SETTINGS_KURBEITRAG: "settings_kurbeitrag",
 
     BIRTHDATE_FIELDS: [
         "geburtsdatum0_input",

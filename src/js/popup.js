@@ -210,6 +210,17 @@ const initLocalStorage = () => {
         window.localStorage.setItem(constants.SETTINGS_CATCHALL_EMAIL, "@inzell-ferien.de");
     }
 
+    const kurbeitragJSON = window.localStorage.getItem(constants.SETTINGS_KURBEITRAG);
+    if(kurbeitragJSON === null){
+        // default values per night (as they are 11.09.2021)
+        const kurbeitrag = {
+            adults: 2.10, // 16+
+            children: 1.00, // 6-15
+            toddlers: 0.00  // 0-5
+        };
+        window.localStorage.setItem(constants.SETTINGS_KURBEITRAG, JSON.stringify(kurbeitrag));
+    }
+
 };
 
 function getSelectedTableRow() {
