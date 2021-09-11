@@ -590,7 +590,12 @@ function buildUI() {
 
     // Button "Rechnung erstellen"
     document.getElementById("invoice_download").addEventListener('click', event => {
-        invoice_generator.generate(getSelectedTableRow())
+        const tableRow = getSelectedTableRow();
+        if (tableRow == null) {
+            alert("keine Tabellenzeile ausgewählt");
+        }
+
+        invoice_generator.generate(tableRow, db.getBirthdates(tableRow))
             .then(() => console.log("invoice xlsx generated"))
             .catch(error => alert(error));
     })

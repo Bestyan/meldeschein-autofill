@@ -52,8 +52,8 @@ const invoiceUtils = {
             worksheet.getCell("A14").value = `${row.land}`;
         }
 
-        // set invoice number to be yyyy0000 (current year + "0000")
-        worksheet.getCell("B17").value = +`${new Date().getFullYear()}0000`;
+        // set invoice number to be the current year
+        worksheet.getCell("B17").value = new Date().getFullYear();
 
         // aufenthalt
         worksheet.getCell("B20").value = `${row.anreise} - ${row.abreise}`;
@@ -66,16 +66,48 @@ const invoiceUtils = {
         // anzahl personen
         if (birthdates) {
             worksheet.getCell("A24").value = birthdates.length;
+        } else {
+            worksheet.getCell("A24").value = row.personen;
         }
         // anzahl naechte
-        worksheet.getCell("C24").value = data_utils.getNumberOfNights(row.anreise, row.abreise);
+        const numberOfNights = data_utils.getNumberOfNights(row.anreise, row.abreise);
+        worksheet.getCell("C24").value = numberOfNights;
 
         // preis
         worksheet.getCell("G24").value = row.preis;
 
         // kurbeitrag
-        // TODO
-        //worksheet.getCell("G48").value = 
+        if (birthdates) {
+            // get kurbeitrag prices from local storage
+            const { adults, children, toddlers } = JSON.parse(window.localStorage.getItem(constants.SETTINGS_KURBEITRAG));
+
+            let kurbeitragFormula = "";
+            birthdates.forEach(({ birthdate }) => {
+                const age = data_utils.getAgeOnDate(birthdate, row.anreise);
+
+                if (age >= 16) { //adults 16+
+
+                    // replace . with , so German Excel can compute it
+                    const kurbeitragComma = (adults + "").replace(".", ",");
+                    kurbeitragFormula += `+${numberOfNights}*${kurbeitragComma}`;
+
+                } else if (age <= 15 && age >= 6) { //children 6-15
+
+                    const kurbeitragComma = (children + "").replace(".", ",");
+                    kurbeitragFormula += `+${numberOfNights}*${kurbeitragComma}`;
+
+                } else if (age <= 5) { // toddlers 0-5
+
+                    const kurbeitragComma = (toddlers + "").replace(".", ",");
+                    kurbeitragFormula += `+${numberOfNights}*${toddlers.toFixed(2)}`;
+
+                }
+            });
+            kurbeitragFormula = kurbeitragFormula.slice(1);
+            worksheet.getCell("G48").value = { formula: kurbeitragFormula };
+        }
+
+
     }
 }
 
