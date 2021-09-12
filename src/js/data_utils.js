@@ -158,6 +158,27 @@ const utils = {
         const newDate = new Date(date.valueOf());
         newDate.setDate(newDate.getDate() + days);
         return newDate;
+    },
+
+    /**
+     * 
+     * @param {string} birthdate 
+     * @param {string} date day of the age check
+     * @returns {number} age
+     */
+     getAgeOnDate(birthdate, date) {
+        try {
+            const ageDate = new Date(utils.parseDate(date) - utils.parseDate(birthdate));
+            const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+            return age;
+        } catch (error) {
+            console.log(`getAgeOnDate("${birthdate}", "${date}") threw an exception`);
+            console.log(error.toString());
+            alert(`Geburtsdatum oder Tag der Anreise sind ungültig.
+Geburtsdatum: ${birthdate}
+Anreise: ${date}`);
+            return -1;
+        }
     }
 }
 
@@ -348,7 +369,7 @@ export default {
 
         let numberOfKeys = 0;
         namesAndBirthdates.forEach(({ birthdate }) => {
-            const age = getAgeOnDate(birthdate, anreise);
+            const age = utils.getAgeOnDate(birthdate, anreise);
             if (age >= 16) {
                 numberOfKeys++;
             }
@@ -405,8 +426,8 @@ export default {
         const testNames = {};
         for (let i = 0; i < namesAndBirthdates.length; i++) {
             let { name, birthdate } = namesAndBirthdates[i];
-            const ageOnArrival = getAgeOnDate(birthdate, anreise);
-            const ageOnDeparture = getAgeOnDate(birthdate, abreise);
+            const ageOnArrival = utils.getAgeOnDate(birthdate, anreise);
+            const ageOnDeparture = utils.getAgeOnDate(birthdate, abreise);
 
             // add age to the name if child is exempt bc its younger than 6
             if (ageOnDeparture === 6 && ageOnArrival === 5) {
@@ -661,24 +682,5 @@ export default {
         return numberOfNights;
     },
 
-    /**
-     * 
-     * @param {string} birthdate 
-     * @param {string} date day of the age check
-     * @returns {number} age
-     */
-    getAgeOnDate(birthdate, date) {
-        try {
-            const ageDate = new Date(utils.parseDate(date) - utils.parseDate(birthdate));
-            const age = Math.abs(ageDate.getUTCFullYear() - 1970);
-            return age;
-        } catch (error) {
-            console.log(`getAgeOnDate("${birthdate}", "${date}") threw an exception`);
-            console.log(error.toString());
-            alert(`Geburtsdatum oder Tag der Anreise sind ungültig.
-Geburtsdatum: ${birthdate}
-Anreise: ${date}`);
-            return -1;
-        }
-    }
+    getAgeOnDate: utils.getAgeOnDate
 };
