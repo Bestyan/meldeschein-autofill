@@ -130,7 +130,6 @@ export default {
             }
             try {
                 const workbook = new exceljs.Workbook();
-                console.log(xlsxBuffer);
                 workbook.xlsx.load(xlsxBuffer, { base64: true })
                     .then(() => {
                         // fill the template invoice with all the relevant data
