@@ -89,17 +89,17 @@ const invoiceUtils = {
 
                     // replace . with , so German Excel can compute it
                     const kurbeitragComma = (adults + "").replace(".", ",");
-                    kurbeitragFormula += `+${numberOfNights}*${kurbeitragComma}`;
+                    kurbeitragFormula += `+C24*${kurbeitragComma}`;
 
                 } else if (age <= 15 && age >= 6) { //children 6-15
 
                     const kurbeitragComma = (children + "").replace(".", ",");
-                    kurbeitragFormula += `+${numberOfNights}*${kurbeitragComma}`;
+                    kurbeitragFormula += `+C24*${kurbeitragComma}`;
 
                 } else if (age <= 5) { // toddlers 0-5
 
                     const kurbeitragComma = (toddlers + "").replace(".", ",");
-                    kurbeitragFormula += `+${numberOfNights}*${toddlers.toFixed(2)}`;
+                    kurbeitragFormula += `+C24*${toddlers.toFixed(2)}`;
 
                 }
             });
