@@ -166,7 +166,7 @@ const utils = {
      * @param {string} date day of the age check
      * @returns {number} age
      */
-     getAgeOnDate(birthdate, date) {
+    getAgeOnDate(birthdate, date) {
         try {
             const ageDate = new Date(utils.parseDate(date) - utils.parseDate(birthdate));
             const age = Math.abs(ageDate.getUTCFullYear() - 1970);
@@ -461,15 +461,66 @@ export default {
             datesSorted
         } = utils.sortNamesAndDates(dates, names);
 
+        let originalBooker = {
+            firstname: data.vorname.trim(),
+            lastname: data.nachname.trim()
+        };
+
         const result = {};
         const birthdate_fields = JSON.parse(JSON.stringify(constants.BIRTHDATE_FIELDS));
         const firstname_fields = JSON.parse(JSON.stringify(constants.FIRSTNAME_FIELDS));
 
         // for the person who is already filled in because they were in the xls as the one who booked it
         // since they are not necessarily the oldest person, they need to have a special case
+        // if there is no matching name, the closest person found will overwrite it
+        // if no close match is found, the oldest person will overwrite it
         const birthdate_field_guest = birthdate_fields.shift();
-        firstname_fields.shift();
+        const firstname_field_guest = firstname_fields.shift();
+        const lastname_field_guest = constants.LASTNAME_FIELDS[0];
 
+        let originalBookerFound = false;
+        namesSorted.forEach(name => {
+            const {
+                firstname,
+                lastname
+            } = utils.getNameParts(name);
+
+            // if firstname and lastname match, the original booker's name is in the list
+            if (firstname === originalBooker.firstname && lastname === originalBooker.lastname) {
+                originalBookerFound = true;
+            }
+        });
+
+        // if no match is found, try to find the closest equivalent
+        let equivalentFound = false;
+        if (!originalBookerFound) {
+            namesSorted.forEach(name => {
+                const {
+                    firstname,
+                    lastname
+                } = utils.getNameParts(name);
+
+                // assume last name is still the same, but first name may have a longer version
+                if (originalBooker.lastname === lastname &&
+                    originalBooker.firstname.includes(firstname)) {
+                    // adjust first name
+                    originalBooker.firstname = firstname;
+                    equivalentFound = true;
+                }
+            });
+        }
+
+        // if no equivalent is found, the oldest person will overwrite it
+        if (!equivalentFound) {
+            const {
+                firstname,
+                lastname
+            } = utils.getNameParts(namesSorted[0]);
+            originalBooker.firstname = firstname;
+            originalBooker.lastname = lastname;
+        }
+
+        // set all the name and birthdate fields
         for (let i = 0; i < namesSorted.length; i++) {
             const name = namesSorted[i];
             const date = datesSorted[i];
@@ -478,13 +529,19 @@ export default {
                 lastname
             } = utils.getNameParts(name);
 
-            if (firstname.trim() === data.vorname.trim()) {
-                // special case for the person who booked it
+            // the original booker has special fields and is not necessarily the first in the list
+            if (firstname === originalBooker.firstname &&
+                lastname === originalBooker.lastname) {
+                // set birth date with blur event (will be executed by content script)
                 result[birthdate_field_guest] = {
                     value: date,
                     event: "blur"
                 };
+                result[firstname_field_guest] = firstname;
+                result[lastname_field_guest] = lastname;
             } else {
+                // standard case: set both firstname field and birthdate field
+
                 // set birthdate field value and blur event (will be executed by content script)
                 const birthdate_field = birthdate_fields.shift();
                 result[birthdate_field] = {
