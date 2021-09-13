@@ -74,7 +74,13 @@ const invoiceUtils = {
         worksheet.getCell("C24").value = numberOfNights;
 
         // preis
-        worksheet.getCell("G24").value = row.preis;
+        if (row.rabatt === 0) {
+            worksheet.getCell("G24").value = row.preis;
+        } else {
+            const priceFormula = `${row.preis}*(1 - ${row.rabatt}/100)`;
+            console.log(`Peisformel: ${priceFormula}`);
+            worksheet.getCell("G24").value = { formula: priceFormula };
+        }
 
         // kurbeitrag
         if (birthdates) {
@@ -87,23 +93,20 @@ const invoiceUtils = {
 
                 if (age >= 16) { //adults 16+
 
-                    // replace . with , so German Excel can compute it
-                    const kurbeitragComma = (adults + "").replace(".", ",");
-                    kurbeitragFormula += `+C24*${kurbeitragComma}`;
+                    kurbeitragFormula += `+C24*${adults}`;
 
                 } else if (age <= 15 && age >= 6) { //children 6-15
 
-                    const kurbeitragComma = (children + "").replace(".", ",");
-                    kurbeitragFormula += `+C24*${kurbeitragComma}`;
+                    kurbeitragFormula += `+C24*${children}`;
 
                 } else if (age <= 5) { // toddlers 0-5
 
-                    const kurbeitragComma = (toddlers + "").replace(".", ",");
-                    kurbeitragFormula += `+C24*${toddlers.toFixed(2)}`;
+                    kurbeitragFormula += `+C24*${toddlers}`;
 
                 }
             });
             kurbeitragFormula = kurbeitragFormula.slice(1);
+            console.log(`Kurbeitragsformel: ${kurbeitragFormula}`);
             worksheet.getCell("G48").value = { formula: kurbeitragFormula };
         }
 
