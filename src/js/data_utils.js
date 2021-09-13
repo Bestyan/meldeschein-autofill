@@ -240,10 +240,12 @@ export default {
         }
 
         try {
-            let adressdaten = anschrift
-                .replace(/\#\d+\#/g, "") // remove rebate patterns like #15# from the start
-                .trim()
-                .match(/(.{3,}) (\d{4,5}) (.+)/m); // match '3+letters 4-5numbers 1+letters'
+            // remove rebate patterns like #15# from the start
+            const anschriftTrimmed = anschrift.replace(/\#\d+\,?\d*\#/g, "").trim(); 
+
+            // match '3+letters 4-5numbers 1+letters'
+            let adressdaten = anschriftTrimmed.match(/(.{3,}) (\d{4,5}) (.+)/m);
+            console.log(adressdaten);
             if (adressdaten != null && adressdaten.length == 4) {
                 result.strasse = adressdaten[1];
                 result.plz = adressdaten[2];
