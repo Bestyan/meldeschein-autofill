@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "Meldeschein Autofill from Excel",
   "scripts": {
-    "build": "node utils/build.js",
-    "build-prod": "env NODE_ENV=production node utils/build.js",
+    "build-dev": "node utils/build.js",
+    "build": "env NODE_ENV=production node utils/build.js",
     "start": "node utils/webserver.js",
     "zip": "node utils/zip.js",
     "base64": "node utils/file_to_base64.js"
