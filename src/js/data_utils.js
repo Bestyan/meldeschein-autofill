@@ -34,17 +34,10 @@ const utils = {
         const dateObjects = dates.map(dateString => {
             const parts = dateString.split(".");
             const day = parts[0],
-                month = parts[1];
-            let year = parts[2];
+                month = parts[1],
+                year = parts[2];
 
-            // converts two-digit years into 4 digit ones
-            // if number > current year digits, e.g. 89 > 20 => 1989
-            // if number <= current year digits, e.g. 04 > 20 => 2004
-            if (year.length == 2) {
-                const currentYearOnes = new Date().getFullYear() % 100;
-                const currentYearHundreds = Math.floor(new Date().getFullYear() / 100);
-                year = year > currentYearOnes ? (currentYearHundreds - 1) * 100 + (+year) : currentYearHundreds * 100 + (+year);
-            }
+            // month is weird in the Date format: 0 -> January, 1 -> February etc
             return new Date(year, month - 1, day);
         });
 
@@ -82,8 +75,8 @@ const utils = {
      * parse Text from email into an array of names and array of birthdates
      */
     parseText(text) {
-        // keine vorangestellte zahl, 1-2 Zahlen, Punkt, 1-2 Zahlen, Punkt, 2 oder 4 Zahlen, keine nachgestellte Zahl
-        const regexDate = /((?<!\d)\d{1,2}[.]\d{1,2}[.]\d{2}(?:\d{2})?(?!\d))/g;
+        // keine vorangestellte zahl, 1-2 Zahlen, Punkt oder Minus, 1-2 Zahlen, Punkt, 2 oder 4 Zahlen, keine nachgestellte Zahl
+        const regexDate = /((?<!\d)\d{1,2}[.-]\d{1,2}[.-]\d{2}(?:\d{2})?(?!\d))/g;
         // 2+ Zeichen (keine Zahl/Whitespace), Leerzeichen, 2+ Zeichen (keine Zahl/Whitespace)
         const regexName = /\p{Lu}((?=[^\d]).)+ \p{Lu}((?=[^\d])(?=[^,.])\S)+/ug;
         // 2+ Zeichen (keine Zahl/Whitespace), Leerzeichen (optional), Komma, Leerzeichen (optional), 2+ Zeichen (keine Zahl/Whitespace)
@@ -122,6 +115,29 @@ const utils = {
             console.log(`number of dates (${JSON.stringify(dates)}) does not match the number of names (${JSON.stringify(names)})`)
             return null;
         }
+
+        dates = dates.map(dateString => {
+            // the date regex allows "-" as well as "." as a separator
+            // for all further steps, only . is allowed
+            dateString = dateString.split("-").join(".");
+
+            // convert two-digit years into 4 digit ones
+            // if number > current year digits, e.g. 89 > 20 => 1989
+            // if number <= current year digits, e.g. 04 < 20 => 2004
+            let parts = dateString.split(".");
+            let year = parts[2];
+
+            if (year.length == 2) {
+                const currentYearOnes = new Date().getFullYear() % 100;
+                const currentYearHundreds = Math.floor(new Date().getFullYear() / 100);
+                year = +year > currentYearOnes ? (currentYearHundreds - 1) * 100 + (+year) : currentYearHundreds * 100 + (+year);
+                parts[2] = year;
+            }
+            dateString = parts.join(".");
+            return dateString;
+        });
+
+
 
         return {
             dates: dates,
@@ -241,7 +257,7 @@ export default {
 
         try {
             // remove rebate patterns like #15# from the start
-            const anschriftTrimmed = anschrift.replace(/\#\d+\,?\d*\#/g, "").trim(); 
+            const anschriftTrimmed = anschrift.replace(/\#\d+\,?\d*\#/g, "").trim();
 
             // match '3+letters 4-5numbers 1+letters'
             let adressdaten = anschriftTrimmed.match(/(.{3,}) (\d{4,5}) (.+)/m);
