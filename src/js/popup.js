@@ -501,17 +501,10 @@ function buildUI() {
         }
 
         // message to content script fill_vlan_voucher.js
-        chrome.tabs.query({
-            active: true,
-            currentWindow: true
-        }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                data: {
-                    hotspot: util.getHotspot(data.apartment),
-                    gueltigkeit: util.getVoucherGueltigkeit(data.abreise),
-                    kommentar: util.getKommentar(data)
-                }
-            });
+        sendToContentScript({
+            hotspot: util.getHotspot(data.apartment),
+            gueltigkeit: util.getVoucherGueltigkeit(data.abreise),
+            kommentar: util.getKommentar(data)
         });
     });
 
