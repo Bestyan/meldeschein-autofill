@@ -9,6 +9,7 @@ const DD_MM_YYYY = {
 chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
         console.log("message received");
+        console.log(request.data);
         // von bis
         const dateFields = document.getElementsByClassName('tm-ProcessV2-Text-Datefield-Bold');
         // Radio Anreise
@@ -50,8 +51,9 @@ chrome.runtime.onMessage.addListener(
         }
 
         // this is not enough for the date fields. need to trigger them via datepicker as well.
-        dateFields[0].value = new Date(new Date().getFullYear(), 0, 1).toLocaleDateString("de-DE", DD_MM_YYYY);
-        dateFields[1].value = new Date(new Date().getFullYear(), 11, 31).toLocaleDateString("de-DE", DD_MM_YYYY);
+        const {from, to} = request.data;
+        dateFields[0].value = new Date(from).toLocaleDateString("de-DE", DD_MM_YYYY);
+        dateFields[1].value = new Date(to).toLocaleDateString("de-DE", DD_MM_YYYY);
 
 
         // picking dates via datepicker because weird jsp stuff doesn't recognize the set values
@@ -63,7 +65,7 @@ chrome.runtime.onMessage.addListener(
         new Promise(r => setTimeout(r, sleepTime))
             .then(() => {
                 let calendarDays = document.getElementsByClassName('gwt-HTML');
-                // click on [Jan] 1
+                // click on [May] 1
                 [...calendarDays][1].click();
                 return new Promise(r => setTimeout(r, sleepTime));
             })
@@ -74,8 +76,8 @@ chrome.runtime.onMessage.addListener(
             })
             .then(() => {
                 let calendarDays = document.getElementsByClassName('gwt-HTML');
-                // click on [Dec] 31
-                [...calendarDays][31].click();
+                // click on [April] 30
+                [...calendarDays][30].click();
                 return new Promise(r => setTimeout(r, sleepTime));
             })
             .then(() => {

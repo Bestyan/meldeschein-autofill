@@ -68,14 +68,32 @@ function refreshStatus() {
     }
 }
 
+/**
+ * populate the popup.html <select> tags with <option> tags
+ */
 function setupSearchDropDowns() {
 
+    // anreise / abreise
     COLUMNS_FILTER_REISE.forEach(column => {
         let option = document.createElement("option");
         option.value = column;
         option.innerHTML = column;
         document.getElementById("search1").append(option);
     });
+
+    // preset the anreise/abreise search field to today
+    document.getElementById("search1_input").value = new Date().toISOString().substr(0, "yyyy-mm-dd".length);
+
+    // +1 day on the anreise/abreise search field
+    document.getElementById("date_plus_one").addEventListener("click", event => {
+        document.getElementById("search1_input").stepUp(1);
+    });
+    // -1 day on the anreise/abreise search field
+    document.getElementById("date_minus_one").addEventListener("click", event => {
+        document.getElementById("search1_input").stepUp(-1);
+    });
+
+    // nachname / strasse / etc
     COLUMNS_FILTER.forEach(column => {
         let option = document.createElement("option");
         option.value = column;
@@ -83,15 +101,19 @@ function setupSearchDropDowns() {
         document.getElementById("search2").append(option);
     });
 
-    document.getElementById("search1_input").value = new Date().toISOString().substr(0, "yyyy-mm-dd".length);
-    document.getElementById("date_plus_one").addEventListener("click", event => {
-        document.getElementById("search1_input").stepUp(1);
+    // tmanager seasons
+    const seasons = util.getSeasons();
+    seasons.forEach(({ value, text, selected }) => {
+        let option = document.createElement("option");
+        option.value = value;
+        option.innerHTML = text;
+        if (selected) {
+            option.selected = "selected";
+        }
+        document.getElementById("tmanager_season").append(option);
     });
-    document.getElementById("date_minus_one").addEventListener("click", event => {
-        document.getElementById("search1_input").stepUp(-1);
-    });
-
 }
+
 
 function searchDB(event) {
 
@@ -206,7 +228,7 @@ function wakeServer() {
 const initLocalStorage = () => {
 
     const kurbeitragJSON = window.localStorage.getItem(constants.SETTINGS_KURBEITRAG);
-    if(kurbeitragJSON === null){
+    if (kurbeitragJSON === null) {
         // default values per night (as they are 11.09.2021)
         const kurbeitrag = {
             adults: 2.10, // 16+
@@ -495,7 +517,11 @@ function buildUI() {
 
     // Button "TManager ausfüllen"
     document.getElementById('tmanager_fill').addEventListener('click', event => {
-        tmanager.fillTManager();
+        const season = document.getElementById("tmanager_season").value;
+        sendToContentScript({
+            from: `${season}-05-01`,
+            to: `${+season + 1}-04-30`
+        });
     });
 
     // Button "Check-in Dokument"
@@ -653,12 +679,13 @@ function buildUI() {
         tabs => {
             let url = tabs[0].url;
 
-            let meldeschein_fill_button = document.getElementById('meldeschein_fill');
-            let wlan_voucher_fill_button = document.getElementById('wlan_voucher_fill');
-            let tmanager_fill_button = document.getElementById('tmanager_fill');
+            const meldeschein_fill_button = document.getElementById('meldeschein_fill');
+            const wlan_voucher_fill_button = document.getElementById('wlan_voucher_fill');
+            const tmanager_div = document.getElementById('tmanager');
+
             meldeschein_fill_button.classList.remove('hide');
             wlan_voucher_fill_button.classList.remove('hide');
-            tmanager_fill_button.classList.remove('hide');
+            tmanager_div.classList.remove('hide');
 
             // no url entered
             if (url == null || url == undefined) {
@@ -675,7 +702,7 @@ function buildUI() {
             }
 
             if (!url.toString().includes('tmanager.tomas-travel.com')) {
-                tmanager_fill_button.classList.add('hide');
+                tmanager_div.classList.add('hide');
             }
         });
 }
