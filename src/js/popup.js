@@ -569,20 +569,6 @@ function buildUI() {
             .catch(error => alert(error));
     })
 
-    // Button "Chiemgaukarte Mails erstellen"
-    document.getElementById("process_emails").addEventListener('click', event => {
-        connection.get(constants.SERVER_PROCESS_MAILS)
-            .then(response => response.json())
-            .then(responseData => {
-                if (connection.isOk(responseData)) {
-                    alert(responseData.data);
-                } else {
-                    alert(responseData.error);
-                }
-            })
-            .catch(error => console.log(error));
-    });
-
     // Button "Rechnung erstellen"
     document.getElementById("invoice_download").addEventListener('click', event => {
         const tableRow = getSelectedTableRow();
