@@ -4,8 +4,10 @@ import email from "./email";
 import XLSX from 'xlsx';
 import db from './database';
 
-alert = chrome.extension.getBackgroundPage().alert;
-confirm = chrome.extension.getBackgroundPage().confirm;
+const setErrorMessage = (message) => {
+    const errorDiv = document.getElementById("save_errors");
+    errorDiv.innerHTML = message;
+}
 
 /**
  * set the text and the css of the email status field  
@@ -144,13 +146,13 @@ function buildMailSettingsUI() {
             !passwordInput.value ||
             !hostInput.value ||
             !portInput.value) {
-            alert("nicht alle Felder ausgefüllt");
+            setErrorMessage("nicht alle Felder ausgefüllt");
             return;
         }
 
         // check if port is a number
         if (!+portInput.value) {
-            alert("Port muss eine Zahl sein");
+            setErrorMessage("Port muss eine Zahl sein");
             return;
         }
 
@@ -176,7 +178,7 @@ function buildMailSettingsUI() {
                         setEmailStatus(responseBody.error, "bad");
                     }
                 })
-            .catch(error => alert(error));
+            .catch(error => setErrorMessage(error));
     });
 
     document.getElementById("wipe").addEventListener("click", event => {
@@ -293,7 +295,7 @@ function buildKeysUI() {
                 refreshKeysXlsStatus();
 
             } catch (error) {
-                alert(error.toString());
+                setErrorMessage(error.toString());
             }
         };
         reader.readAsArrayBuffer(f);
@@ -379,7 +381,7 @@ function buildKurbeitragUI() {
 
             window.localStorage.setItem(constants.SETTINGS_KURBEITRAG, JSON.stringify(kurbeitrag));
         } catch (error) {
-            alert("ungültiger Wert in einem der Kurbeitragsfelder");
+            setErrorMessage("ungültiger Wert in einem der Kurbeitragsfelder");
         }
     });
 }

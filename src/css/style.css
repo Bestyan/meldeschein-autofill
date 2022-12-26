@@ -144,10 +144,10 @@ button.settings {
     flex-grow: 2;
 }
 
-span.bad {
+span.bad, div.bad {
     color: red;
 }
 
-span.good {
+span.good, div.good {
     color: green;
 }
