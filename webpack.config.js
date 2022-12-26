@@ -32,21 +32,21 @@ const options = {
   module: {
     rules: [{
         test: /\.css$/,
-        loader: "style-loader!css-loader",
+        use: ['style-loader', 'css-loader'],
         exclude: /node_modules/
       },
       {
         test: /\tabulator-tables.min.css$/,
-        loader: "style-loader!css-loader"
+        use: ['style-loader', 'css-loader']
       },
       {
         test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
-        loader: "file-loader?name=[name].[ext]",
+        use: ['file-loader?name=[name].[ext]'],
         exclude: /node_modules/
       },
       {
         test: /\.html$/,
-        loader: "html-loader",
+        use: ['html-loader'],
         exclude: /node_modules/
       }
     ]
@@ -90,11 +90,6 @@ const options = {
       template: path.join(__dirname, "src", "options.html"),
       filename: "options.html",
       chunks: ["options"] // list of js bundle files to be included
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, "src", "background.html"),
-      filename: "background.html",
-      chunks: ["background"] // list of js bundle files to be included
     }),
     new WriteFilePlugin()
   ]
