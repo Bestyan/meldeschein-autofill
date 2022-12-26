@@ -31,28 +31,32 @@ const options = {
   },
   module: {
     rules: [{
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-        exclude: /node_modules/
-      },
-      {
-        test: /\tabulator-tables.min.css$/,
-        use: ['style-loader', 'css-loader']
-      },
-      {
-        test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
-        use: ['file-loader?name=[name].[ext]'],
-        exclude: /node_modules/
-      },
-      {
-        test: /\.html$/,
-        use: ['html-loader'],
-        exclude: /node_modules/
-      }
+      test: /\.css$/,
+      use: ['style-loader', 'css-loader'],
+      exclude: /node_modules/
+    },
+    {
+      test: /\tabulator-tables.min.css$/,
+      use: ['style-loader', 'css-loader']
+    },
+    {
+      test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
+      use: ['file-loader?name=[name].[ext]'],
+      exclude: /node_modules/
+    },
+    {
+      test: /\.html$/,
+      use: ['html-loader'],
+      exclude: /node_modules/
+    }
     ]
   },
   resolve: {
-    alias: alias
+    alias: {
+      // use bare min to avoid eval() calls which are no longer permitted with manifest v3
+      // requires import of regenerator-runtime/runtime whenever exceljs is used
+      'exceljs': 'exceljs/dist/exceljs.bare.min.js' 
+    }
   },
   plugins: [
     // clean the build folder

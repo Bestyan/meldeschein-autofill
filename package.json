@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "docxtemplater": "^3.18.0",
+    "regenerator-runtime": "^0.13.11",
     "exceljs": "^4.3.0",
     "localstoragedb": "^2.3.2",
     "pizzip": "^3.0.6",

@@ -1,5 +1,6 @@
 import constants from './constants';
-import exceljs from 'exceljs';
+import 'regenerator-runtime/runtime'; // required for exceljs
+import {Workbook} from 'exceljs';
 import data_utils from './data_utils';
 
 const invoiceUtils = {
@@ -32,7 +33,7 @@ const invoiceUtils = {
 
     /**
      * 
-     * @param {exceljs.Workbook} workbook 
+     * @param {Workbook} workbook 
      * @param {Object} row 
      * @param {Array<{name: string, birthdate: string}>} birthdates 
      */
@@ -132,7 +133,7 @@ export default {
                 return;
             }
             try {
-                const workbook = new exceljs.Workbook();
+                const workbook = new Workbook();
                 workbook.xlsx.load(xlsxBuffer, { base64: true })
                     .then(() => {
                         // fill the template invoice with all the relevant data
