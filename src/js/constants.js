@@ -77,7 +77,7 @@ export default {
 
     getServerURL() {
         const server_url = {
-            production: "https://floating-hamlet-48922.herokuapp.com",
+            production: "https://meldeschein-autofill-server.onrender.com",
             development: "http://localhost:8000"
         };
 
