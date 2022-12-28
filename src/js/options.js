@@ -4,9 +4,17 @@ import email from "./email";
 import XLSX from 'xlsx';
 import db from './database';
 
-const setErrorMessage = (message) => {
-    const errorDiv = document.getElementById("save_errors");
-    errorDiv.innerHTML = message;
+/**
+ * Set save message in specified field
+ * @param {string} message 
+ * @param {string} divId id of the field which displays the message
+ * @param {string} cssClass 'good'|'bad' (colors the text green or red)
+ */
+const setSaveMessage = (message, divId, cssClass) => {
+    const errorDiv = document.getElementById(divId);
+    errorDiv.textContent = message;
+    errorDiv.classList.remove("good", "bad");
+    errorDiv.classList.add(cssClass);
 }
 
 /**
@@ -146,13 +154,13 @@ function buildMailSettingsUI() {
             !passwordInput.value ||
             !hostInput.value ||
             !portInput.value) {
-            setErrorMessage("nicht alle Felder ausgefüllt");
+            setSaveMessage("nicht alle Felder ausgefüllt", "save_email_message", "bad");
             return;
         }
 
         // check if port is a number
         if (!+portInput.value) {
-            setErrorMessage("Port muss eine Zahl sein");
+            setSaveMessage("Port muss eine Zahl sein", "save_email_message", "bad");
             return;
         }
 
@@ -177,8 +185,9 @@ function buildMailSettingsUI() {
                     } else {
                         setEmailStatus(responseBody.error, "bad");
                     }
+                    setSaveMessage("Email gespeichert", "save_email_message", "good");
                 })
-            .catch(error => setErrorMessage(error));
+            .catch(error => setSaveMessage(error, "save_email_message", "bad"));
     });
 
     document.getElementById("wipe").addEventListener("click", event => {
@@ -295,7 +304,7 @@ function buildKeysUI() {
                 refreshKeysXlsStatus();
 
             } catch (error) {
-                setErrorMessage(error.toString());
+                console.log(error);
             }
         };
         reader.readAsArrayBuffer(f);
@@ -380,8 +389,9 @@ function buildKurbeitragUI() {
             };
 
             window.localStorage.setItem(constants.SETTINGS_KURBEITRAG, JSON.stringify(kurbeitrag));
+            setSaveMessage("Kurbeitrag gespeichert", "save_kurbeitrag_message", "good");
         } catch (error) {
-            setErrorMessage("ungültiger Wert in einem der Kurbeitragsfelder");
+            setSaveMessage("ungültiger Wert in einem der Kurbeitragsfelder", "save_kurbeitrag_message", "bad");
         }
     });
 }
