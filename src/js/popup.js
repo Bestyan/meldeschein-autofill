@@ -510,11 +510,7 @@ function buildUI() {
 
     // Button "TManager ausfüllen"
     document.getElementById('tmanager_fill').addEventListener('click', event => {
-        const season = document.getElementById("tmanager_season").value;
-        sendToContentScript({
-            from: `${season}-05-01`,
-            to: `${+season + 1}-04-30`
-        });
+        tmanager.fillTManager();
     });
 
     // Button "Check-in Dokument"
