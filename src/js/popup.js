@@ -204,12 +204,6 @@ function wakeServer() {
 // initialize default settings in localStorage
 const initLocalStorage = () => {
 
-    // catchall für chiemgaukarten mails
-    const catchAll = window.localStorage.getItem(constants.SETTINGS_CATCHALL_EMAIL);
-    if (catchAll === null) {
-        window.localStorage.setItem(constants.SETTINGS_CATCHALL_EMAIL, "@inzell-ferien.de");
-    }
-
     const kurbeitragJSON = window.localStorage.getItem(constants.SETTINGS_KURBEITRAG);
     if(kurbeitragJSON === null){
         // default values per night (as they are 11.09.2021)
