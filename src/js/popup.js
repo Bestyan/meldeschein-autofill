@@ -238,18 +238,6 @@ function fillMeldeschein() {
         return;
     }
 
-    // modified customer email like this:
-    // customer@example.com => customer|at|example.com@catchall.domain
-    let modifiedEmail = "";
-    if (!data.email.includes("bitte_email_eintragen@tomas.travel")) {
-        let catchAll = window.localStorage.getItem(constants.SETTINGS_CATCHALL_EMAIL);
-
-        if (!catchAll.startsWith("@")) {
-            catchAll = "@" + catchAll;
-        }
-        modifiedEmail = data.email.replace("@", "|at|") + catchAll;
-    }
-
     let form_data = {
         anreise_input: data.anreise,
         abreise_input: data.abreise,
@@ -258,7 +246,7 @@ function fillMeldeschein() {
         strasse0: data.strasse || data.anschrift,
         plz0_input: data.plz,
         ort0_input: data.ort,
-        email: modifiedEmail
+        email: data.email.includes("bitte_email_eintragen@tomas.travel") ? "" : data.email
     };
 
     if (data.land !== "") {
