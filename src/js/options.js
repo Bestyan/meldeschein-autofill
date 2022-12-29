@@ -356,7 +356,6 @@ function buildKurbeitragUI() {
  */
 function buildUI() {
     buildMailSettingsUI();
-    buildCatchAllSettingsUI();
     buildCheckinDocumentUI();
     buildKeysUI();
     buildInvoiceUI();

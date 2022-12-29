@@ -757,5 +757,54 @@ export default {
         return numberOfNights;
     },
 
-    getAgeOnDate: utils.getAgeOnDate
+    getAgeOnDate: utils.getAgeOnDate,
+
+    /**
+     * creates an Array of season Objects based on today's date
+     * @returns {Array<{value: Number, text: String, selected: Boolean}>}
+     */
+    getSeasons: () => {
+        const today = new Date();
+        /**
+         * seasons last from 1st of may to 30th of april  
+         * currentSeason denotes the year of the seasons start, e.g. season 2020/2021 is denoted by currentSeason = 2020
+         */
+        let currentSeasonValue;
+        // 1st of May - remember, in the Date format, month = 0 means January, therefore month = 4 is May
+        const thisYearsSeasonStart = new Date(today.getFullYear(), 4, 1);
+
+        if (today > thisYearsSeasonStart){
+            // if we're past 1st of May this year, today's year is the season's starting year
+            currentSeasonValue = today.getFullYear();
+        } else{
+            // if we're not past the 1st of May, the current season started last year
+            currentSeasonValue = today.getFullYear() - 1;
+        }
+
+        const currentSeasonText = `Saison ${currentSeasonValue}/${currentSeasonValue + 1}`;
+        const currentSeason = {
+            value: currentSeasonValue,
+            text: currentSeasonText,
+            selected: true
+        };
+
+        const lastSeasonValue = currentSeasonValue - 1;
+        const lastSeasonText = `Saison ${lastSeasonValue}/${lastSeasonValue + 1}`;
+        const lastSeason = {
+            value: lastSeasonValue,
+            text: lastSeasonText,
+            selected: false
+        };
+
+        const nextSeasonValue = currentSeasonValue + 1;
+        const nextSeasonText = `Saison ${nextSeasonValue}/${nextSeasonValue + 1}`;
+        const nextSeason = {
+            value: nextSeasonValue,
+            text: nextSeasonText,
+            selected: false
+        };
+
+        // return array in chronological order
+        return [lastSeason, currentSeason, nextSeason];
+    }
 };

@@ -85,7 +85,6 @@ export default {
 
     SERVER_WAKE_UP: "/wake-up",
     SERVER_FETCH_ALL_MAILS: "/fetch-all-mails",
-    SERVER_PROCESS_MAILS: "/process-emails",
     SERVER_TEST_CONNECTION: "/test-connection",
     SERVER_GET_VORNAME: "/db/get-firstname",
     SERVER_PUT_VORNAME: "/db/put-firstname",
