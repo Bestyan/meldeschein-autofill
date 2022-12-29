@@ -12,7 +12,7 @@ chrome.runtime.onMessage.addListener(
         // von bis
         const dateFields = document.getElementsByClassName('tm-ProcessV2-Text-Datefield-Bold');
         // Radio Anreise
-        const radioAnreise = document.getElementById('gwt-uid-5');
+        const radioAbreise = document.getElementById('gwt-uid-6');
 
         // Checkbox Buchung
         const checkboxBuchung = document.getElementById('gwt-uid-13');
@@ -39,8 +39,8 @@ chrome.runtime.onMessage.addListener(
         );
 
         // weird jsp mechanics require everything to be clicked in order to register
-        if(!radioAnreise.checked){
-            radioAnreise.click();
+        if(!radioAbreise.checked){
+            radioAbreise.click();
         }
         if(!checkboxBuchung.checked){
             checkboxBuchung.click();
