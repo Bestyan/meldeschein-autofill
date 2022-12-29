@@ -4,3 +4,4 @@ secrets.*.js
 *.zip
 utils/email.js
 docx_as_base64.txt
+\.idea
