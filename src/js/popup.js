@@ -12,6 +12,7 @@ import data_utils from "./data_utils";
 import connection from "./connection";
 import check_in_generator from './check_in_generator';
 import invoice_generator from './invoice_generator';
+import tmanager from './connector/tmanager/tmanager-connector';
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
@@ -494,14 +495,7 @@ function buildUI() {
 
     // Button "TManager ausfüllen"
     document.getElementById('tmanager_fill').addEventListener('click', event => {
-        chrome.tabs.query({
-            active: true,
-            currentWindow: true
-        }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                hello: 'go do your stuff' // message content doesn't matter at all here, just sending a message is important
-            });
-        });
+        tmanager.fillTManager();
     });
 
     // Button "Check-in Dokument"
