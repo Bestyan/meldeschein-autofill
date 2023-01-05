@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 
 const getEmailText = (data, pronomen, isFirstVisit) => {
 
