@@ -2,6 +2,10 @@
 @import url('~tabulator-tables/dist/css/tabulator.min.css');
 @import "style.css";
 
+body {
+    min-width: fit-content;
+}
+
 .status {
     font-weight: bold;
 }
