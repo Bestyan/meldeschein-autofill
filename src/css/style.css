@@ -3,8 +3,6 @@
 */
 
 html {
-    display: flex;
-    flex-direction: column;
     padding: 0 5px 5px 5px;
 }
 

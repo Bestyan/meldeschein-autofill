@@ -3,6 +3,8 @@
 
 html{
     width: 420px;
+    display: flex;
+    flex-direction: column;
 }
 
 .row.skewered>div:first-child {
