@@ -1,25 +1,16 @@
-const webpack = require("webpack");
-const path = require("path");
-const fileSystem = require("fs");
-const env = require("./utils/env");
-const CleanWebpackPlugin = require("clean-webpack-plugin").CleanWebpackPlugin;
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const WriteFilePlugin = require("write-file-webpack-plugin");
 
-// load the secrets
-const alias = {};
-
-const secretsPath = path.join(__dirname, ("secrets." + env.NODE_ENV + ".js"));
+import webpack from "webpack";
+import path from "path";
+import env from "./utils/env";
+import {CleanWebpackPlugin} from "clean-webpack-plugin";
+import CopyWebpackPlugin from "copy-webpack-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import WriteFilePlugin from "write-file-webpack-plugin";
 
 const fileExtensions = ["jpg", "jpeg", "png", "gif", "eot", "otf", "svg", "ttf", "woff", "woff2"];
 
-if (fileSystem.existsSync(secretsPath)) {
-  alias.secrets = secretsPath;
-}
-
-const options = {
-  mode: process.env.NODE_ENV || "development",
+const config: webpack.Configuration = {
+  mode: process.env.NODE_ENV as "development" | "production" | undefined || "development",
   entry: {
     popup: path.join(__dirname, "src", "js", "main", "popup.js"),
     options: path.join(__dirname, "src", "js", "main", "options.js"),
@@ -95,12 +86,12 @@ const options = {
       filename: "options.html",
       chunks: ["options"] // list of js bundle files to be included
     }),
-    new WriteFilePlugin()
+    new WriteFilePlugin() as { apply(...args: any[]): void; }   // THE TYPE ASSERTION GETS RID OF THE ERROR
   ]
 };
 
 if (env.NODE_ENV === "development") {
-  options.devtool = "cheap-module-source-map";
+  config["devtool"] = "cheap-module-source-map";
 }
 
-module.exports = options;
+module.exports = config;

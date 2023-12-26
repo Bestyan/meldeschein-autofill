@@ -3,14 +3,15 @@
   "version": "0.0.1",
   "description": "Meldeschein Autofill from Excel",
   "scripts": {
-    "build-dev": "webpack --config webpack.config.js",
-    "build": "set NODE_ENV=production&& webpack --config webpack.config.js",
+    "build-dev": "webpack --config webpack.config.ts",
+    "build": "set NODE_ENV=production&& webpack --config webpack.config.ts",
     "zip": "node utils/zip.js",
     "base64": "node utils/file_to_base64.js"
   },
   "devDependencies": {
     "@types/node": "^14.0.13",
     "@types/webpack": "^5.28.5",
+    "@types/write-file-webpack-plugin": "^4.5.4",
     "archiver": "5.3.1",
     "clean-webpack-plugin": "4.0.0",
     "copy-webpack-plugin": "11.0.0",
