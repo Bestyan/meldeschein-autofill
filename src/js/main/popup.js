@@ -1,14 +1,15 @@
 // for webpack (css needs to be referenced to be packed)
-import "../css/popup.css";
+import "../../css/popup.css";
 
 import XLSX from 'xlsx';
 import Tabulator from 'tabulator-tables';
-import mail_generator from './review_email/mail_generator';
-import db from './database/database';
+import mailGenerator from './review_email/mail_generator';
+import database from './database/database';
 import util from './util/data_utils';
 import constants from './util/constants';
-import data_utils from "./util/data_utils";
-import check_in_generator from './checkin_document/checkin_generator';
+import dataUtils from "./util/data_utils";
+import checkinGenerator from './checkin_document/checkin_generator';
+import contentScriptConnector from './content_scripts/connector';
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
@@ -39,7 +40,7 @@ function handleFile(e) {
             hand over to database
         */
         let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
-        db.initDB(sheet_as_json);
+        database.initDB(sheet_as_json);
         setLoadingScreenVisible(false);
     };
     reader.readAsArrayBuffer(f);
@@ -50,10 +51,10 @@ function refreshStatus() {
     const status = document.getElementById("status");
     status.classList.remove("good", "bad");
 
-    if (db.hasData()) {
+    if (database.hasData()) {
 
         status.classList.add("good");
-        status.innerHTML = `Daten vom ${db.xls_upload_datetime}`;
+        status.innerHTML = `Daten vom ${database.xls_upload_datetime}`;
 
     } else {
 
@@ -115,7 +116,7 @@ function searchDB(event) {
     }
 
     // query DB
-    let rows = db.search(searchParams);
+    let rows = database.search(searchParams);
 
     result_table = new Tabulator("#search_results", {
         layout: "fitDataFill",
@@ -163,7 +164,7 @@ function generateMail() {
     const pronomen = document.getElementById('pronomen').value;
     const isFirstVisit = document.getElementById('is_first_visit').value == 'true';
 
-    mail_generator.generate(data, pronomen, isFirstVisit);
+    mailGenerator.generate(data, pronomen, isFirstVisit);
 }
 
 // set visibility of the "loading..." layer that blocks interaction with any elements
@@ -175,21 +176,6 @@ function setLoadingScreenVisible(visible) {
     } else {
         loadingScreen.classList.add('hide');
     }
-}
-
-function sendToContentScript(data) {
-    if (data === null) {
-        return;
-    }
-
-    chrome.tabs.query({
-        active: true,
-        currentWindow: true
-    }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-            data: data
-        });
-    });
 }
 
 /**
@@ -257,10 +243,10 @@ function fillMeldeschein() {
     }
 
     // send available data now, firstname data will be sent in a second message
-    sendToContentScript(form_data);
+    contentScriptConnector.send(form_data);
 
     const vorname = data.vorname.split(" ")[0];
-    db.getGender(vorname)
+    database.getGender(vorname)
         .then(
             // onFulfilled
             gender => {
@@ -269,7 +255,7 @@ function fillMeldeschein() {
                     const anrede = constants.getAnrede(gender);
 
                     // send data to content script fill_meldeschein.js
-                    sendToContentScript({
+                    contentScriptConnector.send({
                         anrede0: anrede,
                         // Anrede der Begleitperson != Anrede des Buchenden
                         anrede1: anrede === constants.ANREDE_HERR ? constants.ANREDE_FRAU : constants.ANREDE_HERR
@@ -283,10 +269,10 @@ function fillMeldeschein() {
                     document.getElementById("firstname_male").addEventListener("click", function handler(event) {
                         genderPopup.classList.add("hide");
                         // add firstname entry to db
-                        db.addFirstName(vorname, "M");
+                        database.addFirstName(vorname, "M");
 
                         // send firstname dependent data
-                        sendToContentScript({
+                        contentScriptConnector.send({
                             anrede0: constants.ANREDE_HERR,
                             anrede1: constants.ANREDE_FRAU,
                         });
@@ -298,10 +284,10 @@ function fillMeldeschein() {
                     document.getElementById("firstname_female").addEventListener("click", function handler(event) {
                         genderPopup.classList.add("hide");
                         // add firstname entry to db
-                        db.addFirstName(vorname, "F");
+                        database.addFirstName(vorname, "F");
 
                         // send firstname dependent data
-                        sendToContentScript({
+                        contentScriptConnector.send({
                             anrede0: constants.ANREDE_FRAU,
                             anrede1: constants.ANREDE_HERR,
                         });
@@ -313,7 +299,7 @@ function fillMeldeschein() {
                     document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
                         genderPopup.classList.add("hide");
                         // send firstname dependent data
-                        sendToContentScript({
+                        contentScriptConnector.send({
                             anrede0: constants.ANREDE_GAST,
                             anrede1: constants.ANREDE_GAST,
                         });
@@ -372,7 +358,7 @@ function buildUI() {
 
     // Button "Daten löschen"
     document.getElementById('delete').addEventListener('click', event => {
-        db.resetBookingsTables();
+        database.resetBookingsTables();
         alert("Daten gelöscht");
         refreshStatus();
     });
@@ -398,7 +384,7 @@ function buildUI() {
         }
 
         // message to content script fill_vlan_voucher.js
-        sendToContentScript({
+        contentScriptConnector.send({
             hotspot: util.getHotspot(data.apartment),
             gueltigkeit: util.getVoucherGueltigkeit(data.abreise),
             kommentar: util.getKommentar(data)
@@ -419,7 +405,7 @@ function buildUI() {
 
             // name placeholders are name1, name2, name3 etc
             // if no names have been found, only the name of the person who booked will appear as name1
-            const namesAndBirthdates = db.getBirthdates(tableData);
+            const namesAndBirthdates = database.getBirthdates(tableData);
             // TODO remove
             console.log(JSON.stringify(namesAndBirthdates));
             if (namesAndBirthdates && namesAndBirthdates.length > 0) {
@@ -431,28 +417,28 @@ function buildUI() {
             }
 
             // placeholders schluessel and anzahlSchluessel
-            let numberOfKeys = data_utils.getNumberOfKeys(namesAndBirthdates, tableData.anreise);
+            let numberOfKeys = dataUtils.getNumberOfKeys(namesAndBirthdates, tableData.anreise);
             if (numberOfKeys > 0) {
-                const keys = db.getKeys(tableData.apartment, numberOfKeys).join(", ");
+                const keys = database.getKeys(tableData.apartment, numberOfKeys).join(", ");
                 placeholderData.anzahlSchluessel = numberOfKeys;
                 placeholderData.schluessel = keys;
             }
 
             // placeholders testdatum2 to testdatum7
-            const testDates = data_utils.getCovidTestDates(tableData.anreise, tableData.abreise);
+            const testDates = dataUtils.getCovidTestDates(tableData.anreise, tableData.abreise);
             placeholderData = { ...placeholderData, ...testDates };
 
             // placeholders nameTestpflicht1 to nameTestpflicht5
             // if no names have been found, only the name of the person who booked will appear as nameTestpflicht1
             if (namesAndBirthdates && namesAndBirthdates.length > 0) {
-                const testNames = data_utils.getCovidTestNames(namesAndBirthdates, tableData.anreise, tableData.abreise);
+                const testNames = dataUtils.getCovidTestNames(namesAndBirthdates, tableData.anreise, tableData.abreise);
                 placeholderData = { ...placeholderData, ...testNames };
             } else {
                 placeholderData.nameTestpflicht1 = `${tableData.vorname} ${tableData.nachname}`;
             }
         }
 
-        check_in_generator.generate(placeholderData)
+        checkinGenerator.generate(placeholderData)
             .then(() => console.log("checkin docx generated"))
             .catch(error => alert(error));
     })
@@ -515,7 +501,7 @@ console.log(`environment: ${process.env.NODE_ENV}`);
 // Tabulator table
 let result_table = null;
 
-db.setup(refreshStatus);
+database.setup(refreshStatus);
 initLocalStorage();
 
 buildUI();

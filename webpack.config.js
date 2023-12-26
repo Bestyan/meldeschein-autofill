@@ -21,9 +21,9 @@ if (fileSystem.existsSync(secretsPath)) {
 const options = {
   mode: process.env.NODE_ENV || "development",
   entry: {
-    popup: path.join(__dirname, "src", "js", "popup.js"),
-    options: path.join(__dirname, "src", "js", "options.js"),
-    background: path.join(__dirname, "src", "js", "background.js")
+    popup: path.join(__dirname, "src", "js", "main", "popup.js"),
+    options: path.join(__dirname, "src", "js", "main", "options.js"),
+    background: path.join(__dirname, "src", "js", "main", "background.js")
   },
   output: {
     path: path.join(__dirname, "build"),
@@ -81,7 +81,7 @@ const options = {
     }),
     new CopyWebpackPlugin({
       patterns: [{
-        from: 'src/js/content_scripts',
+        from: 'src/js/main/content_scripts/scripts',
         to: 'content_scripts'
       }]
     }),

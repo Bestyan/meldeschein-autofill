@@ -1,7 +1,7 @@
-import "../css/options.css";
+import "../../css/options.css";
 import constants from "./util/constants";
 import XLSX from 'xlsx';
-import db from './db/database';
+import db from './database/database';
 
 /**
  * Set save message in specified field

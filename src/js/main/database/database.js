@@ -1,6 +1,6 @@
 import localStorageDB from 'localstoragedb';
 import util from '../util/data_utils';
-import constants from './constants';
+import constants from '../util/constants';
 import connection from '../rest/connection';
 
 const LOCALSTORAGE_LAST_UPLOAD = "xls_upload_datetime";
