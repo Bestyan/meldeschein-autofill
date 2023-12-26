@@ -5,14 +5,14 @@ import XLSX from 'xlsx';
 import Tabulator from 'tabulator-tables';
 import mail_generator from './mail_generator';
 import db from './database';
-import util from './data_utils';
-import constants from './constants';
+import util from './util/data_utils';
+import constants from './util/constants';
 import email from './email';
-import data_utils from "./data_utils";
+import data_utils from "./util/data_utils";
 import connection from "./connection";
 import check_in_generator from './check_in_generator';
 import invoice_generator from './invoice_generator';
-import tmanager from './connector/tmanager/tmanager-connector';
+import tmanager from './connector/tmanager-connector';
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];

@@ -1,7 +1,7 @@
 import constants from './constants';
 import 'regenerator-runtime/runtime'; // required for exceljs
 import {Workbook} from 'exceljs';
-import data_utils from './data_utils';
+import data_utils from './util/data_utils';
 
 const invoiceUtils = {
     /**

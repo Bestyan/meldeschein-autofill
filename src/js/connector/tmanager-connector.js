@@ -1,4 +1,4 @@
-import contentScriptConnector from "../content.script/content-script-connector";
+import contentScriptConnector from "./content-script-connector";
 
 export default {
   /**

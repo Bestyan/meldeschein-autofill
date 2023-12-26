@@ -1,5 +1,5 @@
 import localStorageDB from 'localstoragedb';
-import util from './data_utils';
+import util from './util/data_utils';
 import constants from './constants';
 import connection from './connection';
 

@@ -1,4 +1,4 @@
-import constants from './constants';
+import constants from './util/constants';
 import connection from './connection';
 
 export default {

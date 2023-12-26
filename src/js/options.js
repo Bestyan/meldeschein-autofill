@@ -1,5 +1,5 @@
 import "../css/options.css";
-import constants from "./constants";
+import constants from "./util/constants";
 import email from "./email";
 import XLSX from 'xlsx';
 import db from './database';
