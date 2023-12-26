@@ -11,7 +11,6 @@ import email from './email';
 import data_utils from "./util/data_utils";
 import connection from "./connection";
 import check_in_generator from './check_in_generator';
-import invoice_generator from './invoice_generator';
 import tmanager from './connector/tmanager-connector';
 
 // dropdowns in popup
@@ -562,18 +561,6 @@ function buildUI() {
 
         check_in_generator.generate(placeholderData)
             .then(() => console.log("checkin docx generated"))
-            .catch(error => alert(error));
-    })
-
-    // Button "Rechnung erstellen"
-    document.getElementById("invoice_download").addEventListener('click', event => {
-        const tableRow = getSelectedTableRow();
-        if (tableRow == null) {
-            alert("keine Tabellenzeile ausgewählt");
-        }
-
-        invoice_generator.generate(tableRow, db.getBirthdates(tableRow))
-            .then(() => console.log("invoice xlsx generated"))
             .catch(error => alert(error));
     })
 

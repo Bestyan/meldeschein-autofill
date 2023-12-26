@@ -59,20 +59,6 @@ const setKeysXlsStatus = (htmlContent, ...cssClasses) => {
 };
 
 /**
- * set the html content and the css classes of the invoice xlsx status field  
- * removes all css classes from the field before setting new ones
- * @param {string} htmlContent 
- * @param  {...string} cssClasses 
- */
-const setInvoiceXlsxStatus = (htmlContent, ...cssClasses) => {
-    const uploadStatus = document.getElementById("invoice_xlsx_status");
-    // remove all classes
-    uploadStatus.classList.remove(...uploadStatus.classList);
-    uploadStatus.innerHTML = htmlContent;
-    uploadStatus.classList.add("bold", cssClasses);
-};
-
-/**
  * check local storage for existing checkin docx and set status field accordingly
  */
 const refreshCheckInDocStatus = () => {
@@ -97,20 +83,6 @@ const refreshKeysXlsStatus = () => {
         setKeysXlsStatus("fehlt &cross;", "bad");
     } else {
         setKeysXlsStatus("vorhanden &check;", "good");
-    }
-};
-
-/**
- * check local storage for existing invoice xlsx and set status field accordingly
- */
-const refreshInvoiceXlsxStatus = () => {
-    // check for an existing invoice xslx
-    let currentInvoiceXlsx = window.localStorage.getItem(constants.SETTINGS_INVOICE_XLSX);
-    // set status accordingly
-    if (currentInvoiceXlsx === null) {
-        setInvoiceXlsxStatus("fehlt &cross;", "bad");
-    } else {
-        setInvoiceXlsxStatus("vorhanden &check;", "good");
     }
 };
 
@@ -267,53 +239,6 @@ function buildKeysUI() {
 
 }
 
-/**
- * initialize the invoice section
- */
-function buildInvoiceUI() {
-    const uploadButton = document.getElementById("upload_invoice");
-
-    refreshInvoiceXlsxStatus();
-
-    uploadButton.addEventListener("change", event => {
-
-        setInvoiceXlsxStatus("lädt...", "bad");
-
-        // convert binary buffer to base64
-        const arrayBufferToBase64 = buffer => {
-            const bytes = new Uint8Array(buffer);
-            const chars = [];
-            const length = bytes.byteLength;
-            for (let i = 0; i < length; i++) {
-                chars.push(String.fromCharCode(bytes[i]))
-            }
-            const binary = chars.join('');
-            return window.btoa(binary);
-        }
-
-        // function to read file to base64
-        const toArrayBuffer = file => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsArrayBuffer(file);
-            reader.onload = () => resolve(arrayBufferToBase64(reader.result));
-            reader.onerror = error => reject(error);
-        });
-
-
-
-        const file = event.target.files[0];
-
-        toArrayBuffer(file)
-            .then(buffer => {
-                // save to local storage
-                window.localStorage.setItem(constants.SETTINGS_INVOICE_XLSX, buffer);
-                refreshInvoiceXlsxStatus();
-            })
-            .catch(error => setCheckInDocStatus(error.toString(), "bad"));
-    });
-
-}
-
 function buildKurbeitragUI() {
     const adultsInput = document.getElementById("kurbeitrag_erwachsene");
     const childrenInput = document.getElementById("kurbeitrag_kinder");
@@ -358,7 +283,6 @@ function buildUI() {
     buildMailSettingsUI();
     buildCheckinDocumentUI();
     buildKeysUI();
-    buildInvoiceUI();
     buildKurbeitragUI();
 }
 
