@@ -3,15 +3,12 @@ import "../css/popup.css";
 
 import XLSX from 'xlsx';
 import Tabulator from 'tabulator-tables';
-import mail_generator from './mail_generator';
-import db from './database';
+import mail_generator from './review_email/mail_generator';
+import db from './database/database';
 import util from './util/data_utils';
 import constants from './util/constants';
-import email from './email';
 import data_utils from "./util/data_utils";
-import connection from "./connection";
-import check_in_generator from './check_in_generator';
-import tmanager from './connector/tmanager-connector';
+import check_in_generator from './checkin_document/checkin_generator';
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
@@ -98,18 +95,6 @@ function setupSearchDropDowns() {
         option.value = column;
         option.innerHTML = column;
         document.getElementById("search2").append(option);
-    });
-
-    // tmanager seasons
-    const seasons = util.getSeasons();
-    seasons.forEach(({ value, text, selected }) => {
-        let option = document.createElement("option");
-        option.value = value;
-        option.innerHTML = text;
-        if (selected) {
-            option.selected = "selected";
-        }
-        document.getElementById("tmanager_season").append(option);
     });
 }
 
@@ -340,95 +325,8 @@ function fillMeldeschein() {
             }
         )
         .catch(error => console.log(error));
-
-    buildMailUI(data.email);
 }
 
-function buildMailUI(emails_from) {
-    const statusText = document.getElementById("email_status");
-    const emailContent = document.getElementById("email_content");
-    const emailDisplay = document.getElementById("email_display");
-
-    // reset potentially previously existing UI
-    emailContent.value = "";
-    document.getElementById("email_selection").innerHTML = "";
-    document.getElementById("birthdates_relevant_text").value = "";
-    document.getElementById("birthdates").classList.remove("hide");
-    emailDisplay.classList.remove("hide");
-    emailDisplay.classList.add("hide");
-    statusText.classList.remove("hide");
-
-    statusText.textContent = "E-Mails werden abgefragt ...";
-
-    // extract additional email addresses from the field vermerk
-    const user_data = getSelectedTableRow();
-    const emails = [user_data.email];
-    if (user_data.vermerk) {
-        // regex from http://emailregex.com/
-        const vermerk_mails = [...user_data.vermerk.matchAll(/(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/gm)].map(match_array => match_array[0]);
-        emails.push(...vermerk_mails);
-    }
-
-    email.fetchAllMails(user_data.vorname, user_data.nachname, emails)
-        .then(responseBody => {
-            const {
-                status,
-                error,
-                data
-            } = responseBody;
-
-            if (status !== "ok") {
-                statusText.textContent = error;
-                return;
-            }
-
-            // update email fetch status
-            if (!data.mails || data.mails.length === 0) {
-                // no emails found
-                statusText.textContent = `keine Emails von ${emails_from} gefunden`;
-            } else {
-                // hide status
-                statusText.textContent = "";
-                statusText.classList.add("hide");
-            }
-
-            // show textareas for displaying email contents
-            emailDisplay.classList.remove("hide");
-
-
-            // create tabulator table for email selection
-            const mail_table = new Tabulator("#email_selection", {
-                layout: "fitDataFill",
-                data: data.mails,
-                selectableRollingSelection: true,
-                selectable: 1,
-                pagination: "local",
-                paginationSize: 5,
-                initialSort: [{
-                    column: "date",
-                    dir: "desc"
-                }],
-                columns: [{
-                    title: "Betreff",
-                    field: "subject",
-                    widthGrow: 1
-                },
-                {
-                    title: "Datum",
-                    field: "date",
-                    formatter: (cell, formatterParams, onRendered) => {
-                        return new Date(cell.getValue()).toLocaleDateString("de-DE", constants.STATUS_DATE_FORMAT).replace(",", "");
-                    }
-                }
-                ],
-                rowClick: function (event, rowComponent) {
-                    // textarea displays plaintext email
-                    emailContent.value = rowComponent._row.data.text;
-                }
-            });
-        })
-        .catch(error => statusText.textContent = error);
-}
 
 function setContentVisibility(isVisible) {
     const div = document.getElementById("content_container");
@@ -507,11 +405,6 @@ function buildUI() {
         });
     });
 
-    // Button "TManager ausfüllen"
-    document.getElementById('tmanager_fill').addEventListener('click', event => {
-        tmanager.fillTManager();
-    });
-
     // Button "Check-in Dokument"
     document.getElementById('checkin_download').addEventListener('click', event => {
         const tableData = getSelectedTableRow();
@@ -564,53 +457,6 @@ function buildUI() {
             .catch(error => alert(error));
     })
 
-    // Button "Felder ausfüllen"
-    document.getElementById("email_data_fill").addEventListener('click', event => {
-        const tableRow = getSelectedTableRow();
-        if (tableRow == null) {
-            alert("keine Tabellenzeile ausgewählt");
-            return;
-        }
-
-
-        const makeNewMeldeschein = document.getElementById("make_own_meldeschein").checked;
-        const birthdatesText = document.getElementById("birthdates_relevant_text").value;
-        const addressText = document.getElementById("address_relevant_text").value;
-
-        // set names in database
-        if (birthdatesText) {
-            const namesAndBirthdates = data_utils.getNamesAndBirthdates(birthdatesText);
-            if (namesAndBirthdates && namesAndBirthdates.length > 0) {
-                db.setBirthdates(tableRow, namesAndBirthdates);
-            } else {
-                console.log("could not determine names and keys");
-            }
-        }
-
-        // if the adress of a group member is different, they need their own Meldeschein
-        // to achieve this, all the fields are reset and only the person's data will be entered
-        if (makeNewMeldeschein) {
-            sendToContentScript(data_utils.getClearFormData());
-            // has to be async because server needs to be queried to get the gender for the title
-            data_utils.getDataForNewMeldeschein(birthdatesText, db.getGender)
-                .then(data => sendToContentScript(data))
-                .catch(error => console.log(error));
-        } else {
-            const birthdates = data_utils.getBirthdatesForMeldeschein(birthdatesText, tableRow);
-            sendToContentScript(birthdates);
-        }
-
-        if (addressText) {
-            connection.get(constants.SERVER_GET_LOCATION, [{
-                key: "location_string",
-                value: data_utils.cleanLocationText(addressText)
-            }])
-                .then(response => response.json())
-                .then(data => sendToContentScript(data_utils.getLocationForForm(data)))
-                .catch(error => console.log(error));
-        }
-    });
-
     // Dropdown "Sie"/"Du"
     document.getElementById('pronomen').addEventListener('change', event => {
         const pronomen = document.getElementById('pronomen');
@@ -643,11 +489,9 @@ function buildUI() {
 
             const meldeschein_fill_button = document.getElementById('meldeschein_fill');
             const wlan_voucher_fill_button = document.getElementById('wlan_voucher_fill');
-            const tmanager_div = document.getElementById('tmanager');
 
             meldeschein_fill_button.classList.remove('hide');
             wlan_voucher_fill_button.classList.remove('hide');
-            tmanager_div.classList.remove('hide');
 
             // no url entered
             if (url == null || url == undefined) {
@@ -661,10 +505,6 @@ function buildUI() {
             if (!url.toString().includes('192.168.1.254:44444') &&
                 !url.toString().includes('file://')) {
                 wlan_voucher_fill_button.classList.add('hide');
-            }
-
-            if (!url.toString().includes('tmanager.tomas-travel.com')) {
-                tmanager_div.classList.add('hide');
             }
         });
 }

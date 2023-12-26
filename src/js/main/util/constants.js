@@ -35,7 +35,6 @@ export default {
         return this.ANREDE_GAST;
     },
 
-    SETTINGS_EMAIL: "settings_email",
     SETTINGS_CHECKIN_DOCX: "settings_checkin_docx",
     SETTINGS_KEYS_XLS: "settings_keys_xls",
     SETTINGS_KURBEITRAG: "settings_kurbeitrag",
@@ -83,8 +82,6 @@ export default {
     },
 
     SERVER_WAKE_UP: "/wake-up",
-    SERVER_FETCH_ALL_MAILS: "/fetch-all-mails",
-    SERVER_TEST_CONNECTION: "/test-connection",
     SERVER_GET_VORNAME: "/db/get-firstname",
     SERVER_PUT_VORNAME: "/db/put-firstname",
     SERVER_GET_LOCATION: "/get-location"

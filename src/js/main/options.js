@@ -1,8 +1,7 @@
 import "../css/options.css";
 import constants from "./util/constants";
-import email from "./email";
 import XLSX from 'xlsx';
-import db from './database';
+import db from './db/database';
 
 /**
  * Set save message in specified field
@@ -15,19 +14,6 @@ const setSaveMessage = (message, divId, cssClass) => {
     errorDiv.textContent = message;
     errorDiv.classList.remove("good", "bad");
     errorDiv.classList.add(cssClass);
-}
-
-/**
- * set the text and the css of the email status field  
- * removes all css classes from the field before setting new ones
- * @param {string} text 
- * @param  {...string} cssClasses 
- */
-const setEmailStatus = (text, ...cssClasses) => {
-    const status = document.getElementById("status");
-    status.classList.remove("good", "bad");
-    status.textContent = text;
-    status.classList.add(cssClasses);
 }
 
 /**
@@ -85,90 +71,6 @@ const refreshKeysXlsStatus = () => {
         setKeysXlsStatus("vorhanden &check;", "good");
     }
 };
-
-// initialize the email settings section
-function buildMailSettingsUI() {
-
-    const userInput = document.getElementById("email_user");
-    const passwordInput = document.getElementById("email_password");
-    const hostInput = document.getElementById("email_host");
-    const portInput = document.getElementById("email_port");
-    const tlsCheckbox = document.getElementById("email_tls");
-
-    const loadEmailSettingsFromStorage = () => {
-        const settings_string = window.localStorage.getItem(constants.SETTINGS_EMAIL);
-
-        if (!settings_string) {
-
-            userInput.value = "";
-            passwordInput.value = "";
-            hostInput.value = "";
-            portInput.value = "993";
-            tlsCheckbox.checked = true;
-
-        } else {
-
-            const settings = JSON.parse(settings_string);
-
-            userInput.value = settings.user;
-            passwordInput.value = "";
-            hostInput.value = settings.host;
-            portInput.value = settings.port;
-            tlsCheckbox.checked = settings.tls;
-
-        }
-    };
-
-    // Button speichern
-    document.getElementById("save").addEventListener("click", event => {
-        // check for empty inputs
-        if (!userInput.value ||
-            !passwordInput.value ||
-            !hostInput.value ||
-            !portInput.value) {
-            setSaveMessage("nicht alle Felder ausgefüllt", "save_email_message", "bad");
-            return;
-        }
-
-        // check if port is a number
-        if (!+portInput.value) {
-            setSaveMessage("Port muss eine Zahl sein", "save_email_message", "bad");
-            return;
-        }
-
-        const settings = {
-            user: userInput.value,
-            password: passwordInput.value,
-            host: hostInput.value,
-            port: portInput.value,
-            tls: tlsCheckbox.checked
-        };
-
-        // save settings to local storage
-        window.localStorage.setItem(constants.SETTINGS_EMAIL, JSON.stringify(settings));
-
-        // test connection
-        setEmailStatus("Login testen ...", "bad");
-        email.testConnection()
-            .then(
-                responseBody => {
-                    if (responseBody.status === "ok") {
-                        setEmailStatus("Login erfolgreich", "good");
-                    } else {
-                        setEmailStatus(responseBody.error, "bad");
-                    }
-                    setSaveMessage("Email gespeichert", "save_email_message", "good");
-                })
-            .catch(error => setSaveMessage(error, "save_email_message", "bad"));
-    });
-
-    document.getElementById("wipe").addEventListener("click", event => {
-        window.localStorage.clear();
-        refreshCheckInDocStatus();
-    })
-
-    loadEmailSettingsFromStorage();
-}
 
 // initialize the check-in document section
 function buildCheckinDocumentUI() {
@@ -280,7 +182,6 @@ function buildKurbeitragUI() {
  * initialize all the sections
  */
 function buildUI() {
-    buildMailSettingsUI();
     buildCheckinDocumentUI();
     buildKeysUI();
     buildKurbeitragUI();

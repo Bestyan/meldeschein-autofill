@@ -1,4 +1,4 @@
-import constants from "./util/constants";
+import constants from "../util/constants";
 
 const JSON_HEADERS = {
     'Accept': 'application/json',

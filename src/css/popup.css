@@ -42,7 +42,3 @@ body {
     background-color: lightgray;
     color: black;
 }
-
-#email_content{
-    min-height: 400px;
-}

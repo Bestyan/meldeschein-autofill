@@ -1,7 +1,7 @@
 
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
-import constants from './util/constants';
+import constants from '../util/constants';
 
 const EMPTY_TEMPLATE_DATA = {
     apartment: "__________________",
