@@ -12,7 +12,7 @@
 
 # How to run it
 
-1. Check if your Node.js version is >= 10.13.
+1. Check if your Node.js version is >= 18.0.0.
 2. Clone the repository.
 3. Install [yarn](https://yarnpkg.com/lang/en/docs/install/).
 4. Run `yarn`.

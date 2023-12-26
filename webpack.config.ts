@@ -1,8 +1,7 @@
 
 import webpack from "webpack";
 import path from "path";
-import env from "./utils/env";
-import {CleanWebpackPlugin} from "clean-webpack-plugin";
+import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import WriteFilePlugin from "write-file-webpack-plugin";
@@ -11,10 +10,11 @@ const fileExtensions = ["jpg", "jpeg", "png", "gif", "eot", "otf", "svg", "ttf",
 
 const config: webpack.Configuration = {
   mode: process.env.NODE_ENV as "development" | "production" | undefined || "development",
+  devtool: 'inline-source-map',
   entry: {
     popup: path.join(__dirname, "src", "js", "main", "popup.js"),
     options: path.join(__dirname, "src", "js", "main", "options.js"),
-    background: path.join(__dirname, "src", "js", "main", "background.js")
+    background: path.join(__dirname, "src", "js", "main", "background.ts")
   },
   output: {
     path: path.join(__dirname, "build"),
@@ -29,6 +29,11 @@ const config: webpack.Configuration = {
     {
       test: /\tabulator-tables.min.css$/,
       use: ['style-loader', 'css-loader']
+    },
+    {
+      test: /\.tsx?$/,
+      use: 'ts-loader',
+      exclude: /node_modules/,
     },
     {
       test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
@@ -46,8 +51,9 @@ const config: webpack.Configuration = {
     alias: {
       // use bare min to avoid eval() calls which are no longer permitted with manifest v3
       // requires import of regenerator-runtime/runtime whenever exceljs is used
-      'exceljs': 'exceljs/dist/exceljs.bare.min.js' 
-    }
+      'exceljs': 'exceljs/dist/exceljs.bare.min.js'
+    },
+    extensions: ['.tsx', '.ts', '.js']
   },
   plugins: [
     // clean the build folder
@@ -90,8 +96,4 @@ const config: webpack.Configuration = {
   ]
 };
 
-if (env.NODE_ENV === "development") {
-  config["devtool"] = "cheap-module-source-map";
-}
-
-module.exports = config;
+export default config;
