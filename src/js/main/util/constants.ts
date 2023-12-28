@@ -1,3 +1,10 @@
+
+enum Anrede {
+    Herr = 1,
+    Frau = 4,
+    Gast = 48
+}
+
 export default {
 
     SEARCH_RESULT_DATE_FORMAT: {
@@ -6,7 +13,7 @@ export default {
         day: '2-digit'
     },
 
-    BIRTHDAY_DATE_FORMAT : {
+    BIRTHDAY_DATE_FORMAT: {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
@@ -23,21 +30,20 @@ export default {
     ANREDE_HERR: 1,
     ANREDE_FRAU: 4,
     ANREDE_GAST: 48,
-    getAnrede(gender){
-        if(gender === "F"){
-            return this.ANREDE_FRAU;
+    getAnrede(gender: string): Anrede {
+        if (gender === "F") {
+            return Anrede.Frau;
         }
 
         if (gender === "M") {
-            return this.ANREDE_HERR;
+            return Anrede.Herr;
         }
 
-        return this.ANREDE_GAST;
+        return Anrede.Gast;
     },
 
     SETTINGS_CHECKIN_DOCX: "settings_checkin_docx",
     SETTINGS_KEYS_XLS: "settings_keys_xls",
-    SETTINGS_KURBEITRAG: "settings_kurbeitrag",
 
     BIRTHDATE_FIELDS: [
         "geburtsdatum0_input",
@@ -72,17 +78,16 @@ export default {
         lastname: "nachname1_input"
     },
 
-    getServerURL() {
-        const server_url = {
+    getServerURL(): string {
+        const serverUrl = {
             production: "https://meldeschein-autofill-server.onrender.com",
             development: "http://localhost:8000"
         };
 
-        return server_url[process.env.NODE_ENV];
+        return serverUrl[process.env.NODE_ENV as "production" | "development"].toString();
     },
 
     SERVER_WAKE_UP: "/wake-up",
     SERVER_GET_VORNAME: "/db/get-firstname",
-    SERVER_PUT_VORNAME: "/db/put-firstname",
-    SERVER_GET_LOCATION: "/get-location"
+    SERVER_PUT_VORNAME: "/db/put-firstname"
 };
