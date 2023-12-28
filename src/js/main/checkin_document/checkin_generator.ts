@@ -28,7 +28,7 @@ const EMPTY_TEMPLATE_DATA = {
 }
 
 export default {
-    generate(placeholderData) {
+    generate(placeholderData: any) {
         return new Promise((resolve, reject) => {
 
             // load base64 encoded docx from local storage
@@ -47,21 +47,21 @@ export default {
                     // if there's fewer than 5 people, fill the rest with underscores
                     for(let i = 1; i <= 5; i++){
                         if(!templateData[`name${i}`]){
-                            templateData[`name${i}`] = EMPTY_TEMPLATE_DATA[`name${i}`];
+                            templateData[`name${i}`] = EMPTY_TEMPLATE_DATA[`name${i}` as keyof typeof EMPTY_TEMPLATE_DATA];
                         }
                     }
 
                     // if there's fewer than 5 people, fill the rest with underscores
                     for(let i = 1; i <= 5; i++){
                         if(!templateData[`nameTestpflicht${i}`]){
-                            templateData[`nameTestpflicht${i}`] = EMPTY_TEMPLATE_DATA[`nameTestpflicht${i}`];
+                            templateData[`nameTestpflicht${i}`] = EMPTY_TEMPLATE_DATA[`nameTestpflicht${i}` as keyof typeof EMPTY_TEMPLATE_DATA];
                         }
                     }
 
                     // if there's fewer than 7 testDates, fill the rest with underscores 
                     for(let i = 2; i <= 7; i++){
                         if(!templateData[`testdatum${i}`]){
-                            templateData[`testdatum${i}`] = EMPTY_TEMPLATE_DATA[`testdatum${i}`];
+                            templateData[`testdatum${i}`] = EMPTY_TEMPLATE_DATA[`testdatum${i}` as keyof typeof EMPTY_TEMPLATE_DATA];
                         }
                     }
 
@@ -93,7 +93,7 @@ export default {
                 document.body.removeChild(link);
                 window.URL.revokeObjectURL(docxUrl);
                 
-                resolve();
+                resolve(null);
             } catch (error) {
                 reject(error);
                 return;

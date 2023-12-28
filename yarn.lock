@@ -207,6 +207,13 @@
   resolved "https://registry.npmjs.org/@types/node/-/node-14.0.13.tgz"
   integrity sha512-rouEWBImiRaSJsVA+ITTFM6ZxibuAlTuNOCyxVbwreu6k6+ujs7DfnU9o+PShFhET78pMBl3eH+AGSI5eOTkPA==
 
+"@types/pizzip@^3.0.5":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@types/pizzip/-/pizzip-3.0.5.tgz#fa02a18c7a85cac455d4494d5966032d692bae4e"
+  integrity sha512-XnXA0VgZZy/caVTkENhNCGeE6U/TH7MWe2SnqPi137BTcxWlN/s/ijohQm1KngR2XL5TfzWcY3QfJlhgsyBZfg==
+  dependencies:
+    "@types/node" "*"
+
 "@types/source-list-map@*":
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/@types/source-list-map/-/source-list-map-0.1.6.tgz#164e169dd061795b50b83c19e4d3be09f8d3a454"
