@@ -5,7 +5,8 @@ import XLSX from 'xlsx';
 import Tabulator from 'tabulator-tables';
 import mailGenerator from './review_email/mail_generator';
 import database from './database/database';
-import util from './util/data_utils';
+import dataUtil from './util/data_utils';
+import uiUtil from './util/ui_utils';
 import constants from './util/constants';
 import dataUtils from "./util/data_utils";
 import checkinGenerator from './checkin_document/checkin_generator';
@@ -20,7 +21,7 @@ const COLUMNS_FILTER = ["nachname", "strasse", "plz", "ort", "apartment", "perso
  * @param {Event} e
  */
 function handleFile(e) {
-    setLoadingScreenVisible(true);
+    uiUtil.showLoadingOverlay();
     let files = e.target.files,
         f = files[0];
     let reader = new FileReader();
@@ -35,13 +36,13 @@ function handleFile(e) {
             modify column names to not contain forbidden characters
         */
         let sheet = workbook.Sheets[workbook.SheetNames[0]];
-        util.cleanColumnNames(sheet);
+        dataUtil.cleanColumnNames(sheet);
         /*
             hand over to database
         */
         let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
         database.initDB(sheet_as_json);
-        setLoadingScreenVisible(false);
+        uiUtil.hideLoadingOverlay();
     };
     reader.readAsArrayBuffer(f);
 }
@@ -165,17 +166,6 @@ function generateMail() {
     const isFirstVisit = document.getElementById('is_first_visit').value == 'true';
 
     mailGenerator.generate(data, pronomen, isFirstVisit);
-}
-
-// set visibility of the "loading..." layer that blocks interaction with any elements
-function setLoadingScreenVisible(visible) {
-    const loadingScreen = document.getElementById('loading_screen');
-    loadingScreen.classList.remove('hide', 'flex');
-    if (visible) {
-        loadingScreen.classList.add('flex');
-    } else {
-        loadingScreen.classList.add('hide');
-    }
 }
 
 /**
@@ -369,9 +359,9 @@ function buildUI() {
 
         // message to content script fill_vlan_voucher.js
         contentScriptConnector.send({
-            hotspot: util.getHotspot(data.apartment),
-            gueltigkeit: util.getVoucherGueltigkeit(data.abreise),
-            kommentar: util.getKommentar(data)
+            hotspot: dataUtil.getHotspot(data.apartment),
+            gueltigkeit: dataUtil.getVoucherGueltigkeit(data.abreise),
+            kommentar: dataUtil.getKommentar(data)
         });
     });
 

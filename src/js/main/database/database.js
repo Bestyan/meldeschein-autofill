@@ -76,7 +76,7 @@ export default {
                 ...util.processAnschrift(row.Anschrift), // extract strasse, plz, ort, land
                 anreise: row.Anreise.toLocaleDateString("de-DE", constants.SEARCH_RESULT_DATE_FORMAT),
                 abreise: row.Abreise.toLocaleDateString("de-DE", constants.SEARCH_RESULT_DATE_FORMAT),
-                apartment: util.processApartment(row.Name_der_gebuchten_Leistung),
+                apartment: util.getApartmentFlower(row.Name_der_gebuchten_Leistung),
                 personen: row.Personen,
                 vermerk: row.Interner_Vermerk,
                 email: row.EMail,
