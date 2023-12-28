@@ -1,47 +1,30 @@
 import "../../css/options.css";
 import constants from "./util/constants";
 import XLSX from 'xlsx';
-import db from './database/database';
-
-/**
- * Set save message in specified field
- * @param {string} message 
- * @param {string} divId id of the field which displays the message
- * @param {string} cssClass 'good'|'bad' (colors the text green or red)
- */
-const setSaveMessage = (message, divId, cssClass) => {
-    const errorDiv = document.getElementById(divId);
-    errorDiv.textContent = message;
-    errorDiv.classList.remove("good", "bad");
-    errorDiv.classList.add(cssClass);
-}
+import database from './database/database';
 
 /**
  * set the html content and the css classes of the checkin doc status field  
  * removes all css classes from the field before setting new ones
- * @param {string} htmlContent 
- * @param  {...string} cssClasses 
  */
-const setCheckInDocStatus = (htmlContent, ...cssClasses) => {
+const setCheckInDocStatus = (htmlContent: string, ...cssClasses: string[]) => {
     const uploadStatus = document.getElementById("checkin_docx_status");
     // remove all classes
     uploadStatus.classList.remove(...uploadStatus.classList);
     uploadStatus.innerHTML = htmlContent;
-    uploadStatus.classList.add("bold", cssClasses);
+    uploadStatus.classList.add("bold", ...cssClasses);
 };
 
 /**
  * set the html content and the css classes of the keys xls status field  
  * removes all css classes from the field before setting new ones
- * @param {string} htmlContent 
- * @param  {...string} cssClasses 
  */
-const setKeysXlsStatus = (htmlContent, ...cssClasses) => {
+const setKeysXlsStatus = (htmlContent: string, ...cssClasses: string[]) => {
     const uploadStatus = document.getElementById("keys_xls_status");
     // remove all classes
     uploadStatus.classList.remove(...uploadStatus.classList);
     uploadStatus.innerHTML = htmlContent;
-    uploadStatus.classList.add("bold", cssClasses);
+    uploadStatus.classList.add("bold", ...cssClasses);
 };
 
 /**
@@ -82,17 +65,17 @@ function buildCheckinDocumentUI() {
 
         setCheckInDocStatus("lädt...", "bad");
 
-        const toBinaryString = file => new Promise((resolve, reject) => {
+        const toBinaryString = (file: File) => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsBinaryString(file);
             reader.onload = () => resolve(reader.result);
             reader.onerror = error => reject(error);
         });
 
-        const file = event.target.files[0];
+        const file = (event.target as HTMLInputElement).files[0];
 
         toBinaryString(file)
-            .then(binaryString => {
+            .then((binaryString: string) => {
                 // save to local storage
                 window.localStorage.setItem(constants.SETTINGS_CHECKIN_DOCX, binaryString);
                 refreshCheckInDocStatus();
@@ -112,13 +95,13 @@ function buildKeysUI() {
 
         setKeysXlsStatus("lädt...", "bad");
 
-        let files = event.target.files,
+        let files = (event.target as HTMLInputElement).files,
             f = files[0];
         const reader = new FileReader();
-        reader.onload = e => {
+        reader.onload = event => {
             try {
 
-                let data = new Uint8Array(e.target.result);
+                let data = new Uint8Array(event.target.result as ArrayBuffer);
                 let workbook = XLSX.read(data, {
                     type: 'array'
                 });
@@ -128,7 +111,7 @@ function buildKeysUI() {
                 let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
 
                 // save keys to database
-                db.initKeys(sheet_as_json);
+                database.initKeys(sheet_as_json);
                 window.localStorage.setItem(constants.SETTINGS_KEYS_XLS, "saved");
                 refreshKeysXlsStatus();
 
