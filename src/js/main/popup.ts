@@ -2,7 +2,7 @@
 import "../../css/popup.css";
 
 import XLSX from 'xlsx';
-import Tabulator from 'tabulator-tables';
+import { Tabulator } from 'tabulator-tables';
 import mailGenerator from './review_email/mail_generator';
 import database from './database/database';
 import dataUtil from './util/data_utils';
@@ -17,30 +17,27 @@ const COLUMNS_FILTER_REISE = ["Anreise", "Abreise", "Nachname", "Email"];
 
 /**
  * reads xls to json
- * @param {Event} e
+ * @param {Event} event
  */
-function handleFile(e) {
+function handleFile(event: Event) {
     uiUtil.showLoadingOverlay();
-    let files = e.target.files,
+    let files = (event.target as HTMLInputElement).files,
         f = files[0];
     let reader = new FileReader();
     reader.onload = e => {
-        let data = new Uint8Array(e.target.result);
+        let data = new Uint8Array(e.target.result as ArrayBuffer);
         let workbook = XLSX.read(data, {
             type: 'array',
             cellDates: true
         });
 
-        /*
-            modify column names to not contain forbidden characters
-        */
         let sheet = workbook.Sheets[workbook.SheetNames[0]];
-        dataUtil.cleanColumnNames(sheet);
-        /*
-            hand over to database
-        */
+
+        // hand over to database
         let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
-        database.initBookings(sheet_as_json);
+
+        // TODO
+        //database.initBookings(sheet_as_json);
         uiUtil.hideLoadingOverlay();
     };
     reader.readAsArrayBuffer(f);
@@ -79,54 +76,48 @@ function setupSearchDropDowns() {
     });
 
     // preset the anreise/abreise search field to today
-    document.getElementById("search1_input").value = new Date().toISOString().substring(0, "yyyy-mm-dd".length);
+    uiUtil.getHtmlInputElement("search1_input").value = new Date().toISOString().substring(0, "yyyy-mm-dd".length);
 
     // +1 day on the anreise/abreise search field
     document.getElementById("date_plus_one").addEventListener("click", event => {
-        document.getElementById("search1_input").stepUp(1);
+        uiUtil.getHtmlInputElement("search1_input").stepUp(1);
     });
     // -1 day on the anreise/abreise search field
     document.getElementById("date_minus_one").addEventListener("click", event => {
-        document.getElementById("search1_input").stepUp(-1);
+        uiUtil.getHtmlInputElement("search1_input").stepUp(-1);
     });
 }
 
-
-function searchDB(event) {
+function searchDB(event: Event) {
 
     event.preventDefault();
-    let searchParams = {};
 
-    let search1 = document.getElementById("search1_input").value;
-    if (search1.length > 0) {
-        searchParams[document.getElementById("search1").value] = new Date(search1).toLocaleDateString("de-DE", constants.SEARCH_RESULT_DATE_FORMAT);
-    }
-
-    // query DB
-    let rows = database.search(searchParams);
+    let search1 = uiUtil.getHtmlInputElement("search1_input").value;
+    // TODO search
+    let rows = database.search("TODO", "TODO");
 
     result_table = new Tabulator("#search_results", {
         layout: "fitDataFill",
         data: rows,
         selectableRollingSelection: true,
         selectable: 1,
-        pagination: "local",
+        pagination: true,
         paginationSize: 10,
         columns: [{
             title: "Vorname",
-            field: "vorname"
+            field: "organiser_firstname"
         },
         {
             title: "Nachname",
-            field: "nachname"
+            field: "organiser_lastname"
         },
         {
             title: "Anreise",
-            field: "anreise"
+            field: "arrival"
         },
         {
             title: "Abreise",
-            field: "abreise"
+            field: "departure"
         },
         {
             title: "Apartment",
@@ -147,11 +138,11 @@ function generateMail() {
         return;
     }
 
-    data.anrede = document.getElementById('anrede').value;
-    const pronomen = document.getElementById('pronomen').value;
-    const isFirstVisit = document.getElementById('is_first_visit').value == 'true';
+    data.anrede = uiUtil.getHtmlSelectElement('anrede').value;
+    const pronomen = uiUtil.getHtmlSelectElement('pronomen').value;
+    const isFirstVisit = uiUtil.getHtmlSelectElement('is_first_visit').value == 'true';
 
-    mailGenerator.generate(data, pronomen, isFirstVisit);
+    mailGenerator.generate(data, pronomen as "Du" | "Sie", isFirstVisit);
 }
 
 /**
@@ -196,10 +187,10 @@ function fillMeldeschein() {
         email: data.email.includes("bitte_email_eintragen@tomas.travel") ? "" : data.email
     };
 
-    if (data.land !== "") {
-        form_data.land0_input = data.land; // Land in Adresse (vorausgefüllt Deutschland)
-        form_data.staat0_input = data.land; // Staatsangehörigkeit Gast
-        form_data.staat1_input = data.land; // Staatsangehörigkeit Begl. 1
+    if (data.land !== "") { // TODO
+        //form_data.land0_input = data.land; // Land in Adresse (vorausgefüllt Deutschland)
+        //form_data.staat0_input = data.land; // Staatsangehörigkeit Gast
+        //form_data.staat1_input = data.land; // Staatsangehörigkeit Begl. 1
     }
 
     // send available data now, firstname data will be sent in a second message
@@ -209,7 +200,7 @@ function fillMeldeschein() {
     database.getGender(vorname)
         .then(
             // onFulfilled
-            gender => {
+            (gender: "M" | "F" | undefined) => {
 
                 if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
                     const anrede = constants.getAnrede(gender);
@@ -274,21 +265,12 @@ function fillMeldeschein() {
 }
 
 
-function setContentVisibility(isVisible) {
-    const div = document.getElementById("content_container");
-    div.classList.remove("hide");
-
-    if (!isVisible) {
-        div.classList.add("hide");
-    }
-}
-
 function buildUI() {
     refreshStatus();
 
     // Button minimieren
     document.getElementById('minimize').addEventListener('click', event => {
-        setContentVisibility(false);
+        uiUtil.hideContent();
 
         const minimize = document.getElementById('minimize');
         minimize.classList.remove("hide");
@@ -299,7 +281,7 @@ function buildUI() {
 
     // Button maximieren
     document.getElementById('maximize').addEventListener('click', event => {
-        setContentVisibility(true);
+        uiUtil.showContent();
         const maximize = document.getElementById('maximize');
         maximize.classList.remove("hide");
         maximize.classList.add("hide");
@@ -355,7 +337,7 @@ function buildUI() {
     document.getElementById('checkin_download').addEventListener('click', event => {
         const tableData = getSelectedTableRow();
         // create placeholder mappings from selected table row. if no row is selected, blank lines will be generated instead
-        let placeholderData = null;
+        let placeholderData: any = null;
         if (tableData != null) {
             placeholderData = {
                 apartment: tableData.apartment,
@@ -365,37 +347,21 @@ function buildUI() {
 
             // name placeholders are name1, name2, name3 etc
             // if no names have been found, only the name of the person who booked will appear as name1
-            const namesAndBirthdates = database.getBirthdates(tableData);
-            // TODO remove
-            console.log(JSON.stringify(namesAndBirthdates));
-            if (namesAndBirthdates && namesAndBirthdates.length > 0) {
-                namesAndBirthdates.forEach((element, i) => {
-                    placeholderData[`name${i + 1}`] = element.name;
-                })
+            // const guests = database.getGuests(tableData);
+            if(false) { // TODO
+
             } else {
                 placeholderData.name1 = `${tableData.vorname} ${tableData.nachname}`;
             }
 
             // placeholders schluessel and anzahlSchluessel
-            let numberOfKeys = dataUtils.getNumberOfKeys(namesAndBirthdates, tableData.anreise);
-            if (numberOfKeys > 0) {
-                const keys = database.getKeys(tableData.apartment, numberOfKeys).join(", ");
-                placeholderData.anzahlSchluessel = numberOfKeys;
-                placeholderData.schluessel = keys;
-            }
-
-            // placeholders testdatum2 to testdatum7
-            const testDates = dataUtils.getCovidTestDates(tableData.anreise, tableData.abreise);
-            placeholderData = { ...placeholderData, ...testDates };
-
-            // placeholders nameTestpflicht1 to nameTestpflicht5
-            // if no names have been found, only the name of the person who booked will appear as nameTestpflicht1
-            if (namesAndBirthdates && namesAndBirthdates.length > 0) {
-                const testNames = dataUtils.getCovidTestNames(namesAndBirthdates, tableData.anreise, tableData.abreise);
-                placeholderData = { ...placeholderData, ...testNames };
-            } else {
-                placeholderData.nameTestpflicht1 = `${tableData.vorname} ${tableData.nachname}`;
-            }
+            // TODO
+            // let numberOfKeys = dataUtils.getNumberOfKeys(birthdates, tableData.anreise);
+            // if (numberOfKeys > 0) {
+            //     const keys = database.getKeys(tableData.apartment, numberOfKeys).join(", ");
+            //     placeholderData.anzahlSchluessel = numberOfKeys;
+            //     placeholderData.schluessel = keys;
+            // }
         }
 
         checkinGenerator.generate(placeholderData)
@@ -405,9 +371,9 @@ function buildUI() {
 
     // Dropdown "Sie"/"Du"
     document.getElementById('pronomen').addEventListener('change', event => {
-        const pronomen = document.getElementById('pronomen');
-        const anrede = document.getElementById('anrede');
-        const firstVisit = document.getElementById('is_first_visit');
+        const pronomen = uiUtil.getHtmlSelectElement('pronomen');
+        const anrede = uiUtil.getHtmlSelectElement('anrede');
+        const firstVisit = uiUtil.getHtmlSelectElement('is_first_visit');
 
         if (pronomen.value === "Sie") {
 
@@ -459,7 +425,7 @@ wakeServer();
 console.log(`environment: ${process.env.NODE_ENV}`);
 
 // Tabulator table
-let result_table = null;
+let result_table: any = null;
 
 database.setup(refreshStatus);
 

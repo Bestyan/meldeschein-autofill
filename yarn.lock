@@ -219,6 +219,11 @@
   resolved "https://registry.yarnpkg.com/@types/source-list-map/-/source-list-map-0.1.6.tgz#164e169dd061795b50b83c19e4d3be09f8d3a454"
   integrity sha512-5JcVt1u5HDmlXkwOD2nslZVllBBc7HDuOICfiZah2Z0is8M8g+ddAEawbmd3VjedfDHBzxCaXLs07QEmb7y54g==
 
+"@types/tabulator-tables@^5.5.4":
+  version "5.5.4"
+  resolved "https://registry.yarnpkg.com/@types/tabulator-tables/-/tabulator-tables-5.5.4.tgz#27a906226da33b14634cdc26ab46393337c96531"
+  integrity sha512-gAeMwFaWLu3WgtC7YSqXfIuNjZGu7BzDQafsAf3DYeCsyGFe5g6DDvClc3ZrT/Etw9PPmDI0CG+7KwwqBkPDHQ==
+
 "@types/tapable@^1":
   version "1.0.12"
   resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.12.tgz#bc2cab12e87978eee89fb21576b670350d6d86ab"

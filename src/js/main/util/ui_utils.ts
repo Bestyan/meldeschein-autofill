@@ -9,10 +9,22 @@ const utils = {
         } else {
             loadingScreen.classList.add('hide');
         }
+    },
+    setContentVisible: (visible: boolean) => {
+        const div = document.getElementById("content_container");
+        div.classList.remove("hide");
+    
+        if (!visible) {
+            div.classList.add("hide");
+        }
     }
 };
 
 export default {
     hideLoadingOverlay: () => utils.setLoadingOverlayVisible(false),
-    showLoadingOverlay: () => utils.setLoadingOverlayVisible(true)
+    showLoadingOverlay: () => utils.setLoadingOverlayVisible(true),
+    getHtmlInputElement: (id: string) => document.getElementById(id) as HTMLInputElement,
+    getHtmlSelectElement: (id: string) => document.getElementById(id) as HTMLSelectElement,
+    hideContent: () => utils.setContentVisible(false),
+    showContent: () => utils.setContentVisible(true)
 };

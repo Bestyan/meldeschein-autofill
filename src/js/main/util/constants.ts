@@ -1,5 +1,5 @@
 
-enum Anrede {
+export enum Anrede {
     Herr = 1,
     Frau = 4,
     Gast = 48

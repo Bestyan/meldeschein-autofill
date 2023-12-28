@@ -49,7 +49,7 @@ export default {
         clear old data and create table
         */
         this.resetBookingsTables();
-        DB.createTable(TABLE_BOOKINGS, ["anreise", "abreise", "apartment", "organiser_firstname", "organiser_lastname", "email", "meldeschein_groups", "isValid"]);
+        DB.createTable(TABLE_BOOKINGS, ["arrival", "departure", "apartment", "organiser_firstname", "organiser_lastname", "email", "meldeschein_groups", "isValid"]);
 
         rows.forEach(row => {
 

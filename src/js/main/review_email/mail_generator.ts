@@ -1,6 +1,6 @@
 import { Buffer } from "buffer";
 
-const getEmailText = (data: { vorname: string, nachname: string, anrede: string, email: string },
+const getEmailText = (data: { vorname: string, nachname: string, anrede: string, email: string }, 
     pronomen: "Du" | "Sie", isFirstVisit: boolean) => {
 
     if (pronomen === "Du") {
