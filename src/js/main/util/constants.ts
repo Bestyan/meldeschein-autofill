@@ -5,10 +5,35 @@ enum Anrede {
     Gast = 48
 }
 
+export class Booking {
+    organiser: Guest;
+    anreise: string;
+    abreise: string;
+    apartment: string;
+    email: string;
+    meldescheinGroups: Array<MeldescheinGroup>;
+    isValid: boolean;
+}
+
+export class MeldescheinGroup {
+    id: number;
+    streetAndNumber: string;
+    zip: string;
+    city: string;
+    nationality: string;
+    guests: Array<Guest>;
+}
+
+export class Guest {
+    firstname: string;
+    lastname: string;
+    birthdate: Date | null;
+}
+
 export default {
 
     SEARCH_RESULT_DATE_FORMAT: {
-        year: 'numeric',
+        year: "numeric" as "numeric" | "2-digit",
         month: '2-digit',
         day: '2-digit'
     },

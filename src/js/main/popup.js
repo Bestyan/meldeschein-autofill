@@ -41,7 +41,7 @@ function handleFile(e) {
             hand over to database
         */
         let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
-        database.initDB(sheet_as_json);
+        database.initBookings(sheet_as_json);
         uiUtil.hideLoadingOverlay();
     };
     reader.readAsArrayBuffer(f);
@@ -332,7 +332,7 @@ function buildUI() {
 
     // Button "Daten löschen"
     document.getElementById('delete').addEventListener('click', event => {
-        database.resetBookingsTables();
+        database.resetBookingsTable();
         alert("Daten gelöscht");
         refreshStatus();
     });
