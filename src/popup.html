@@ -42,10 +42,6 @@
       </div>
 
       <div class="row">
-        <select id="search2"></select><input type="text" id="search2_input" />
-      </div class="row">
-
-      <div class="row">
         <button type="submit" class="neutral">suchen</button>
       </div>
 
@@ -54,6 +50,18 @@
     <!-- search result table -->
     <div class="row">
       <div id="search_results">
+      </div>
+    </div>
+
+    <!-- all bookings for the selected email -->
+    <div id="bookings" class="row hide">
+      <div id="bookings_results">
+      </div>
+    </div>
+
+    <!-- all meldeschein groups for the selected booking -->
+    <div id="meldeschein_groups" class="row hide">
+      <div id="meldeschein_groups_results">
       </div>
     </div>
 
@@ -66,48 +74,12 @@
     <!-- "Popup" if first name's gender is unknown -->
     <div class="col hide" id="firstname_gender">
       <div class="row">
-        <span>Ist</span><span id="firstname">Platzhalter</span><span>männlich oder weiblich?</span>
+        <span>Ist</span> <span id="firstname">Platzhalter</span> <span>männlich oder weiblich?</span>
       </div>
       <div class="row">
         <button id="firstname_male">männlich</button>
         <button id="firstname_female">weiblich</button>
         <button id="firstname_unknown">weiß nicht</button>
-      </div>
-    </div>
-
-    <!-- email selection for birth dates -->
-    <div class="col hide" id="birthdates">
-      <div id="email_status"></div>
-      <!-- tabulator table for subject and date of email -->
-      <div id="email_selection"></div>
-
-      <!-- display email content and textarea for relevant text -->
-      <div id="email_display" class="row hide">
-        <textarea id="email_content" readonly="readonly" class="flex-grow"></textarea>
-        <div class="col">
-
-          <div class="row">
-            <h2>Geburtsdaten</h2>
-          </div>
-
-          <textarea id="birthdates_relevant_text" class="flex-grow-2"></textarea>
-
-          <div class="row">
-            <h2>Adresse</h2>
-          </div>
-
-          <div class="row">
-            <!-- when checked discard everything except the stay duration and fill the rest of the fields with the data given in the textareas -->
-            <input type="checkbox" id="make_own_meldeschein" />
-            <label for="make_own_meldeschein">eigener Meldeschein</label>
-          </div>
-
-          <textarea id="address_relevant_text" class="flex-grow-1"></textarea>
-
-          <div class="row">
-            <button id="email_data_fill" class="neutral">Felder ausfüllen</button>
-          </div>
-        </div>
       </div>
     </div>
 

@@ -13,8 +13,7 @@ import checkinGenerator from './checkin_document/checkin_generator';
 import contentScriptConnector from './content_scripts/connector';
 
 // dropdowns in popup
-const COLUMNS_FILTER_REISE = ["anreise", "abreise"];
-const COLUMNS_FILTER = ["nachname", "strasse", "plz", "ort", "apartment", "personen", "vermerk", "email"];
+const COLUMNS_FILTER_REISE = ["Anreise", "Abreise", "Nachname", "Email"];
 
 /**
  * reads xls to json
@@ -80,7 +79,7 @@ function setupSearchDropDowns() {
     });
 
     // preset the anreise/abreise search field to today
-    document.getElementById("search1_input").value = new Date().toISOString().substr(0, "yyyy-mm-dd".length);
+    document.getElementById("search1_input").value = new Date().toISOString().substring(0, "yyyy-mm-dd".length);
 
     // +1 day on the anreise/abreise search field
     document.getElementById("date_plus_one").addEventListener("click", event => {
@@ -89,14 +88,6 @@ function setupSearchDropDowns() {
     // -1 day on the anreise/abreise search field
     document.getElementById("date_minus_one").addEventListener("click", event => {
         document.getElementById("search1_input").stepUp(-1);
-    });
-
-    // nachname / strasse / etc
-    COLUMNS_FILTER.forEach(column => {
-        let option = document.createElement("option");
-        option.value = column;
-        option.innerHTML = column;
-        document.getElementById("search2").append(option);
     });
 }
 
@@ -109,11 +100,6 @@ function searchDB(event) {
     let search1 = document.getElementById("search1_input").value;
     if (search1.length > 0) {
         searchParams[document.getElementById("search1").value] = new Date(search1).toLocaleDateString("de-DE", constants.SEARCH_RESULT_DATE_FORMAT);
-    }
-
-    let search2 = document.getElementById("search2_input").value;
-    if (search2.length > 0) {
-        searchParams[document.getElementById("search2").value] = search2;
     }
 
     // query DB
