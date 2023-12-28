@@ -1,5 +1,5 @@
 export default {
-  send: (data) => {
+  send: (data: Object) => {
     if (data === null) {
       return;
     }
@@ -7,7 +7,7 @@ export default {
     chrome.tabs.query({
       active: true,
       currentWindow: true
-    }, function (tabs) {
+    }, tabs => {
       chrome.tabs.sendMessage(tabs[0].id, {
         data: data
       });
