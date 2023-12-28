@@ -128,8 +128,8 @@ export default {
     addFirstName(name: string, gender: "F" | "M") {
         connection.put(constants.SERVER_PUT_VORNAME, {
             name: name,
-            gender: gender
-        })
+            gender: gender,
+        }, null)
             .then(response => response.json())
             .then(json => {
                 // we don't really care about the outcome as long as it's not an error
