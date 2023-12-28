@@ -141,50 +141,12 @@ function buildKeysUI() {
 
 }
 
-function buildKurbeitragUI() {
-    const adultsInput = document.getElementById("kurbeitrag_erwachsene");
-    const childrenInput = document.getElementById("kurbeitrag_kinder");
-    const toddlersInput = document.getElementById("kurbeitrag_kleinkinder");
-
-    // load Kurbeitrag values from local storage
-    (() => { // fancy scoping
-        const kurbeitragJSON = window.localStorage.getItem(constants.SETTINGS_KURBEITRAG);
-        if (kurbeitragJSON != null) {
-            const { adults, children, toddlers } = JSON.parse(kurbeitragJSON);
-            adultsInput.value = adults.toFixed(2);
-            childrenInput.value = children.toFixed(2);
-            toddlersInput.value = toddlers.toFixed(2);
-        }
-    })();
-
-    // speichern
-    document.getElementById("save_kurbeitrag").addEventListener("click", event => {
-        try {
-            const adults = +adultsInput.value.replace(",", ".");
-            const children = +childrenInput.value.replace(",", ".");
-            const toddlers = +toddlersInput.value.replace(",", ".");
-
-            const kurbeitrag = {
-                adults: adults, // 16+
-                children: children, // 6-15
-                toddlers: toddlers // 0-5
-            };
-
-            window.localStorage.setItem(constants.SETTINGS_KURBEITRAG, JSON.stringify(kurbeitrag));
-            setSaveMessage("Kurbeitrag gespeichert", "save_kurbeitrag_message", "good");
-        } catch (error) {
-            setSaveMessage("ungültiger Wert in einem der Kurbeitragsfelder", "save_kurbeitrag_message", "bad");
-        }
-    });
-}
-
 /**
  * initialize all the sections
  */
 function buildUI() {
     buildCheckinDocumentUI();
     buildKeysUI();
-    buildKurbeitragUI();
 }
 
 buildUI();

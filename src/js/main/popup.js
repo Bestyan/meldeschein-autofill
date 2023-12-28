@@ -194,22 +194,6 @@ function wakeServer() {
         });
 }
 
-// initialize default settings in localStorage
-const initLocalStorage = () => {
-
-    const kurbeitragJSON = window.localStorage.getItem(constants.SETTINGS_KURBEITRAG);
-    if (kurbeitragJSON === null) {
-        // default values per night (as they are 11.09.2021)
-        const kurbeitrag = {
-            adults: 2.10, // 16+
-            children: 1.00, // 6-15
-            toddlers: 0.00  // 0-5
-        };
-        window.localStorage.setItem(constants.SETTINGS_KURBEITRAG, JSON.stringify(kurbeitrag));
-    }
-
-};
-
 function getSelectedTableRow() {
     if (result_table == null) {
         return null;
@@ -502,6 +486,5 @@ console.log(`environment: ${process.env.NODE_ENV}`);
 let result_table = null;
 
 database.setup(refreshStatus);
-initLocalStorage();
 
 buildUI();
