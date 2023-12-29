@@ -12,8 +12,8 @@ const config: webpack.Configuration = {
   mode: process.env.NODE_ENV as "development" | "production" | undefined || "development",
   devtool: 'inline-source-map',
   entry: {
-    popup: path.join(__dirname, "src", "js", "main", "popup.js"),
-    options: path.join(__dirname, "src", "js", "main", "options.js"),
+    popup: path.join(__dirname, "src", "js", "main", "popup.ts"),
+    options: path.join(__dirname, "src", "js", "main", "options.ts"),
     background: path.join(__dirname, "src", "js", "main", "background.ts")
   },
   output: {
