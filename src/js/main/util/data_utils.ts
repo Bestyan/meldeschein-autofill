@@ -77,6 +77,7 @@ export default {
         if (apartment.includes("Narzissen")) {
             return "32 Narzissen";
         }
+        return null;
     },
 
     getVoucherGueltigkeit: (abreise: string): string => {
