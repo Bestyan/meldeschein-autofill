@@ -1,6 +1,8 @@
 import { Row, CellValue } from "exceljs";
 import { WorkSheet } from "xlsx";
-import { Booking, Apartment } from "../util/constants";
+import { Apartment } from "../util/constants";
+
+const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
 
 export class ValidationError {
     rowNumber: number;
@@ -55,13 +57,16 @@ export class RowValues {
         this.rowNumber = rowNumber;
     }
 
-    validatePrimaryRow(): Array<ValidationError> {
+    validateBookingColumns(): Array<ValidationError> {
         const errors: Array<ValidationError> = [];
         if (typeof this.arrival !== "object") {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], this.arrival.toString(), "ist kein gültiges Datum"));
         }
         if (typeof this.departure !== "object") {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["departure"], this.departure.toString(), "ist kein gültiges Datum"));
+        }
+        if((this.arrival as Date).getTime() >= (this.departure as Date).getTime()) {
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], (this.arrival as Date).toLocaleDateString("de-DE"), "ist gleich oder nach dem Abreisedatum"));
         }
         if (this.apartment.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["apartment"], this.apartment, "ist leer"));
@@ -75,11 +80,11 @@ export class RowValues {
         if (this.organiserLastname.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["organiserLastname"], this.organiserLastname, "ist leer"));
         }
-        errors.push(...this.validateGuestRow());
+        errors.forEach(error => error.rowNumber = this.rowNumber);
         return errors;
     }
 
-    validateGuestRow(): Array<ValidationError> {
+    validateGuestColumns(): Array<ValidationError> {
         const errors: Array<ValidationError> = [];
         if (typeof this.meldescheinId !== "number") {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["meldescheinId"], this.meldescheinId.toString(), "ist keine Zahl"));
@@ -105,23 +110,22 @@ export class RowValues {
         if (this.guestNationalityCode.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestNationalityCode"], this.guestNationalityCode, "ist leer"));
         }
+        errors.forEach(error => error.rowNumber = this.rowNumber);
         return errors;
     }
 }
 
 export class GuestExcel {
-    private sheet: WorkSheet;
+    private bookings: Array<Booking> = [];
 
     constructor(sheet: WorkSheet) {
-        this.sheet = sheet;
-        this.processSheet();
+        this.processSheet(sheet);
     }
 
-    private processSheet() {
-        const bookings: Array<Booking> = [];
-        let currentBooking: Booking = new Booking();
+    private processSheet(sheet: WorkSheet) {
+        let currentBooking = new Booking();
         let isNewBooking = true;
-        this.sheet.eachRow({ includeEmpty: true }, (row: Row, rowNumber: number) => {
+        sheet.eachRow({ includeEmpty: true }, (row: Row, rowNumber: number) => {
             if (rowNumber <= 2) {
                 return;
             }
@@ -131,19 +135,31 @@ export class GuestExcel {
                 return;
             }
 
+            // empty row after a non-empty row
             if (!row.hasValues) {
-                bookings.push(currentBooking);
-                currentBooking = new Booking();
+                this.bookings.push(currentBooking);
                 isNewBooking = true;
                 return;
             }
 
-            currentBooking.initFromRowValues(this.getRowValues(row, rowNumber));
+            const rowValues = this.extractRowValues(row, rowNumber);
 
+            // first row after empty row
+            if (isNewBooking) {
+                currentBooking = Booking.fromRowValues(rowValues);
+                isNewBooking = false;
+            }
+
+            currentBooking.addGuest(rowValues);
         });
+
+        // if the last row was not empty, add the last booking
+        if(!isNewBooking) {
+            this.bookings.push(currentBooking);
+        }
     }
 
-    private getRowValues(row: Row, rowNumber: number): RowValues {
+    private extractRowValues(row: Row, rowNumber: number): RowValues {
         const values = new RowValues(rowNumber);
         values.arrival = row.getCell("B").value;
         values.departure = row.getCell("C").value;
@@ -160,5 +176,91 @@ export class GuestExcel {
         values.guestCity = row.getCell("P").text.trim();
         values.guestNationalityCode = row.getCell("Q").text.trim();
         return values;
+    }
+}
+
+export class Booking {
+    organiser: Guest;
+    anreise: Date;
+    abreise: Date;
+    apartment: string;
+    email: string;
+    meldescheinGroups: Array<MeldescheinGroup>;
+    validationErrors: Array<ValidationError>;
+
+    static fromRowValues(rowValues: RowValues): Booking {
+        const booking = new Booking();
+        // validate the non-guest columns
+        booking.validationErrors = rowValues.validateBookingColumns();
+
+        booking.organiser = new Guest();
+        booking.organiser.firstname = rowValues.organiserFirstname;
+        booking.organiser.lastname = rowValues.organiserLastname;
+        booking.organiser.birthdate = rowValues.guestBirthdate as Date;
+        booking.anreise = rowValues.arrival as Date;
+        booking.abreise = rowValues.departure as Date;
+        booking.apartment = rowValues.apartment;
+        booking.email = rowValues.email;
+        booking.meldescheinGroups = [];
+        return booking;
+    }
+
+    addGuest(rowValues: RowValues): void {
+        // validate guest columns
+        this.validationErrors.push(...rowValues.validateGuestColumns());
+
+        // get the meldeschein group whose id matches the meldescheinId in rowValues
+        let foundExistingMeldescheinGroup = false;
+        for (const meldescheinGroup of this.meldescheinGroups) {
+            if (meldescheinGroup.id === Number(rowValues.meldescheinId)) {
+                foundExistingMeldescheinGroup = true;
+                meldescheinGroup.guests.push(Guest.fromRowValues(rowValues));
+                break;
+            }
+        }
+
+        if (!foundExistingMeldescheinGroup) {
+            this.meldescheinGroups.push(MeldescheinGroup.fromRowValues(rowValues));
+        }
+    }
+
+    isValid(): boolean {
+        return this.validationErrors.length === 0;
+    }
+}
+
+export class MeldescheinGroup {
+    id: number;
+    streetAndNumber: string;
+    zip: string;
+    city: string;
+    country: string;
+    guests: Array<Guest>;
+
+    static fromRowValues(rowValues: RowValues): MeldescheinGroup {
+        const meldescheinGroup = new MeldescheinGroup();
+        meldescheinGroup.id = rowValues.meldescheinId as number;
+        meldescheinGroup.streetAndNumber = rowValues.guestStreet;
+        meldescheinGroup.zip = rowValues.guestZip;
+        meldescheinGroup.city = rowValues.guestCity;
+        meldescheinGroup.country = regionNamesToFull.of(rowValues.guestNationalityCode.toUpperCase());
+        meldescheinGroup.guests = [Guest.fromRowValues(rowValues)];
+        return meldescheinGroup
+    }
+}
+
+export class Guest {
+    firstname: string;
+    lastname: string;
+    birthdate: Date | null;
+    nationality: string;
+
+    static fromRowValues(rowValues: RowValues): Guest {
+        const guest = new Guest();
+        guest.firstname = rowValues.guestFirstname;
+        guest.lastname = rowValues.guestLastname;
+        guest.birthdate = rowValues.guestBirthdate as Date;
+        guest.nationality = regionNamesToFull.of(rowValues.guestNationalityCode.toUpperCase());
+        return guest;
     }
 }

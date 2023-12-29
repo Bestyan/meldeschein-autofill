@@ -1,6 +1,3 @@
-import { RowValues, ValidationError } from "../database/bookings_excel";
-
-const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
 
 export enum Anrede {
     Herr = 1,
@@ -17,90 +14,6 @@ export enum Apartment {
     "tulpen",
     "nelken",
     "narzissen"
-}
-
-export class Booking {
-    organiser: Guest;
-    anreise: Date;
-    abreise: Date;
-    apartment: string;
-    email: string;
-    meldescheinGroups: Array<MeldescheinGroup>;
-    validationErrors: Array<ValidationError>;
-
-    initFromRowValues(rowValues: RowValues): void {
-        this.validationErrors = rowValues.validatePrimaryRow();
-        this.organiser = new Guest();
-        this.organiser.firstname = rowValues.organiserFirstname;
-        this.organiser.lastname = rowValues.organiserLastname;
-        this.organiser.birthdate = rowValues.guestBirthdate as Date;
-        this.anreise = rowValues.arrival as Date;
-        this.abreise = rowValues.departure as Date;
-        this.apartment = rowValues.apartment;
-        this.email = rowValues.email;
-        this.meldescheinGroups = [];
-    }
-
-    addGuest(rowValues: RowValues): void {
-        // get the meldeschein group whose id matches the meldescheinId in rowValues
-        let foundExistingMeldescheinGroup = false;
-        for(const meldescheinGroup of this.meldescheinGroups) {
-            if (meldescheinGroup.id === Number(rowValues.meldescheinId)) {
-                foundExistingMeldescheinGroup = true;
-                meldescheinGroup.guests.push(Guest.fromRowValues(rowValues));
-                break;
-            }
-        }
-
-        if(!foundExistingMeldescheinGroup) {
-
-        }
-    }
-
-    isValid(): boolean {
-        return this.validationErrors.length === 0;
-    }
-
-    validate(): void {
-        // TODO
-    }
-}
-
-export class MeldescheinGroup {
-    id: number;
-    streetAndNumber: string;
-    zip: string;
-    city: string;
-    country: string;
-    guests: Array<Guest>;
-
-    static fromRowValues(rowValues: RowValues): MeldescheinGroup {
-        const meldescheinGroup = new MeldescheinGroup();
-        meldescheinGroup.id = rowValues.meldescheinId as number;
-        meldescheinGroup.streetAndNumber = rowValues.guestStreet;
-        meldescheinGroup.zip = rowValues.guestZip;
-        meldescheinGroup.city = rowValues.guestCity;
-        meldescheinGroup.country = regionNamesToFull.of(rowValues.guestNationalityCode.toUpperCase());
-        meldescheinGroup.guests = [Guest.fromRowValues(rowValues)];
-        return meldescheinGroup
-    }
-}
-
-export class Guest {
-
-    firstname: string;
-    lastname: string;
-    birthdate: Date | null;
-    nationality: string;
-
-    static fromRowValues(rowValues: RowValues): Guest {
-        const guest = new Guest();
-        guest.firstname = rowValues.guestFirstname;
-        guest.lastname = rowValues.guestLastname;
-        guest.birthdate = rowValues.guestBirthdate as Date;
-        guest.nationality = regionNamesToFull.of(rowValues.guestNationalityCode.toUpperCase());
-        return guest;
-    }
 }
 
 export default {
