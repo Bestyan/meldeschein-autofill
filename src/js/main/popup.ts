@@ -21,26 +21,26 @@ const COLUMNS_FILTER_REISE = ["Anreise", "Abreise", "Nachname", "Email"];
  */
 function handleFile(event: Event) {
     uiUtil.showLoadingOverlay();
-    let files = (event.target as HTMLInputElement).files,
-        f = files[0];
-    let reader = new FileReader();
-    reader.onload = e => {
-        let data = new Uint8Array(e.target.result as ArrayBuffer);
-        let workbook = XLSX.read(data, {
+    const file = (event.target as HTMLInputElement).files[0];
+    const reader = new FileReader();
+    reader.onload = event => {
+        const data = new Uint8Array(event.target.result as ArrayBuffer);
+        const workbook = XLSX.read(data, {
             type: 'array',
             cellDates: true
         });
 
-        let sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
         // hand over to database
-        let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
+        const sheet_as_json = XLSX.utils.sheet_to_json(sheet);
+        console.log(sheet_as_json);
 
         // TODO
         //database.initBookings(sheet_as_json);
         uiUtil.hideLoadingOverlay();
     };
-    reader.readAsArrayBuffer(f);
+    reader.readAsArrayBuffer(file);
 }
 
 function refreshStatus() {
