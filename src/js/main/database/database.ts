@@ -74,21 +74,25 @@ export default {
         return DB.queryAll(TABLE_BOOKINGS, {});
     },
 
-    search(column: string, value: string) {
+    search(column: string, value: string): Array<Booking> {
+        console.log(`database.search(${column}, ${value})`);
         if (!this.hasData()) {
             alert("Keine Daten. Bitte xls hochladen");
         }
 
-        return DB.queryAll(TABLE_BOOKINGS, {
-            query: (row: any) => row[column].toString().includes(value)
+        const queryResult = DB.queryAll(TABLE_BOOKINGS, {
+            query: (row: any) => {
+                const rowString: string = JSON.stringify(row[column]);
+                return rowString.toLowerCase().includes((value || "").toLowerCase());
+            }
         });
+
+        return queryResult.map((row: any) => Booking.fromQueryResult(row));
     },
 
     /**
      * stub for server
      * Promise resolves into "M", "F" or "not in db"
-     * @param {string} firstname 
-     * @returns {Promise}
      */
     getGender(firstname: string) {
         return new Promise((resolve, reject) => {

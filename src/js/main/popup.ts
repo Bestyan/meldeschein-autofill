@@ -1,7 +1,7 @@
 // for webpack (css needs to be referenced to be packed)
 import "../../css/popup.css";
 
-import { Tabulator } from 'tabulator-tables';
+import { Tabulator, MutatorModule, SelectRowModule, PageModule } from 'tabulator-tables';
 import mailGenerator from './review_email/mail_generator';
 import database from './database/database';
 import dataUtil from './util/data_utils';
@@ -13,11 +13,30 @@ import { GuestExcel } from "./database/guest_excel";
 import 'regenerator-runtime/runtime'; // required by exceljs
 import { Workbook } from 'exceljs';
 
+// enable mutators
+Tabulator.registerModule([MutatorModule, SelectRowModule, PageModule]);
+
+class Option {
+    text: string;
+    value: string;
+
+    static of(text: string, value: string): Option {
+        const option = new Option();
+        option.value = value;
+        option.text = text;
+        return option;
+    }
+}
+
 // dropdowns in popup
-const COLUMNS_FILTER_REISE = ["Anreise", "Abreise", "Nachname", "Email"];
+const SEARCH_OPTIONS = [
+    Option.of("Anreise", "arrival"), 
+    Option.of("Abreise", "departure"), 
+    Option.of("Nachname", "organiserLastname"), 
+    Option.of("Email", "email")];
 
 // reads excel file
-function handleFile(event: Event) {
+function handleExcelUpload(event: Event) {
     uiUtil.showLoadingOverlay();
     const reader = new FileReader();
     reader.onload = event => {
@@ -33,7 +52,6 @@ function handleFile(event: Event) {
 }
 
 function refreshStatus() {
-    const NO_DATA = "keine Daten";
     const status = document.getElementById("status");
     status.classList.remove("good", "bad");
 
@@ -45,9 +63,8 @@ function refreshStatus() {
     } else {
 
         status.classList.add("bad");
-        status.innerHTML = NO_DATA;
+        status.innerHTML = "keine Daten";
         return;
-
     }
 }
 
@@ -56,57 +73,89 @@ function refreshStatus() {
  */
 function setupSearchDropDowns() {
 
+    const searchDropdown = uiUtil.getHtmlSelectElement("search_field");
+    const searchDateInput = uiUtil.getHtmlInputElement("search_input_date");
+    const searchTextInput = uiUtil.getHtmlInputElement("search_input_text");
+
     // anreise / abreise
-    COLUMNS_FILTER_REISE.forEach(column => {
+    SEARCH_OPTIONS.forEach(entry => {
         let option = document.createElement("option");
-        option.value = column;
-        option.innerHTML = column;
-        document.getElementById("search1").append(option);
+        option.value = entry.value;
+        option.innerHTML = entry.text;
+        searchDropdown.append(option);
+    });
+
+    searchDropdown.addEventListener("change", event => {
+        const selected = searchDropdown.value;
+        searchDateInput.classList.remove("hide");
+        searchTextInput.classList.remove("hide");
+        if (selected === "arrival" || selected === "departure") {
+            searchTextInput.classList.add("hide");
+        } else {
+            searchDateInput.classList.add("hide");
+        }
     });
 
     // preset the anreise/abreise search field to today
-    uiUtil.getHtmlInputElement("search1_input").value = new Date().toISOString().substring(0, "yyyy-mm-dd".length);
+    searchDateInput.value = new Date().toISOString().substring(0, "yyyy-mm-dd".length);
 
     // +1 day on the anreise/abreise search field
     document.getElementById("date_plus_one").addEventListener("click", event => {
-        uiUtil.getHtmlInputElement("search1_input").stepUp(1);
+        searchDateInput.stepUp(1);
     });
     // -1 day on the anreise/abreise search field
     document.getElementById("date_minus_one").addEventListener("click", event => {
-        uiUtil.getHtmlInputElement("search1_input").stepUp(-1);
+        searchDateInput.stepUp(-1);
     });
+}
+
+function dateMutator(value: Date | string, data: any, type: any, params: any, component: any): string {
+    return dataUtil.formatDate(new Date(value));
 }
 
 function searchDB(event: Event) {
 
     event.preventDefault();
 
-    let search1 = uiUtil.getHtmlInputElement("search1_input").value;
-    // TODO search
-    let rows = database.search("TODO", "TODO");
+    const searchDropdown = uiUtil.getHtmlSelectElement("search_field");
+    const searchDateInput = uiUtil.getHtmlInputElement("search_input_date");
+    const searchTextInput = uiUtil.getHtmlInputElement("search_input_text");
+    let searchValue: string;
+    const searchColumn = searchDropdown.value;
+
+    if(searchColumn === "arrival" || searchColumn === "departure") {
+        searchValue = searchDateInput.value;
+    } else{
+        searchValue = searchTextInput.value;
+    }
+    
+    console.log(database.findAll())
+    const rows = database.search(searchColumn, searchValue);
 
     result_table = new Tabulator("#search_results", {
         layout: "fitDataFill",
         data: rows,
         selectableRollingSelection: true,
-        selectable: 1,
+        selectable: true,
         pagination: true,
         paginationSize: 10,
         columns: [{
             title: "Vorname",
-            field: "organiser_firstname"
+            field: "organiserFirstname"
         },
         {
             title: "Nachname",
-            field: "organiser_lastname"
+            field: "organiserLastname"
         },
         {
             title: "Anreise",
-            field: "arrival"
+            field: "arrival",
+            mutator: dateMutator
         },
         {
             title: "Abreise",
-            field: "departure"
+            field: "departure",
+            mutator: dateMutator
         },
         {
             title: "Apartment",
@@ -295,7 +344,7 @@ function buildUI() {
     });
 
     // Button "xls hochladen"
-    document.getElementById('upload').addEventListener('change', handleFile, false);
+    document.getElementById('upload').addEventListener('change', handleExcelUpload, false);
 
     // Suchparameter (Dropdowns)
     setupSearchDropDowns();

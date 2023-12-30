@@ -183,5 +183,12 @@ export default {
 
             email: ""
         };
+    },
+
+    /**
+     * @returns dd.MM.yyyy
+     */
+    formatDate(date: Date): string {
+        return date.toLocaleDateString("de-DE");
     }
 };

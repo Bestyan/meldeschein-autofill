@@ -37,7 +37,7 @@
     "localstoragedb": "^2.3.2",
     "pizzip": "^3.0.6",
     "regenerator-runtime": "^0.13.11",
-    "tabulator-tables": "^4.6.3",
+    "tabulator-tables": "^5.5.2",
     "xlsx": "^0.17.0"
   }
 }

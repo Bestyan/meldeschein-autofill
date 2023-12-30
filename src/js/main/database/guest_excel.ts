@@ -171,8 +171,8 @@ export class GuestExcel {
         values.arrival = row.getCell("B").value;
         values.departure = row.getCell("C").value;
         values.apartment = row.getCell("D").text.trim();
-        values.organiserFirstname = row.getCell("E").text.trim();
-        values.organiserLastname = row.getCell("F").text.trim();
+        values.organiserLastname = row.getCell("E").text.trim();
+        values.organiserFirstname = row.getCell("F").text.trim();
         values.email = row.getCell("G").text.trim();
         values.meldescheinId = row.getCell("I").value;
         values.guestLastname = row.getCell("K").text.trim();
@@ -211,6 +211,14 @@ export class Booking {
         return booking;
     }
 
+    static fromQueryResult(row: any): Booking {
+        const booking = row as Booking;
+        booking.arrival = new Date(row.arrival);
+        booking.departure = new Date(row.departure);
+        booking.meldescheinGroups = row.meldescheinGroups.map((meldescheinGroup: any) => MeldescheinGroup.fromQueryResult(meldescheinGroup));
+        return booking;
+    }
+
     addGuest(rowValues: RowValues): void {
         // validate guest columns
         this.validationErrors.push(...rowValues.validateGuestColumns());
@@ -245,13 +253,19 @@ export class MeldescheinGroup {
 
     static fromRowValues(rowValues: RowValues): MeldescheinGroup {
         const meldescheinGroup = new MeldescheinGroup();
-        meldescheinGroup.id = rowValues.meldescheinId as number;
+        meldescheinGroup.id = Number(rowValues.meldescheinId);
         meldescheinGroup.streetAndNumber = rowValues.guestStreet;
         meldescheinGroup.zip = rowValues.guestZip;
         meldescheinGroup.city = rowValues.guestCity;
         meldescheinGroup.country = regionNamesToFull.of(rowValues.guestNationalityCode.toUpperCase());
         meldescheinGroup.guests = [Guest.fromRowValues(rowValues)];
         return meldescheinGroup
+    }
+
+    static fromQueryResult(queryResult: any): MeldescheinGroup {
+        const meldescheinGroup = queryResult as MeldescheinGroup;
+        meldescheinGroup.guests = queryResult.guests.map((guest: any) => Guest.fromRowValues(guest));
+        return meldescheinGroup;
     }
 }
 
@@ -266,7 +280,13 @@ export class Guest {
         guest.firstname = rowValues.guestFirstname;
         guest.lastname = rowValues.guestLastname;
         guest.birthdate = rowValues.guestBirthdate as Date;
-        guest.nationality = regionNamesToFull.of(rowValues.guestNationalityCode.toUpperCase());
+        guest.nationality = regionNamesToFull.of((rowValues.guestNationalityCode || "").toUpperCase());
+        return guest;
+    }
+
+    static fromQueryResult(queryResult: any): Guest {
+        const guest = queryResult as Guest;
+        guest.birthdate = new Date(queryResult.birthdate);
         return guest;
     }
 }
