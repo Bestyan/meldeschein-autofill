@@ -1,5 +1,5 @@
-import { Row, CellValue } from "exceljs";
-import { WorkSheet } from "xlsx";
+import 'regenerator-runtime/runtime'; // required by exceljs
+import { Row, CellValue, Worksheet } from "exceljs";
 import { Apartment } from "../util/constants";
 
 const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
@@ -16,7 +16,7 @@ export class ValidationError {
     }
 
     toString(): string {
-        return `${this.field} "${this.value}" ${this.message}`;
+        return `Row ${this.rowNumber}: ${this.field} "${this.value}" ${this.message}`;
     }
 }
 
@@ -59,25 +59,27 @@ export class RowValues {
 
     validateBookingColumns(): Array<ValidationError> {
         const errors: Array<ValidationError> = [];
-        if (typeof this.arrival !== "object") {
-            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], this.arrival.toString(), "ist kein gültiges Datum"));
+        if (!this.arrival || typeof this.arrival !== "object") {
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], this.arrival as string, "ist kein gültiges Datum"));
         }
-        if (typeof this.departure !== "object") {
-            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["departure"], this.departure.toString(), "ist kein gültiges Datum"));
+        if (!this.departure || typeof this.departure !== "object") {
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["departure"], this.departure as string, "ist kein gültiges Datum"));
         }
-        if((this.arrival as Date).getTime() >= (this.departure as Date).getTime()) {
+        const arrivalDate = this.arrival as Date;
+        const departureDate = this.departure as Date;
+        if (arrivalDate && departureDate && arrivalDate.getTime() >= departureDate.getTime()) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], (this.arrival as Date).toLocaleDateString("de-DE"), "ist gleich oder nach dem Abreisedatum"));
         }
-        if (this.apartment.length === 0) {
+        if (!this.apartment || this.apartment.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["apartment"], this.apartment, "ist leer"));
         }
-        if (!Object.values(Apartment).includes(this.apartment)) {
+        if (!Object.values(Apartment).includes(this.apartment.toLowerCase())) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["apartment"], this.apartment, "ist kein bekanntes Apartment"));
         }
-        if (this.organiserFirstname.length === 0) {
+        if (!this.organiserFirstname || this.organiserFirstname.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["organiserFirstname"], this.organiserFirstname, "ist leer"));
         }
-        if (this.organiserLastname.length === 0) {
+        if (!this.organiserFirstname || this.organiserLastname.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["organiserLastname"], this.organiserLastname, "ist leer"));
         }
         errors.forEach(error => error.rowNumber = this.rowNumber);
@@ -86,28 +88,28 @@ export class RowValues {
 
     validateGuestColumns(): Array<ValidationError> {
         const errors: Array<ValidationError> = [];
-        if (typeof this.meldescheinId !== "number") {
-            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["meldescheinId"], this.meldescheinId.toString(), "ist keine Zahl"));
+        if (!this.meldescheinId || typeof this.meldescheinId !== "number") {
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["meldescheinId"], this.meldescheinId as string, "ist keine Zahl"));
         }
-        if (this.guestLastname.length === 0) {
+        if (!this.guestLastname || this.guestLastname.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestLastname"], this.guestLastname, "ist leer"));
         }
-        if (this.guestFirstname.length === 0) {
+        if (!this.guestFirstname || this.guestFirstname.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestFirstname"], this.guestFirstname, "ist leer"));
         }
-        if (typeof this.guestBirthdate !== "object") {
-            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestBirthdate"], this.guestBirthdate.toString(), "ist kein gültiges Datum"));
+        if (!this.guestBirthdate || typeof this.guestBirthdate !== "object") {
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestBirthdate"], this.guestBirthdate as string, "ist kein gültiges Datum"));
         }
-        if (this.guestStreet.length === 0) {
+        if (!this.guestStreet || this.guestStreet.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestStreet"], this.guestStreet, "ist leer"));
         }
-        if (this.guestZip.length === 0) {
+        if (!this.guestZip || this.guestZip.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestZip"], this.guestZip, "ist leer"));
         }
-        if (this.guestCity.length === 0) {
+        if (!this.guestCity || this.guestCity.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestCity"], this.guestCity, "ist leer"));
         }
-        if (this.guestNationalityCode.length === 0) {
+        if (!this.guestNationalityCode || this.guestNationalityCode.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestNationalityCode"], this.guestNationalityCode, "ist leer"));
         }
         errors.forEach(error => error.rowNumber = this.rowNumber);
@@ -118,14 +120,18 @@ export class RowValues {
 export class GuestExcel {
     private bookings: Array<Booking> = [];
 
-    constructor(sheet: WorkSheet) {
+    constructor(sheet: Worksheet) {
         this.processSheet(sheet);
     }
 
-    private processSheet(sheet: WorkSheet) {
+    getBookings(): Array<Booking> {
+        return this.bookings;
+    }
+
+    private processSheet(sheet: Worksheet) {
         let currentBooking = new Booking();
         let isNewBooking = true;
-        sheet.eachRow({ includeEmpty: true }, (row: Row, rowNumber: number) => {
+        sheet.eachRow({includeEmpty: true }, (row: Row, rowNumber: number) => {
             if (rowNumber <= 2) {
                 return;
             }
@@ -154,9 +160,10 @@ export class GuestExcel {
         });
 
         // if the last row was not empty, add the last booking
-        if(!isNewBooking) {
+        if (!isNewBooking) {
             this.bookings.push(currentBooking);
         }
+        console.log(this.bookings); //TODO
     }
 
     private extractRowValues(row: Row, rowNumber: number): RowValues {
@@ -180,9 +187,10 @@ export class GuestExcel {
 }
 
 export class Booking {
-    organiser: Guest;
-    anreise: Date;
-    abreise: Date;
+    organiserFirstname: string;
+    organiserLastname: string;
+    arrival: Date;
+    departure: Date;
     apartment: string;
     email: string;
     meldescheinGroups: Array<MeldescheinGroup>;
@@ -193,12 +201,10 @@ export class Booking {
         // validate the non-guest columns
         booking.validationErrors = rowValues.validateBookingColumns();
 
-        booking.organiser = new Guest();
-        booking.organiser.firstname = rowValues.organiserFirstname;
-        booking.organiser.lastname = rowValues.organiserLastname;
-        booking.organiser.birthdate = rowValues.guestBirthdate as Date;
-        booking.anreise = rowValues.arrival as Date;
-        booking.abreise = rowValues.departure as Date;
+        booking.organiserFirstname = rowValues.organiserFirstname;
+        booking.organiserLastname = rowValues.organiserLastname;
+        booking.arrival = rowValues.arrival as Date;
+        booking.departure = rowValues.departure as Date;
         booking.apartment = rowValues.apartment;
         booking.email = rowValues.email;
         booking.meldescheinGroups = [];

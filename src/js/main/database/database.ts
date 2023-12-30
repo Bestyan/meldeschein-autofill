@@ -1,6 +1,7 @@
 import localStorageDB from 'localStorageDB';
-import constants, { Booking } from '../util/constants';
+import constants from '../util/constants';
 import connection from '../rest/connection';
+import { Booking } from '../database/guest_excel';
 
 const LOCALSTORAGE_LAST_UPLOAD = "xls_upload_datetime";
 
@@ -15,8 +16,8 @@ const DB = new localStorageDB("meldeschein", "localStorage");
 export default {
     xls_upload_datetime: window.localStorage.getItem(LOCALSTORAGE_LAST_UPLOAD),
 
-    setup(refreshStatusFunc: Function) {
-        this.refreshStatus = refreshStatusFunc;
+    setup(refreshStatusFunction: Function) {
+        this.refreshStatus = refreshStatusFunction;
     },
 
     resetBookingsTable() {
@@ -29,6 +30,9 @@ export default {
         }
 
         // actually used tables
+        if (DB.tableExists(TABLE_BOOKINGS)) {
+            DB.dropTable(TABLE_BOOKINGS);
+        }
 
         DB.commit();
     },
@@ -42,23 +46,14 @@ export default {
 
     /**
      * sets up bookings tables for use
-     * @param {Array<any>} rows 
      */
-    initBookings(rows: Array<Booking>) {
+    initBookings(bookings: Array<Booking>) {
         /*
         clear old data and create table
         */
-        this.resetBookingsTables();
-        DB.createTable(TABLE_BOOKINGS, ["arrival", "departure", "apartment", "organiser_firstname", "organiser_lastname", "email", "meldeschein_groups", "isValid"]);
-
-        rows.forEach(row => {
-
-
-            // insert row TODO
-            // DB.insert(TABLE_BOOKINGS, data);
-            DB.commit();
-
-        });
+        this.resetBookingsTable();
+        DB.createTableWithData(TABLE_BOOKINGS, bookings);
+        DB.commit();
         this.setUploadTime();
     },
 
@@ -73,6 +68,10 @@ export default {
 
     hasData() {
         return DB.tableExists(TABLE_BOOKINGS) && DB.queryAll(TABLE_BOOKINGS, {}).length > 0;
+    },
+
+    findAll(){
+        return DB.queryAll(TABLE_BOOKINGS, {});
     },
 
     search(column: string, value: string) {

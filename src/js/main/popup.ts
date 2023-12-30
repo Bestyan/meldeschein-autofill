@@ -1,46 +1,35 @@
 // for webpack (css needs to be referenced to be packed)
 import "../../css/popup.css";
 
-import XLSX from 'xlsx';
 import { Tabulator } from 'tabulator-tables';
 import mailGenerator from './review_email/mail_generator';
 import database from './database/database';
 import dataUtil from './util/data_utils';
 import uiUtil from './util/ui_utils';
 import constants from './util/constants';
-import dataUtils from "./util/data_utils";
 import checkinGenerator from './checkin_document/checkin_generator';
 import contentScriptConnector from './content_scripts/connector';
+import { GuestExcel } from "./database/guest_excel";
+import 'regenerator-runtime/runtime'; // required by exceljs
+import { Workbook } from 'exceljs';
 
 // dropdowns in popup
 const COLUMNS_FILTER_REISE = ["Anreise", "Abreise", "Nachname", "Email"];
 
-/**
- * reads xls to json
- * @param {Event} event
- */
+// reads excel file
 function handleFile(event: Event) {
     uiUtil.showLoadingOverlay();
-    const file = (event.target as HTMLInputElement).files[0];
     const reader = new FileReader();
     reader.onload = event => {
-        const data = new Uint8Array(event.target.result as ArrayBuffer);
-        const workbook = XLSX.read(data, {
-            type: 'array',
-            cellDates: true
+        const workbook = new Workbook();
+        workbook.xlsx.load(event.target.result as ArrayBuffer).then((workbook: Workbook)=> {
+            const guestExcel = new GuestExcel(workbook.worksheets[0]);
+            database.initBookings(guestExcel.getBookings());
+            uiUtil.hideLoadingOverlay();
+            console.log(database.findAll());
         });
-
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-        // hand over to database
-        const sheet_as_json = XLSX.utils.sheet_to_json(sheet);
-        console.log(sheet_as_json);
-
-        // TODO
-        //database.initBookings(sheet_as_json);
-        uiUtil.hideLoadingOverlay();
     };
-    reader.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer((event.target as HTMLInputElement).files[0]);
 }
 
 function refreshStatus() {
@@ -305,7 +294,7 @@ function buildUI() {
         refreshStatus();
     });
 
-    // Button "Choose file"
+    // Button "xls hochladen"
     document.getElementById('upload').addEventListener('change', handleFile, false);
 
     // Suchparameter (Dropdowns)
