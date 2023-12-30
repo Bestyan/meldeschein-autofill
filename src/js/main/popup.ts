@@ -2,12 +2,13 @@
 import "../../css/popup.css";
 
 import { Tabulator, MutatorModule, SelectRowModule, PageModule } from 'tabulator-tables';
-import mailGenerator from './review_email/mail_generator';
+import mailGenerator from './popup/mail_generator';
 import database from './database/database';
-import dataUtil from './util/data_utils';
-import uiUtil from './util/ui_utils';
+import dataUtil from './util/data_util';
+import uiHelper from './popup/ui_helper';
+import UI from './popup/ui';
 import constants from './util/constants';
-import checkinGenerator from './checkin_document/checkin_generator';
+import checkinGenerator from './popup/checkin_generator';
 import contentScriptConnector from './content_scripts/connector';
 import { GuestExcel } from "./database/guest_excel";
 import 'regenerator-runtime/runtime'; // required by exceljs
@@ -15,6 +16,8 @@ import { Workbook } from 'exceljs';
 
 // enable mutators
 Tabulator.registerModule([MutatorModule, SelectRowModule, PageModule]);
+
+const popupUi = new UI();
 
 class Option {
     text: string;
@@ -36,15 +39,16 @@ const SEARCH_OPTIONS = [
     Option.of("Email", "email")];
 
 // reads excel file
+// TODO move to UI / controller
 function handleExcelUpload(event: Event) {
-    uiUtil.showLoadingOverlay();
+    uiHelper.showLoadingOverlay();
     const reader = new FileReader();
     reader.onload = event => {
         const workbook = new Workbook();
         workbook.xlsx.load(event.target.result as ArrayBuffer).then((workbook: Workbook)=> {
             const guestExcel = new GuestExcel(workbook.worksheets[0]);
             database.initBookings(guestExcel.getBookings());
-            uiUtil.hideLoadingOverlay();
+            uiHelper.hideLoadingOverlay();
             console.log(database.findAll());
         });
     };
@@ -73,9 +77,9 @@ function refreshStatus() {
  */
 function setupSearchDropDowns() {
 
-    const searchDropdown = uiUtil.getHtmlSelectElement("search_field");
-    const searchDateInput = uiUtil.getHtmlInputElement("search_input_date");
-    const searchTextInput = uiUtil.getHtmlInputElement("search_input_text");
+    const searchDropdown = uiHelper.getHtmlSelectElement("search_field");
+    const searchDateInput = uiHelper.getHtmlInputElement("search_input_date");
+    const searchTextInput = uiHelper.getHtmlInputElement("search_input_text");
 
     // anreise / abreise
     SEARCH_OPTIONS.forEach(entry => {
@@ -109,17 +113,14 @@ function setupSearchDropDowns() {
     });
 }
 
-function dateMutator(value: Date | string, data: any, type: any, params: any, component: any): string {
-    return dataUtil.formatDate(new Date(value));
-}
 
-function searchDB(event: Event) {
+function searchBookings(event: Event) {
 
     event.preventDefault();
 
-    const searchDropdown = uiUtil.getHtmlSelectElement("search_field");
-    const searchDateInput = uiUtil.getHtmlInputElement("search_input_date");
-    const searchTextInput = uiUtil.getHtmlInputElement("search_input_text");
+    const searchDropdown = uiHelper.getHtmlSelectElement("search_field");
+    const searchDateInput = uiHelper.getHtmlInputElement("search_input_date");
+    const searchTextInput = uiHelper.getHtmlInputElement("search_input_text");
     let searchValue: string;
     const searchColumn = searchDropdown.value;
 
@@ -129,56 +130,22 @@ function searchDB(event: Event) {
         searchValue = searchTextInput.value;
     }
     
-    console.log(database.findAll())
+    console.log(database.findAll()) //TODO
     const rows = database.search(searchColumn, searchValue);
 
-    result_table = new Tabulator("#search_results", {
-        layout: "fitDataFill",
-        data: rows,
-        selectableRollingSelection: true,
-        selectable: true,
-        pagination: true,
-        paginationSize: 10,
-        columns: [{
-            title: "Vorname",
-            field: "organiserFirstname"
-        },
-        {
-            title: "Nachname",
-            field: "organiserLastname"
-        },
-        {
-            title: "Anreise",
-            field: "arrival",
-            mutator: dateMutator
-        },
-        {
-            title: "Abreise",
-            field: "departure",
-            mutator: dateMutator
-        },
-        {
-            title: "Apartment",
-            field: "apartment"
-        },
-        {
-            title: "Email",
-            field: "email"
-        }
-        ]
-    });
+    result_table = uiHelper.createBookingsTabulatorTable("#result_table", rows);
 }
 
-function generateMail() {
+function generateReviewMail() {
     let data = getSelectedTableRow();
     if (data == null) {
         alert("keine Tabellenzeile ausgewählt");
         return;
     }
 
-    data.anrede = uiUtil.getHtmlSelectElement('anrede').value;
-    const pronomen = uiUtil.getHtmlSelectElement('pronomen').value;
-    const isFirstVisit = uiUtil.getHtmlSelectElement('is_first_visit').value == 'true';
+    data.anrede = uiHelper.getHtmlSelectElement('anrede').value;
+    const pronomen = uiHelper.getHtmlSelectElement('pronomen').value;
+    const isFirstVisit = uiHelper.getHtmlSelectElement('is_first_visit').value == 'true';
 
     mailGenerator.generate(data, pronomen as "Du" | "Sie", isFirstVisit);
 }
@@ -302,46 +269,20 @@ function fillMeldeschein() {
         .catch(error => console.log(error));
 }
 
-
 function buildUI() {
     refreshStatus();
 
     // Button minimieren
-    document.getElementById('minimize').addEventListener('click', event => {
-        uiUtil.hideContent();
-
-        const minimize = document.getElementById('minimize');
-        minimize.classList.remove("hide");
-        minimize.classList.add("hide");
-
-        document.getElementById('maximize').classList.remove("hide");
-    });
+    popupUi.initMinimizeButton(document.getElementById('minimize'));
 
     // Button maximieren
-    document.getElementById('maximize').addEventListener('click', event => {
-        uiUtil.showContent();
-        const maximize = document.getElementById('maximize');
-        maximize.classList.remove("hide");
-        maximize.classList.add("hide");
-
-        document.getElementById('minimize').classList.remove("hide");
-    });
+    popupUi.initMaximizeButton(document.getElementById('maximize'));
 
     // Button Einstellungen (Zahnrad)
-    document.getElementById('settings').addEventListener('click', event => {
-        if (chrome.runtime.openOptionsPage) {
-            chrome.runtime.openOptionsPage();
-        } else {
-            window.open(chrome.runtime.getURL('options.html'));
-        }
-    });
+    popupUi.initSettingsButton(document.getElementById('settings'));
 
     // Button "Daten löschen"
-    document.getElementById('delete').addEventListener('click', event => {
-        database.resetBookingsTable();
-        alert("Daten gelöscht");
-        refreshStatus();
-    });
+    popupUi.initDeleteExcelDataButton(document.getElementById('delete'), refreshStatus);
 
     // Button "xls hochladen"
     document.getElementById('upload').addEventListener('change', handleExcelUpload, false);
@@ -350,7 +291,7 @@ function buildUI() {
     setupSearchDropDowns();
 
     // Button/Form "suchen"
-    document.getElementById('search').addEventListener('submit', searchDB);
+    document.getElementById('search').addEventListener('submit', searchBookings);
 
     // Button "Meldeschein ausfüllen"
     document.getElementById('meldeschein_fill').addEventListener("click", event => fillMeldeschein());
@@ -409,9 +350,9 @@ function buildUI() {
 
     // Dropdown "Sie"/"Du"
     document.getElementById('pronomen').addEventListener('change', event => {
-        const pronomen = uiUtil.getHtmlSelectElement('pronomen');
-        const anrede = uiUtil.getHtmlSelectElement('anrede');
-        const firstVisit = uiUtil.getHtmlSelectElement('is_first_visit');
+        const pronomen = uiHelper.getHtmlSelectElement('pronomen');
+        const anrede = uiHelper.getHtmlSelectElement('anrede');
+        const firstVisit = uiHelper.getHtmlSelectElement('is_first_visit');
 
         if (pronomen.value === "Sie") {
 
@@ -427,7 +368,7 @@ function buildUI() {
     })
 
     // Button [Mail] "erstellen"
-    document.getElementById('generate').addEventListener('click', generateMail, false);
+    document.getElementById('generate').addEventListener('click', generateReviewMail, false);
 
     // Visibility of Buttons
     chrome.tabs.query({
