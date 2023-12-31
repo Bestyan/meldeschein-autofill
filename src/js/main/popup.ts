@@ -20,7 +20,7 @@ Tabulator.registerModule([MutatorModule, SelectRowModule, PageModule, Interactio
 
 const database = new Database(refreshStatus, window);
 const popupController = new PopupController(database);
-const popupUi = new UI(popupController);
+const ui = new UI(popupController);
 
 class Option {
     text: string;
@@ -116,30 +116,8 @@ function setupSearchDropDowns() {
     });
 }
 
-function searchBookings(event: Event) {
-
-    event.preventDefault();
-
-    const searchDropdown = uiHelper.getHtmlSelectElement("search_field");
-    const searchDateInput = uiHelper.getHtmlInputElement("search_input_date");
-    const searchTextInput = uiHelper.getHtmlInputElement("search_input_text");
-    let searchValue: string;
-    const searchColumn = searchDropdown.value;
-
-    if(searchColumn === "arrival" || searchColumn === "departure") {
-        searchValue = searchDateInput.value;
-    } else{
-        searchValue = searchTextInput.value;
-    }
-    
-    console.log(database.findAll()) //TODO
-    const rows = database.search(searchColumn, searchValue);
-
-    result_table = uiHelper.createBookingsTabulatorTable("#search_results", rows, (event: Event, row: RowComponent) => popupUi.onBookingsSearchResultRowClick(event, row));
-}
-
 function generateReviewMail() {
-    let data = getSelectedTableRow();
+    const data = ui.getSelectedSearchResultsTableRow();
     if (data == null) {
         alert("keine Tabellenzeile ausgewählt");
         return;
@@ -169,16 +147,8 @@ function wakeServer() {
         });
 }
 
-function getSelectedTableRow(): Booking {
-    if (result_table == null) {
-        return null;
-    }
-
-    return result_table.getSelectedData()[0] as Booking;
-}
-
 function fillMeldeschein() {
-    const data = getSelectedTableRow() as any; //TODO
+    const data = ui.getSelectedSearchResultsTableRow() as any; //TODO
     if (!data) {
         alert("keine Tabellenzeile ausgewählt");
         return;
@@ -276,16 +246,16 @@ function buildUI() {
     refreshStatus();
 
     // Button minimieren
-    popupUi.initMinimizeButton(document.getElementById('minimize'));
+    ui.initMinimizeButton(document.getElementById('minimize'));
 
     // Button maximieren
-    popupUi.initMaximizeButton(document.getElementById('maximize'));
+    ui.initMaximizeButton(document.getElementById('maximize'));
 
     // Button Einstellungen (Zahnrad)
-    popupUi.initSettingsButton(document.getElementById('settings'));
+    ui.initSettingsButton(document.getElementById('settings'));
 
     // Button "Daten löschen"
-    popupUi.initDeleteExcelDataButton(document.getElementById('delete'), refreshStatus);
+    ui.initDeleteExcelDataButton(document.getElementById('delete'), refreshStatus);
 
     // Button "xls hochladen"
     document.getElementById('upload').addEventListener('change', handleExcelUpload, false);
@@ -294,14 +264,14 @@ function buildUI() {
     setupSearchDropDowns();
 
     // Button/Form "suchen"
-    document.getElementById('search').addEventListener('submit', searchBookings);
+    document.getElementById('search').addEventListener('submit', (event: Event) => ui.searchBookings(event));
 
     // Button "Meldeschein ausfüllen"
     document.getElementById('meldeschein_fill').addEventListener("click", event => fillMeldeschein());
 
     // Button "WLAN Voucher ausfüllen"
     document.getElementById('wlan_voucher_fill').addEventListener('click', event => {
-        const data = getSelectedTableRow();
+        const data = ui.getSelectedSearchResultsTableRow();
         if (data == null) {
             alert("keine Tabellenzeile ausgewählt");
             return;
@@ -317,7 +287,7 @@ function buildUI() {
 
     // Button "Check-in Dokument"
     document.getElementById('checkin_download').addEventListener('click', event => {
-        const tableData = getSelectedTableRow();
+        const tableData = ui.getSelectedSearchResultsTableRow();
         // create placeholder mappings from selected table row. if no row is selected, blank lines will be generated instead
         let placeholderData: any = null;
         if (tableData != null) {

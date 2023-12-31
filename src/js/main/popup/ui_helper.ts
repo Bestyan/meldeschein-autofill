@@ -1,4 +1,4 @@
-import { Tabulator, RowComponent } from 'tabulator-tables';
+import { Tabulator, RowComponent, CellComponent } from 'tabulator-tables';
 import dataUtil from '../util/data_util';
 import { Booking, MeldescheinGroup, Guest } from '../database/guest_excel';
 
@@ -8,7 +8,7 @@ function dateMutator(value: Date | string, data: any, type: any, params: any, co
 }
 
 function guestsMutator(value: Array<Guest>, data: any, type: any, params: any, component: any): string {
-    return value.reduce((accumulator, guest) => accumulator + guest.firstname + " " + guest.lastname + "\n", "").slice(0, -1);
+    return value.reduce((accumulator, guest) => accumulator + guest.firstname + ", ", "").slice(0, -2);
 }
 
 const utils = {
@@ -34,10 +34,11 @@ const utils = {
 
     createBookingsTabulatorTable: (selector: string | HTMLElement, rows: Array<Booking>, onRowClick: (event: Event, row: RowComponent) => void) => {
         const table = new Tabulator(selector, {
-            layout: "fitDataFill",
+            layout: "fitData",
+            layoutColumnsOnNewData: true,
             data: rows,
             selectableRollingSelection: true,
-            selectable: true,
+            selectable: 1,
             pagination: true,
             paginationSize: 10,
             columns: [{
@@ -74,12 +75,11 @@ const utils = {
 
     createMeldescheinGroupsTabulatorTable: (selector: string | HTMLElement, rows: Array<MeldescheinGroup>, onRowClick: (event: Event, row: RowComponent) => void) => {
         const table = new Tabulator(selector, {
-            layout: "fitDataFill",
+            layout: "fitData",
+            layoutColumnsOnNewData: true,
             data: rows,
             selectableRollingSelection: true,
-            selectable: true,
-            pagination: true,
-            paginationSize: 10,
+            selectable: 1,
             columns: [{
                 title: "Nr",
                 field: "id"
@@ -87,12 +87,19 @@ const utils = {
             {
                 title: "Gäste",
                 field: "guests",
-                formatter: "textarea",
                 mutator: guestsMutator
             },
             {
                 title: "Straße + Hausnr",
                 field: "streetAndNumber",
+            },
+            {
+                title: "PLZ",
+                field: "zip"
+            },
+            {
+                title: "Ort",
+                field: "city"
             }
             ]
         });
@@ -101,8 +108,9 @@ const utils = {
     },
 
     addCssClass: (element: HTMLElement, className: string) => {
-        element.classList.remove(className);
-        element.classList.add(className);
+        if(!element.classList.contains(className)){
+            element.classList.add(className);
+        }
     },
 
     removeCssClass: (element: HTMLElement, className: string) => {

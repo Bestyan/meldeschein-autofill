@@ -1,13 +1,32 @@
 import uiHelper from "./ui_helper";
 import { PopupController } from "./controller";
-import { RowComponent } from "tabulator-tables";
+import { RowComponent, Tabulator } from "tabulator-tables";
 import { Booking } from "../database/guest_excel";
 
 export default class UI {
     private controller: PopupController;
 
+    private searchResultsSection: HTMLElement = document.getElementById("search_results_section");
+    private searchResultsTable: Tabulator;
+    
+    private bookingsSection: HTMLElement = document.getElementById("bookings_section");
+    private bookingsTable: Tabulator;
+
+    private meldescheinGroupsSection: HTMLElement = document.getElementById("meldeschein_groups_section");
+    private meldescheinGroupsTable: Tabulator;
+
     constructor(controller: PopupController) {
         this.controller = controller;
+
+        const searchResultsDiv = document.getElementById("search_results");
+        this.searchResultsTable = uiHelper.createBookingsTabulatorTable(searchResultsDiv, [], (event: Event, row: RowComponent) => this.onBookingsSearchResultRowClick(event, row));
+        
+        const bookingsResultDiv = document.getElementById("bookings_results");
+        this.bookingsTable = uiHelper.createBookingsTabulatorTable(bookingsResultDiv, [], (event: Event, row: RowComponent) => this.onBookingsResultRowClick(event, row));
+        
+        const meldescheinGroupsResultDiv = document.getElementById("meldeschein_groups_results");
+        this.meldescheinGroupsTable = uiHelper.createMeldescheinGroupsTabulatorTable(meldescheinGroupsResultDiv, [], (event: Event, row: RowComponent) => this.onMeldescheinGroupsResultRowClick(event, row));
+    
     }
 
     initMinimizeButton (minimizeButton: HTMLElement) {
@@ -44,37 +63,71 @@ export default class UI {
         });
     };
 
+    searchBookings(event: Event) {
+        event.preventDefault();
+
+        // hide the tables
+        uiHelper.hideHtmlElement(this.meldescheinGroupsSection);
+        uiHelper.hideHtmlElement(this.bookingsSection);
+        // show search results table, tabulator needs it to be visible
+        uiHelper.showHtmlElement(this.searchResultsSection);
+    
+        const searchDropdown = uiHelper.getHtmlSelectElement("search_field");
+        const searchDateInput = uiHelper.getHtmlInputElement("search_input_date");
+        const searchTextInput = uiHelper.getHtmlInputElement("search_input_text");
+        let searchValue: string;
+        const searchColumn = searchDropdown.value;
+    
+        if(searchColumn === "arrival" || searchColumn === "departure") {
+            searchValue = searchDateInput.value;
+        } else{
+            searchValue = searchTextInput.value;
+        }
+        
+        const bookings = this.controller.findBookingsByColumnAndValue(searchColumn, searchValue);
+        this.searchResultsTable.setData(bookings);
+
+    };
+
     /**
      * what happens when you click on a row in the search_results table
      */
     onBookingsSearchResultRowClick(event: Event, row: RowComponent) {
-        // hide the other tables
-        uiHelper.hideHtmlElement(document.getElementById("meldeschein_groups"));
-        uiHelper.hideHtmlElement(document.getElementById("bookings"));
+        // hide meldeschein groups table
+        uiHelper.hideHtmlElement(this.meldescheinGroupsSection);
+        // show bookings table, tabulator needs it to be visible
+        uiHelper.showHtmlElement(this.bookingsSection);
 
-        const bookingsResultDiv = document.getElementById("bookings_results");
         const selectedBooking = row.getData() as Booking;
         const bookings = this.controller.findBookingsByEmail(selectedBooking.email);
-        uiHelper.createBookingsTabulatorTable(bookingsResultDiv, bookings , (event: Event, row: RowComponent) => this.onBookingsResultRowClick(event, row));
-
-        // show created table
-        uiHelper.showHtmlElement(document.getElementById("bookings"));
+        this.bookingsTable.setData(bookings);
     };
 
     /**
      * what happens when you click on a row in the booking_results table
      */
     onBookingsResultRowClick(event: Event, row: RowComponent) {
-        uiHelper.hideHtmlElement(document.getElementById("meldeschein_groups"));
+        // show meldeschein table, tabulator needs it to be visible
+        uiHelper.showHtmlElement(this.meldescheinGroupsSection);
 
         const selectedBooking = row.getData() as Booking;
-        const meldescheinGroupsResultDiv = document.getElementById("meldeschein_groups_results");
-        uiHelper.createMeldescheinGroupsTabulatorTable(meldescheinGroupsResultDiv, selectedBooking.meldescheinGroups, (event: Event, row: RowComponent) => this.onMeldescheinGroupsResultRowClick(event, row));
-    
-        uiHelper.showHtmlElement(document.getElementById("meldeschein_groups"));
+        this.meldescheinGroupsTable.setData(selectedBooking.meldescheinGroups);
     };
 
     onMeldescheinGroupsResultRowClick(event: Event, row: RowComponent) {
         // TODO fill meldeschein if on meldeschein page
     };
+
+    getSelectedSearchResultsTableRow(): Booking {
+        if (this.searchResultsTable == null) {
+            return null;
+        }
+
+        const selectedRows = this.searchResultsTable.getSelectedRows();
+        if (selectedRows.length === 0) {
+            return null;
+        }
+    
+        return selectedRows[0].getData() as Booking;
+    }
 }
