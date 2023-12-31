@@ -13,12 +13,16 @@ const TABLE_KEYS = "keys";
 
 const DB = new localStorageDB("meldeschein", "localStorage");
 
-export default {
-    xls_upload_datetime: window.localStorage.getItem(LOCALSTORAGE_LAST_UPLOAD),
+export class Database {
+    localStorage: Window["localStorage"];
+    updateExcelDataStatus: () => void;
+    xls_upload_datetime: string;
 
-    setup(refreshStatusFunction: Function) {
-        this.refreshStatus = refreshStatusFunction;
-    },
+    constructor(updateExcelDataStatus: () => void, window: Window) {
+        this.updateExcelDataStatus = updateExcelDataStatus;
+        this.localStorage = window.localStorage;
+        this.xls_upload_datetime = this.localStorage.getItem(LOCALSTORAGE_LAST_UPLOAD);
+    };
 
     resetBookingsTable() {
         // legacy tables
@@ -35,14 +39,14 @@ export default {
         }
 
         DB.commit();
-    },
+    };
 
     resetKeysTable() {
         if (DB.tableExists(TABLE_KEYS)) {
             DB.dropTable(TABLE_KEYS);
         }
         DB.commit();
-    },
+    };
 
     /**
      * sets up bookings tables for use
@@ -55,7 +59,7 @@ export default {
         DB.createTableWithData(TABLE_BOOKINGS, bookings);
         DB.commit();
         this.setUploadTime();
-    },
+    };
 
     /**
      * sets xls_upload_datetime to current time
@@ -63,16 +67,16 @@ export default {
     setUploadTime() {
         this.xls_upload_datetime = new Date().toLocaleDateString('de-DE', constants.STATUS_DATE_FORMAT as Intl.DateTimeFormatOptions);
         window.localStorage.setItem(LOCALSTORAGE_LAST_UPLOAD, this.xls_upload_datetime);
-        this.refreshStatus();
-    },
+        this.updateExcelDataStatus();
+    };
 
     hasData() {
         return DB.tableExists(TABLE_BOOKINGS) && DB.queryAll(TABLE_BOOKINGS, {}).length > 0;
-    },
+    };
 
     findAll(){
         return DB.queryAll(TABLE_BOOKINGS, {});
-    },
+    };
 
     search(column: string, value: string): Array<Booking> {
         console.log(`database.search(${column}, ${value})`);
@@ -88,7 +92,7 @@ export default {
         });
 
         return queryResult.map((row: any) => Booking.fromQueryResult(row));
-    },
+    };
 
     /**
      * stub for server
@@ -121,7 +125,7 @@ export default {
                 })
                 .catch(error => reject(error.toString()));
         });
-    },
+    };
 
     /**
      * stub for server
@@ -141,13 +145,9 @@ export default {
                 }
             })
             .catch(error => console.log(error));
-    },
+    };
 
-    /**
-     * 
-     * @param {Array<any>} rows 
-     */
-    initKeys(rows: Array<any>) {
+    initKeysTable(rows: Array<any>) {
         this.resetKeysTable();
         try {
             DB.createTableWithData(TABLE_KEYS, rows);
@@ -155,7 +155,7 @@ export default {
         } catch (error) {
             alert(error.toString());
         }
-    },
+    };
 
     /**
      * get all key numbers belonging to the given apartment
@@ -163,7 +163,7 @@ export default {
      * @param {number} maxKeys 
      * @returns {string[]}
      */
-    getKeys(apartment: string, maxKeys: number) {
+    getApartmentKeyNames(apartment: string, maxKeys: number): Array<string> {
         const rows = DB.queryAll(TABLE_KEYS, {
             query: {
                 apartment: apartment
@@ -187,5 +187,7 @@ export default {
             }
         }
         return keys;
-    }
+    };
 }
+
+export default Database;

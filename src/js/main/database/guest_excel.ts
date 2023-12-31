@@ -264,7 +264,7 @@ export class MeldescheinGroup {
 
     static fromQueryResult(queryResult: any): MeldescheinGroup {
         const meldescheinGroup = queryResult as MeldescheinGroup;
-        meldescheinGroup.guests = queryResult.guests.map((guest: any) => Guest.fromRowValues(guest));
+        meldescheinGroup.guests = queryResult.guests.map((guest: any) => Guest.fromQueryResult(guest));
         return meldescheinGroup;
     }
 }

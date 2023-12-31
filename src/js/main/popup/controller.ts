@@ -1,12 +1,17 @@
+import { Database } from "../database/database";
 
-export default class PopupController{
-    private database: any;
+export class PopupController{
+    private database: Database;
 
-    constructor(database: any) {
+    constructor(database: Database) {
         this.database = database;
     }
 
     deleteExcelData() {
         this.database.resetBookingsTable();
+    }
+
+    findBookingsByEmail(email: string) {
+        return this.database.search("email", email);
     }
 };

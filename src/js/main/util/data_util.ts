@@ -80,10 +80,8 @@ export default {
         return null;
     },
 
-    getVoucherGueltigkeit: (abreise: string): string => {
-        const abreiseParts: Array<string> = abreise.split(".");
-        const abreiseDate: Date = new Date(Number(abreiseParts[2]), Number(abreiseParts[1]) - 1, Number(abreiseParts[0]));
-        const lengthOfStay: number = Math.ceil((abreiseDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) + 1; // abreise - heute + 1
+    getVoucherGueltigkeit: (abreise: Date): string => {
+        const lengthOfStay: number = Math.ceil((abreise.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) + 1; // abreise - heute + 1
 
         if (lengthOfStay < 0) {
             alert("ungültige Aufenthaltsdauer: Abreise - Anreise < 0");
@@ -109,7 +107,7 @@ export default {
         return `${gueltigkeit} Tage`;
     },
 
-    getKommentar: (table_data: any) => {
+    getVoucherKommentar: (table_data: any) => {
         return `${table_data.nachname} ${table_data.apartment} ${table_data.anreise} bis ${table_data.abreise}`;
     },
 

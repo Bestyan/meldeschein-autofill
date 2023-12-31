@@ -1,23 +1,26 @@
 // for webpack (css needs to be referenced to be packed)
 import "../../css/popup.css";
 
-import { Tabulator, MutatorModule, SelectRowModule, PageModule } from 'tabulator-tables';
+import { Tabulator, MutatorModule, SelectRowModule, PageModule, InteractionModule, FormatModule, RowComponent } from 'tabulator-tables';
 import mailGenerator from './popup/mail_generator';
-import database from './database/database';
+import { Database } from './database/database';
 import dataUtil from './util/data_util';
 import uiHelper from './popup/ui_helper';
 import UI from './popup/ui';
 import constants from './util/constants';
 import checkinGenerator from './popup/checkin_generator';
 import contentScriptConnector from './content_scripts/connector';
-import { GuestExcel } from "./database/guest_excel";
+import { GuestExcel, Booking } from "./database/guest_excel";
 import 'regenerator-runtime/runtime'; // required by exceljs
 import { Workbook } from 'exceljs';
+import { PopupController } from './popup/controller';
 
 // enable mutators
-Tabulator.registerModule([MutatorModule, SelectRowModule, PageModule]);
+Tabulator.registerModule([MutatorModule, SelectRowModule, PageModule, InteractionModule, FormatModule]);
 
-const popupUi = new UI();
+const database = new Database(refreshStatus, window);
+const popupController = new PopupController(database);
+const popupUi = new UI(popupController);
 
 class Option {
     text: string;
@@ -113,7 +116,6 @@ function setupSearchDropDowns() {
     });
 }
 
-
 function searchBookings(event: Event) {
 
     event.preventDefault();
@@ -133,7 +135,7 @@ function searchBookings(event: Event) {
     console.log(database.findAll()) //TODO
     const rows = database.search(searchColumn, searchValue);
 
-    result_table = uiHelper.createBookingsTabulatorTable("#result_table", rows);
+    result_table = uiHelper.createBookingsTabulatorTable("#search_results", rows, (event: Event, row: RowComponent) => popupUi.onBookingsSearchResultRowClick(event, row));
 }
 
 function generateReviewMail() {
@@ -143,7 +145,8 @@ function generateReviewMail() {
         return;
     }
 
-    data.anrede = uiHelper.getHtmlSelectElement('anrede').value;
+    // TODO
+    //data.anrede = uiHelper.getHtmlSelectElement('anrede').value;
     const pronomen = uiHelper.getHtmlSelectElement('pronomen').value;
     const isFirstVisit = uiHelper.getHtmlSelectElement('is_first_visit').value == 'true';
 
@@ -166,16 +169,16 @@ function wakeServer() {
         });
 }
 
-function getSelectedTableRow() {
+function getSelectedTableRow(): Booking {
     if (result_table == null) {
         return null;
     }
 
-    return result_table.getSelectedData()[0];
+    return result_table.getSelectedData()[0] as Booking;
 }
 
 function fillMeldeschein() {
-    const data = getSelectedTableRow();
+    const data = getSelectedTableRow() as any; //TODO
     if (!data) {
         alert("keine Tabellenzeile ausgewählt");
         return;
@@ -307,8 +310,8 @@ function buildUI() {
         // message to content script fill_vlan_voucher.js
         contentScriptConnector.send({
             hotspot: dataUtil.getHotspot(data.apartment),
-            gueltigkeit: dataUtil.getVoucherGueltigkeit(data.abreise),
-            kommentar: dataUtil.getKommentar(data)
+            gueltigkeit: dataUtil.getVoucherGueltigkeit(data.departure),
+            kommentar: dataUtil.getVoucherKommentar(data)
         });
     });
 
@@ -320,8 +323,8 @@ function buildUI() {
         if (tableData != null) {
             placeholderData = {
                 apartment: tableData.apartment,
-                aufenthaltszeit: `${tableData.anreise} ‒ ${tableData.abreise}`,
-                anreise: tableData.anreise,
+                aufenthaltszeit: `${tableData.arrival} ‒ ${tableData.departure}`,
+                anreise: tableData.arrival,
             };
 
             // name placeholders are name1, name2, name3 etc
@@ -330,7 +333,7 @@ function buildUI() {
             if(false) { // TODO
 
             } else {
-                placeholderData.name1 = `${tableData.vorname} ${tableData.nachname}`;
+                placeholderData.name1 = `${tableData.organiserFirstname} ${tableData.organiserLastname}`;
             }
 
             // placeholders schluessel and anzahlSchluessel
@@ -405,7 +408,5 @@ console.log(`environment: ${process.env.NODE_ENV}`);
 
 // Tabulator table
 let result_table: any = null;
-
-database.setup(refreshStatus);
 
 buildUI();

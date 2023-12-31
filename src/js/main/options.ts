@@ -1,7 +1,9 @@
 import "../../css/options.css";
 import constants from "./util/constants";
 import XLSX from 'xlsx';
-import database from './database/database';
+import { Database } from './database/database';
+
+const database = new Database(() => {}, window);
 
 /**
  * set the html content and the css classes of the checkin doc status field  
@@ -111,7 +113,7 @@ function buildKeysUI() {
                 let sheet_as_json = XLSX.utils.sheet_to_json(sheet);
 
                 // save keys to database
-                database.initKeys(sheet_as_json);
+                database.initKeysTable(sheet_as_json);
                 window.localStorage.setItem(constants.SETTINGS_KEYS_XLS, "saved");
                 refreshKeysXlsStatus();
 
