@@ -187,6 +187,7 @@ export class GuestExcel {
 }
 
 export class Booking {
+    ID: number;
     organiserFirstname: string;
     organiserLastname: string;
     arrival: Date;
@@ -226,7 +227,7 @@ export class Booking {
         // get the meldeschein group whose id matches the meldescheinId in rowValues
         let foundExistingMeldescheinGroup = false;
         for (const meldescheinGroup of this.meldescheinGroups) {
-            if (meldescheinGroup.id === Number(rowValues.meldescheinId)) {
+            if (meldescheinGroup.ID === Number(rowValues.meldescheinId)) {
                 foundExistingMeldescheinGroup = true;
                 meldescheinGroup.guests.push(Guest.fromRowValues(rowValues));
                 break;
@@ -244,7 +245,7 @@ export class Booking {
 }
 
 export class MeldescheinGroup {
-    id: number;
+    ID: number;
     streetAndNumber: string;
     zip: string;
     city: string;
@@ -253,7 +254,7 @@ export class MeldescheinGroup {
 
     static fromRowValues(rowValues: RowValues): MeldescheinGroup {
         const meldescheinGroup = new MeldescheinGroup();
-        meldescheinGroup.id = Number(rowValues.meldescheinId);
+        meldescheinGroup.ID = Number(rowValues.meldescheinId);
         meldescheinGroup.streetAndNumber = rowValues.guestStreet;
         meldescheinGroup.zip = rowValues.guestZip;
         meldescheinGroup.city = rowValues.guestCity;
@@ -270,6 +271,7 @@ export class MeldescheinGroup {
 }
 
 export class Guest {
+    ID: number;
     firstname: string;
     lastname: string;
     birthdate: Date | null;

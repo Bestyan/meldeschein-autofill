@@ -117,7 +117,7 @@ function setupSearchDropDowns() {
 }
 
 function generateReviewMail() {
-    const data = ui.getSelectedSearchResultsTableRow();
+    const data = ui.getSelectedSearchResultsData();
     if (data == null) {
         alert("keine Tabellenzeile ausgewählt");
         return;
@@ -148,7 +148,7 @@ function wakeServer() {
 }
 
 function fillMeldeschein() {
-    const data = ui.getSelectedSearchResultsTableRow() as any; //TODO
+    const data = ui.getSelectedSearchResultsData() as any; //TODO
     if (!data) {
         alert("keine Tabellenzeile ausgewählt");
         return;
@@ -266,12 +266,9 @@ function buildUI() {
     // Button/Form "suchen"
     document.getElementById('search').addEventListener('submit', (event: Event) => ui.searchBookings(event));
 
-    // Button "Meldeschein ausfüllen"
-    document.getElementById('meldeschein_fill').addEventListener("click", event => fillMeldeschein());
-
     // Button "WLAN Voucher ausfüllen"
     document.getElementById('wlan_voucher_fill').addEventListener('click', event => {
-        const data = ui.getSelectedSearchResultsTableRow();
+        const data = ui.getSelectedSearchResultsData();
         if (data == null) {
             alert("keine Tabellenzeile ausgewählt");
             return;
@@ -287,7 +284,7 @@ function buildUI() {
 
     // Button "Check-in Dokument"
     document.getElementById('checkin_download').addEventListener('click', event => {
-        const tableData = ui.getSelectedSearchResultsTableRow();
+        const tableData = ui.getSelectedSearchResultsData();
         // create placeholder mappings from selected table row. if no row is selected, blank lines will be generated instead
         let placeholderData: any = null;
         if (tableData != null) {
@@ -349,22 +346,11 @@ function buildUI() {
         active: true
     },
         tabs => {
-            let url = tabs[0].url;
+            let url = tabs[0].url || "";
 
-            const meldeschein_fill_button = document.getElementById('meldeschein_fill');
             const wlan_voucher_fill_button = document.getElementById('wlan_voucher_fill');
 
-            meldeschein_fill_button.classList.remove('hide');
             wlan_voucher_fill_button.classList.remove('hide');
-
-            // no url entered
-            if (url == null || url == undefined) {
-                url = "";
-            }
-
-            if (!url.toString().includes('emeldeschein.de')) {
-                meldeschein_fill_button.classList.add('hide');
-            }
 
             if (!url.toString().includes('192.168.1.254:44444') &&
                 !url.toString().includes('file://')) {

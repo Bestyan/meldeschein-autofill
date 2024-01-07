@@ -76,13 +76,11 @@ const utils = {
     createMeldescheinGroupsTabulatorTable: (selector: string | HTMLElement, rows: Array<MeldescheinGroup>, onRowClick: (event: Event, row: RowComponent) => void) => {
         const table = new Tabulator(selector, {
             layout: "fitData",
-            layoutColumnsOnNewData: true,
+            layoutColumnsOnNewData: true, //TODO make default
             data: rows,
-            selectableRollingSelection: true,
-            selectable: 1,
             columns: [{
                 title: "Nr",
-                field: "id"
+                field: "ID"
             },
             {
                 title: "Gäste",

@@ -1,17 +1,21 @@
 import uiHelper from "./ui_helper";
 import { PopupController } from "./controller";
 import { RowComponent, Tabulator } from "tabulator-tables";
-import { Booking } from "../database/guest_excel";
+import { Booking, MeldescheinGroup } from "../database/guest_excel";
+import dataUtil from "../util/data_util";
 
 export default class UI {
     private controller: PopupController;
 
+    private searchResultsBookings: Array<Booking>;
     private searchResultsSection: HTMLElement = document.getElementById("search_results_section");
     private searchResultsTable: Tabulator;
     
-    private bookingsSection: HTMLElement = document.getElementById("bookings_section");
-    private bookingsTable: Tabulator;
+    private allBookings: Array<Booking>;
+    private allBookingsSection: HTMLElement = document.getElementById("bookings_section");
+    private allBookingsTable: Tabulator;
 
+    private meldescheinGroups: Array<MeldescheinGroup>;
     private meldescheinGroupsSection: HTMLElement = document.getElementById("meldeschein_groups_section");
     private meldescheinGroupsTable: Tabulator;
 
@@ -21,8 +25,8 @@ export default class UI {
         const searchResultsDiv = document.getElementById("search_results");
         this.searchResultsTable = uiHelper.createBookingsTabulatorTable(searchResultsDiv, [], (event: Event, row: RowComponent) => this.onBookingsSearchResultRowClick(event, row));
         
-        const bookingsResultDiv = document.getElementById("bookings_results");
-        this.bookingsTable = uiHelper.createBookingsTabulatorTable(bookingsResultDiv, [], (event: Event, row: RowComponent) => this.onBookingsResultRowClick(event, row));
+        const allBookingsResultDiv = document.getElementById("bookings_results");
+        this.allBookingsTable = uiHelper.createBookingsTabulatorTable(allBookingsResultDiv, [], (event: Event, row: RowComponent) => this.onBookingsResultRowClick(event, row));
         
         const meldescheinGroupsResultDiv = document.getElementById("meldeschein_groups_results");
         this.meldescheinGroupsTable = uiHelper.createMeldescheinGroupsTabulatorTable(meldescheinGroupsResultDiv, [], (event: Event, row: RowComponent) => this.onMeldescheinGroupsResultRowClick(event, row));
@@ -68,7 +72,7 @@ export default class UI {
 
         // hide the tables
         uiHelper.hideHtmlElement(this.meldescheinGroupsSection);
-        uiHelper.hideHtmlElement(this.bookingsSection);
+        uiHelper.hideHtmlElement(this.allBookingsSection);
         // show search results table, tabulator needs it to be visible
         uiHelper.showHtmlElement(this.searchResultsSection);
     
@@ -84,8 +88,8 @@ export default class UI {
             searchValue = searchTextInput.value;
         }
         
-        const bookings = this.controller.findBookingsByColumnAndValue(searchColumn, searchValue);
-        this.searchResultsTable.setData(bookings);
+        this.searchResultsBookings = this.controller.findBookingsByColumnAndValue(searchColumn, searchValue);
+        this.searchResultsTable.setData(dataUtil.clone(this.searchResultsBookings));
 
     };
 
@@ -96,11 +100,14 @@ export default class UI {
         // hide meldeschein groups table
         uiHelper.hideHtmlElement(this.meldescheinGroupsSection);
         // show bookings table, tabulator needs it to be visible
-        uiHelper.showHtmlElement(this.bookingsSection);
+        uiHelper.showHtmlElement(this.allBookingsSection);
 
-        const selectedBooking = row.getData() as Booking;
-        const bookings = this.controller.findBookingsByEmail(selectedBooking.email);
-        this.bookingsTable.setData(bookings);
+        const selectedBooking = this.getSelectedSearchResultsData();
+        if(selectedBooking == null){
+            return;
+        }
+        this.allBookings = this.controller.findBookingsByEmail(selectedBooking.email);
+        this.allBookingsTable.setData(dataUtil.clone(this.allBookings));
     };
 
     /**
@@ -110,24 +117,56 @@ export default class UI {
         // show meldeschein table, tabulator needs it to be visible
         uiHelper.showHtmlElement(this.meldescheinGroupsSection);
 
-        const selectedBooking = row.getData() as Booking;
-        this.meldescheinGroupsTable.setData(selectedBooking.meldescheinGroups);
+        const selectedBooking = this.getSelectedAllBookingsData();
+        if (selectedBooking.meldescheinGroups == null) {
+            return;
+        }
+        this.meldescheinGroups = selectedBooking.meldescheinGroups;
+        this.meldescheinGroupsTable.setData(dataUtil.clone(this.meldescheinGroups));
     };
 
     onMeldescheinGroupsResultRowClick(event: Event, row: RowComponent) {
-        // TODO fill meldeschein if on meldeschein page
+        chrome.tabs.query({
+            currentWindow: true,
+            active: true
+        },
+            tabs => {
+                let url = tabs[0].url || "";
+                if (!url.toString().includes('emeldeschein.de')) {
+                    return;
+                }
+                const searchedBooking = this.getSelectedSearchResultsData();
+                if (searchedBooking == null) {
+                    return;
+                }
+                // because the mutator alters the results of row.getData(), we need to get the original meldescheinGroup from the booking table
+                const meldescheinGroup = this.getSelectedMeldescheinGroupsData(row);
+                this.controller.fillMeldeschein(meldescheinGroup, searchedBooking.arrival, searchedBooking.departure, searchedBooking.email);
+            });
     };
 
-    getSelectedSearchResultsTableRow(): Booking {
-        if (this.searchResultsTable == null) {
+    private getSelectedTableRow(table: Tabulator): any {
+        if (table == null) {
             return null;
         }
 
-        const selectedRows = this.searchResultsTable.getSelectedRows();
+        const selectedRows = table.getSelectedRows();
         if (selectedRows.length === 0) {
             return null;
         }
     
-        return selectedRows[0].getData() as Booking;
+        return selectedRows[0].getData() as any;
+    };
+    
+    getSelectedSearchResultsData(): Booking {
+        return this.searchResultsBookings.filter(booking => booking.ID === this.getSelectedTableRow(this.searchResultsTable).ID)[0];
+    }
+
+    getSelectedAllBookingsData(): Booking {
+        return this.allBookings.filter(booking => booking.ID === this.getSelectedTableRow(this.allBookingsTable).ID)[0];
+    }
+
+    getSelectedMeldescheinGroupsData(row: RowComponent): MeldescheinGroup {
+        return this.meldescheinGroups.filter(group => group.ID === row.getData().ID)[0];
     }
 }

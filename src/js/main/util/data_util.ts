@@ -139,54 +139,13 @@ export default {
     },
 
     /**
-     * resets everything except Anreise/Abreise
-     */
-    getClearFormData() {
-        return {
-            nachname0: "", //Nachname Gast
-            vorname0: "",
-            geburtsdatum0_input: "",
-            klasse0: -1,
-            anrede0: constants.ANREDE_HERR,
-            staat0_input: "Deutschland",
-
-            strasse0: "",
-            land0_input: "Deutschland",
-            plz0_input: "",
-            ort0_input: "",
-
-            nachname1_input: "", // Nachname Begl. 1
-            vorname1: "",
-            geburtsdatum1_input: "",
-            klasse1: -1,
-            anrede1: constants.ANREDE_HERR,
-            staat1_input: "Deutschland",
-
-
-            vorname2: "",
-            geburtsdatum2_input: "",
-            klasse2: -1,
-
-            vorname3: "",
-            geburtsdatum3_input: "",
-            klasse3: -1,
-
-            vorname4: "",
-            geburtsdatum4_input: "",
-            klasse4: -1,
-
-            vorname5: "",
-            geburtsdatum5_input: "",
-            klasse5: -1,
-
-            email: ""
-        };
-    },
-
-    /**
      * @returns dd.MM.yyyy
      */
     formatDate(date: Date): string {
         return date.toLocaleDateString("de-DE");
+    },
+
+    clone(object: any): any {
+        return JSON.parse(JSON.stringify(object));
     }
 };

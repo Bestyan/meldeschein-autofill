@@ -56,15 +56,6 @@ export default {
     SETTINGS_CHECKIN_DOCX: "settings_checkin_docx",
     SETTINGS_KEYS_XLS: "settings_keys_xls",
 
-    BIRTHDATE_FIELDS: [
-        "geburtsdatum0_input",
-        "geburtsdatum1_input",
-        "geburtsdatum2_input",
-        "geburtsdatum3_input",
-        "geburtsdatum4_input",
-        "geburtsdatum5_input"
-    ],
-
     FIRSTNAME_FIELDS: [
         "vorname0",
         "vorname1",
