@@ -1,8 +1,8 @@
 import constants from "./constants";
 
-interface DeferredPromise { 
-    promise: Promise<any>, 
-    resolve: (value: any) => void 
+interface DeferredPromise {
+    promise: Promise<any>,
+    resolve: (value: any) => void
 }
 
 const utils = {
@@ -46,17 +46,8 @@ Anreise: ${date}`);
 
 
 export default {
-    getApartmentFlower: (apartment: string): string => {
-        try {
-            const matches: Array<string> = apartment.match(/(.+?)-Apartment/);
-            return matches[1];
-        } catch (exception) {
-            console.error(`apartment "${apartment}" does not match pattern *-Apartment.`);
-            return "";
-        }
-    },
 
-    getHotspot: (apartment: string): string => {
+    getHotspotName: (apartment: string): string => {
         if (apartment.includes("Enzian") ||
             apartment.includes("Krokus")) {
             return "12 Enzian";
@@ -80,7 +71,7 @@ export default {
         return null;
     },
 
-    getVoucherGueltigkeit: (abreise: Date): string => {
+    getVoucherDuration: (abreise: Date): string => {
         const lengthOfStay: number = Math.ceil((abreise.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) + 1; // abreise - heute + 1
 
         if (lengthOfStay < 0) {
@@ -88,26 +79,26 @@ export default {
             return null;
         }
 
-        let gueltigkeit = 7;
+        let daysValid = 7;
 
         if (lengthOfStay <= 7) {
-            gueltigkeit = 7;
+            daysValid = 7;
         } else if (lengthOfStay <= 10) {
-            gueltigkeit = 10;
+            daysValid = 10;
         } else if (lengthOfStay <= 14) {
-            gueltigkeit = 14;
+            daysValid = 14;
         } else if (lengthOfStay <= 16) {
-            gueltigkeit = 16;
+            daysValid = 16;
         } else if (lengthOfStay <= 22) {
-            gueltigkeit = 22;
+            daysValid = 22;
         } else {
-            gueltigkeit = 40;
+            daysValid = 40;
         }
 
-        return `${gueltigkeit} Tage`;
+        return `${daysValid} Tage`;
     },
 
-    getVoucherKommentar: (table_data: any) => {
+    getVoucherComment: (table_data: any) => {
         return `${table_data.nachname} ${table_data.apartment} ${table_data.anreise} bis ${table_data.abreise}`;
     },
 

@@ -181,9 +181,9 @@ function buildUI() {
 
         // message to content script fill_vlan_voucher.js
         contentScriptConnector.send({
-            hotspot: dataUtil.getHotspot(data.apartment),
-            gueltigkeit: dataUtil.getVoucherGueltigkeit(data.departure),
-            kommentar: dataUtil.getVoucherKommentar(data)
+            hotspot: dataUtil.getHotspotName(data.apartment),
+            gueltigkeit: dataUtil.getVoucherDuration(data.departure),
+            kommentar: dataUtil.getVoucherComment(data)
         });
     });
 
