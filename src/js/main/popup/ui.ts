@@ -1,8 +1,9 @@
 import uiHelper from "./ui_helper";
 import { PopupController } from "./controller";
 import { RowComponent, Tabulator } from "tabulator-tables";
-import { Booking, MeldescheinGroup } from "../database/guest_excel";
+import { Booking, MeldescheinGroup, Guest } from "../database/guest_excel";
 import dataUtil from "../util/data_util";
+import checkinGenerator from './checkin_document';
 
 export default class UI {
     private controller: PopupController;
@@ -168,5 +169,11 @@ export default class UI {
 
     getSelectedMeldescheinGroupsData(row: RowComponent): MeldescheinGroup {
         return this.meldescheinGroups.filter(group => group.ID === row.getData().ID)[0];
+    }
+
+    initCheckinDocumentButton(button: HTMLElement): void {
+        button.addEventListener('click', event => {
+            this.controller.generateCheckinDocument(this.getSelectedSearchResultsData());
+        })
     }
 }

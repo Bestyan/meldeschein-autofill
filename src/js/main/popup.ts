@@ -8,9 +8,8 @@ import dataUtil from './util/data_util';
 import uiHelper from './popup/ui_helper';
 import UI from './popup/ui';
 import constants from './util/constants';
-import checkinGenerator from './popup/checkin_generator';
 import contentScriptConnector from './content_scripts/connector';
-import { GuestExcel, Booking } from "./database/guest_excel";
+import { GuestExcel } from "./database/guest_excel";
 import 'regenerator-runtime/runtime'; // required by exceljs
 import { Workbook } from 'exceljs';
 import { PopupController } from './popup/controller';
@@ -188,40 +187,7 @@ function buildUI() {
     });
 
     // Button "Check-in Dokument"
-    document.getElementById('checkin_download').addEventListener('click', event => {
-        const tableData = ui.getSelectedSearchResultsData();
-        // create placeholder mappings from selected table row. if no row is selected, blank lines will be generated instead
-        let placeholderData: any = null;
-        if (tableData != null) {
-            placeholderData = {
-                apartment: tableData.apartment,
-                aufenthaltszeit: `${tableData.arrival} ‒ ${tableData.departure}`,
-                anreise: tableData.arrival,
-            };
-
-            // name placeholders are name1, name2, name3 etc
-            // if no names have been found, only the name of the person who booked will appear as name1
-            // const guests = database.getGuests(tableData);
-            if(false) { // TODO
-
-            } else {
-                placeholderData.name1 = `${tableData.organiserFirstname} ${tableData.organiserLastname}`;
-            }
-
-            // placeholders schluessel and anzahlSchluessel
-            // TODO
-            // let numberOfKeys = dataUtils.getNumberOfKeys(birthdates, tableData.anreise);
-            // if (numberOfKeys > 0) {
-            //     const keys = database.getKeys(tableData.apartment, numberOfKeys).join(", ");
-            //     placeholderData.anzahlSchluessel = numberOfKeys;
-            //     placeholderData.schluessel = keys;
-            // }
-        }
-
-        checkinGenerator.generate(placeholderData)
-            .then(() => console.log("checkin docx generated"))
-            .catch(error => alert(error));
-    })
+    ui.initCheckinDocumentButton(document.getElementById('checkin_download'));
 
     // Dropdown "Sie"/"Du"
     document.getElementById('pronomen').addEventListener('change', event => {

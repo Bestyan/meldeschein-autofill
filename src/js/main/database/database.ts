@@ -164,6 +164,11 @@ export class Database {
      * @returns {string[]}
      */
     getApartmentKeyNames(apartment: string, maxKeys: number): Array<string> {
+        if (!DB.tableExists(TABLE_KEYS)) {
+            alert("Bitte Apartment-zu-Schlüssel-Zuordnung in Einstellungen hochladen!")
+            return [];
+        }
+
         const rows = DB.queryAll(TABLE_KEYS, {
             query: {
                 apartment: apartment

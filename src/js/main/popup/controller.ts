@@ -1,6 +1,7 @@
 import { Database } from "../database/database";
-import { MeldescheinGroup } from "../database/guest_excel";
+import { MeldescheinGroup, Booking } from "../database/guest_excel";
 import meldeschein from "./meldeschein";
+import checkinDocument from "./checkin_document";
 
 export class PopupController{
     private database: Database;
@@ -23,5 +24,9 @@ export class PopupController{
 
     fillMeldeschein(meldescheinGroup: MeldescheinGroup, arrival: Date, departure: Date, email: string) {
         meldeschein.fillMeldeschein(meldescheinGroup, arrival, departure, email, this.database);
+    }
+
+    generateCheckinDocument(booking: Booking) {
+        checkinDocument.generateDocument(booking, this.database.getApartmentKeyNames);
     }
 };

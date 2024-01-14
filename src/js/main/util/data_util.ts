@@ -123,7 +123,7 @@ export default {
 
         // enforce 2 key minimum
         if (numberOfKeys < 2) {
-            numberOfKeys = 2;
+            return 2;
         }
 
         return numberOfKeys;
