@@ -10,12 +10,12 @@ const utils = {
         return (() => {
             let resolve;
 
-            const p = new Promise(res => {
-                resolve = res;
+            const promise = new Promise(resolvePromise => {
+                resolve = resolvePromise;
             });
 
             return {
-                promise: p,
+                promise: promise,
                 resolve
             };
         })();

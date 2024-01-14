@@ -22,6 +22,6 @@ export class PopupController{
     }
 
     fillMeldeschein(meldescheinGroup: MeldescheinGroup, arrival: Date, departure: Date, email: string) {
-        meldeschein.fillMeldeschein(meldescheinGroup, arrival, departure, email);
+        meldeschein.fillMeldeschein(meldescheinGroup, arrival, departure, email, this.database);
     }
 };

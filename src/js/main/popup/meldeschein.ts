@@ -1,6 +1,10 @@
 import { MeldescheinGroup, Guest } from "../database/guest_excel";
-import { Anrede } from "../util/constants";
+import { Anrede as Title } from "../util/constants";
+import constants from "../util/constants";
 import ContentScriptConnector from "../content_scripts/connector";
+import Database from "../database/database";
+import contentScriptConnector from "../content_scripts/connector";
+import uiHelper from "./ui_helper";
 
 
 interface EventInput {
@@ -15,7 +19,7 @@ class FormData {
     nachname0 = ""; // Nachname Gast
     vorname0 = "";
     geburtsdatum0_input: EventInput | null;
-    anrede0 = Anrede.Herr;
+    anrede0 = Title.Herr;
     staat0_input = "Deutschland";
 
     strasse0 = "";
@@ -26,7 +30,7 @@ class FormData {
     nachname1_input = ""; // Nachname Begl. 1
     vorname1 = "";
     geburtsdatum1_input: EventInput | null;
-    anrede1 = Anrede.Herr;
+    anrede1 = Title.Herr;
     staat1_input = "Deutschland";
 
     vorname2 = "";
@@ -44,13 +48,9 @@ class FormData {
     email = "";
 }
 
-function fillMeldeschein(meldescheinGroup: MeldescheinGroup, arrival: Date, departure: Date, email: string): void {
-    console.log(meldescheinGroup);
-    console.log(arrival);
-    console.log(departure);
-    console.log(email);
+function fillMeldeschein(meldescheinGroup: MeldescheinGroup, arrival: Date, departure: Date, email: string, database: Database): void {
     fillNonInteractiveInformation(meldescheinGroup, arrival, departure, email)
-        .then(() => fillInteractiveInformation(meldescheinGroup.guests))
+        .then(() => fillTitleInformation(meldescheinGroup.guests, database))
         .then(() => console.log("finished filling meldeschein"))
         .catch((error: any) => console.error(error));
 }
@@ -135,10 +135,77 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
     return ContentScriptConnector.send(formData);
 }
 
-function fillInteractiveInformation(guests: Array<Guest>): Promise<void> {
-    return Promise.resolve();
+function fillTitleInformation(guests: Array<Guest>, database: Database): void {
+    console.log("filling title information");
+    guests.forEach((guest: Guest, index: number) => {
+        // title info is only needed for the first 2 entries
+        if (index >= 2) {
+            console.log(`skipping title for guest ${guest.firstname} because they are not one of the first 2`)
+            return;
+        }
+
+        if (guest.firstname == null || guest.firstname == "") {
+            console.log("skipping guest because firstname is empty");
+            return;
+        }
+
+        database.getGender(guest.firstname)
+            .then(
+                // onFulfilled
+                (gender: "M" | "F" | undefined) => {
+
+                    if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
+                        const title = constants.getTitle(gender);
+
+                        // send data to content script fill_meldeschein.js
+                        contentScriptConnector.send({
+                            anrede0: title,
+                            // Anrede der Begleitperson != Anrede des Buchenden
+                            anrede1: title === Title.Herr ? Title.Frau : Title.Herr
+                        });
+                        return;
+                    }
+
+                    // firstname does not have an entry in the firstname table => query the user for its gender
+                    const genderPopup = document.getElementById("firstname_gender");
+                    uiHelper.showHtmlElement(genderPopup)
+                    document.getElementById("firstname").textContent = `"${guest.firstname}"`;
+
+                    document.getElementById("firstname_male").addEventListener("click", function handler(event) {
+                        uiHelper.hideHtmlElement(genderPopup);
+                        database.addFirstName(guest.firstname, "M");
+                        contentScriptConnector.send({
+                            anrede0: Title.Herr,
+                            anrede1: Title.Frau,
+                        });
+                        event.target.removeEventListener(event.type, handler);
+                    });
+
+                    document.getElementById("firstname_female").addEventListener("click", function handler(event) {
+                        uiHelper.hideHtmlElement(genderPopup);
+                        database.addFirstName(guest.firstname, "F");
+                        contentScriptConnector.send({
+                            anrede0: Title.Frau,
+                            anrede1: Title.Herr,
+                        });
+                        event.target.removeEventListener(event.type, handler);
+                    });
+
+                    document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
+                        uiHelper.hideHtmlElement(genderPopup);
+                        contentScriptConnector.send({
+                            anrede0: Title.Gast,
+                            anrede1: Title.Gast,
+                        });
+                        event.target.removeEventListener(event.type, handler);
+                    });
+                }
+
+            )
+            .catch(error => console.error(error));
+    })
 }
 
 export default {
-    fillMeldeschein: (meldescheinGroup: MeldescheinGroup, arrival: Date, departure: Date, email: string): void => fillMeldeschein(meldescheinGroup, arrival, departure, email)
+    fillMeldeschein: (meldescheinGroup: MeldescheinGroup, arrival: Date, departure: Date, email: string, database: Database): void => fillMeldeschein(meldescheinGroup, arrival, departure, email, database)
 };

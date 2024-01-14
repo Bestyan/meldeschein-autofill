@@ -38,10 +38,7 @@ export default {
         minute: '2-digit'
     },
 
-    ANREDE_HERR: 1,
-    ANREDE_FRAU: 4,
-    ANREDE_GAST: 48,
-    getAnrede(gender: string): Anrede {
+    getTitle(gender: string): Anrede {
         if (gender === "F") {
             return Anrede.Frau;
         }
