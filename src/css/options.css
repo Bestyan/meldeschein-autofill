@@ -30,10 +30,6 @@ html{
     display: flex;
 }
 
-#email_port {
-    max-width: 40px;
-}
-
 .currency {
     max-width: 40px;
     text-align: right;

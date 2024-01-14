@@ -24,7 +24,8 @@ const GUELTIGKEIT_TO_VALUE = {
     "10 Tage": "REF_HotVou10Tage",
     "14 Tage": "REF_HotVou14Tage",
     "16 Tage": "REF_HotVou16Tage",
-    "22 Tage": "REF_HotVou22Tage"
+    "22 Tage": "REF_HotVou22Tage",
+    "40 Tage": "REF_HotVou40Tage"
 };
 
 /*

@@ -1,29 +1,20 @@
-const webpack = require("webpack");
-const path = require("path");
-const fileSystem = require("fs");
-const env = require("./utils/env");
-const CleanWebpackPlugin = require("clean-webpack-plugin").CleanWebpackPlugin;
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const WriteFilePlugin = require("write-file-webpack-plugin");
 
-// load the secrets
-const alias = {};
-
-const secretsPath = path.join(__dirname, ("secrets." + env.NODE_ENV + ".js"));
+import webpack from "webpack";
+import path from "path";
+import { CleanWebpackPlugin } from "clean-webpack-plugin";
+import CopyWebpackPlugin from "copy-webpack-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import WriteFilePlugin from "write-file-webpack-plugin";
 
 const fileExtensions = ["jpg", "jpeg", "png", "gif", "eot", "otf", "svg", "ttf", "woff", "woff2"];
 
-if (fileSystem.existsSync(secretsPath)) {
-  alias.secrets = secretsPath;
-}
-
-const options = {
-  mode: process.env.NODE_ENV || "development",
+const config: webpack.Configuration = {
+  mode: process.env.NODE_ENV as "development" | "production" | undefined || "development",
+  devtool: 'inline-source-map',
   entry: {
-    popup: path.join(__dirname, "src", "js", "popup.js"),
-    options: path.join(__dirname, "src", "js", "options.js"),
-    background: path.join(__dirname, "src", "js", "background.js")
+    popup: path.join(__dirname, "src", "js", "main", "popup.ts"),
+    options: path.join(__dirname, "src", "js", "main", "options.ts"),
+    background: path.join(__dirname, "src", "js", "main", "background.ts")
   },
   output: {
     path: path.join(__dirname, "build"),
@@ -38,6 +29,11 @@ const options = {
     {
       test: /\tabulator-tables.min.css$/,
       use: ['style-loader', 'css-loader']
+    },
+    {
+      test: /\.tsx?$/,
+      use: 'ts-loader',
+      exclude: /node_modules/,
     },
     {
       test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
@@ -55,8 +51,9 @@ const options = {
     alias: {
       // use bare min to avoid eval() calls which are no longer permitted with manifest v3
       // requires import of regenerator-runtime/runtime whenever exceljs is used
-      'exceljs': 'exceljs/dist/exceljs.bare.min.js' 
-    }
+      'exceljs': 'exceljs/dist/exceljs.bare.min.js'
+    },
+    extensions: ['.tsx', '.ts', '.js']
   },
   plugins: [
     // clean the build folder
@@ -81,7 +78,7 @@ const options = {
     }),
     new CopyWebpackPlugin({
       patterns: [{
-        from: 'src/js/content_scripts',
+        from: 'src/js/main/content_scripts/scripts',
         to: 'content_scripts'
       }]
     }),
@@ -95,12 +92,8 @@ const options = {
       filename: "options.html",
       chunks: ["options"] // list of js bundle files to be included
     }),
-    new WriteFilePlugin()
+    new WriteFilePlugin() as { apply(...args: any[]): void; }   // THE TYPE ASSERTION GETS RID OF THE ERROR
   ]
 };
 
-if (env.NODE_ENV === "development") {
-  options.devtool = "cheap-module-source-map";
-}
-
-module.exports = options;
+export default config;

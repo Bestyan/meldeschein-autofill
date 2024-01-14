@@ -1,6 +1,7 @@
 import { Buffer } from "buffer";
 
-const getEmailText = (data, pronomen, isFirstVisit) => {
+const getEmailText = (data: { vorname: string, nachname: string, anrede: string, email: string }, 
+    pronomen: "Du" | "Sie", isFirstVisit: boolean) => {
 
     if (pronomen === "Du") {
 
@@ -297,11 +298,11 @@ e-mail: <a id="mailto" href="mailto:info@inzell-ferien.de">info@inzell-ferien.de
 };
 
 export default {
-    generate: (data, pronomen, isFirstVisit) => {
+    generate: (data: any, pronomen: "Du" | "Sie", isFirstVisit: boolean) => {
         const emlContent = getEmailText(data, pronomen, isFirstVisit);
 
-        let textFile = null,
-            makeTextFile = function (text) {
+        let textFile: any = null,
+            makeTextFile = function (text: any) {
                 let data = new Blob([text], {
                     type: 'text/plain;charset=iso-8859-1'
                 });

@@ -18,10 +18,6 @@
     {
       "matches": ["http://192.168.1.254:44444/*", "https://192.168.1.254:44444/*"],
       "js": ["content_scripts/fill_wlan_voucher.js"]
-    },
-    {
-      "matches": ["https://tmanager.tomas-travel.com/*"],
-      "js": ["content_scripts/fill_tmanager.js"]
     }
   ],
   "icons": {

@@ -1,12 +1,30 @@
+
+export enum Anrede {
+    Herr = 1,
+    Frau = 4,
+    Gast = 48
+}
+
+export enum Apartment {
+    "krokus",
+    "enzian",
+    "lavendel",
+    "lilien",
+    "rosen",
+    "tulpen",
+    "nelken",
+    "narzissen"
+}
+
 export default {
 
     SEARCH_RESULT_DATE_FORMAT: {
-        year: 'numeric',
+        year: "numeric" as "numeric" | "2-digit",
         month: '2-digit',
         day: '2-digit'
     },
 
-    BIRTHDAY_DATE_FORMAT : {
+    BIRTHDAY_DATE_FORMAT: {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
@@ -20,35 +38,20 @@ export default {
         minute: '2-digit'
     },
 
-    ANREDE_HERR: 1,
-    ANREDE_FRAU: 4,
-    ANREDE_GAST: 48,
-    getAnrede(gender){
-        if(gender === "F"){
-            return this.ANREDE_FRAU;
+    getTitle(gender: string): Anrede {
+        if (gender === "F") {
+            return Anrede.Frau;
         }
 
         if (gender === "M") {
-            return this.ANREDE_HERR;
+            return Anrede.Herr;
         }
 
-        return this.ANREDE_GAST;
+        return Anrede.Gast;
     },
 
-    SETTINGS_EMAIL: "settings_email",
     SETTINGS_CHECKIN_DOCX: "settings_checkin_docx",
     SETTINGS_KEYS_XLS: "settings_keys_xls",
-    SETTINGS_INVOICE_XLSX: "settings_invoice_xlsx",
-    SETTINGS_KURBEITRAG: "settings_kurbeitrag",
-
-    BIRTHDATE_FIELDS: [
-        "geburtsdatum0_input",
-        "geburtsdatum1_input",
-        "geburtsdatum2_input",
-        "geburtsdatum3_input",
-        "geburtsdatum4_input",
-        "geburtsdatum5_input"
-    ],
 
     FIRSTNAME_FIELDS: [
         "vorname0",
@@ -74,19 +77,15 @@ export default {
         lastname: "nachname1_input"
     },
 
-    getServerURL() {
-        const server_url = {
+    getServerURL(): string {
+        const serverUrl = {
             production: "https://meldeschein-autofill-server.onrender.com",
             development: "http://localhost:8000"
         };
 
-        return server_url[process.env.NODE_ENV];
+        return serverUrl[process.env.NODE_ENV as "production" | "development"].toString();
     },
 
     SERVER_WAKE_UP: "/wake-up",
-    SERVER_FETCH_ALL_MAILS: "/fetch-all-mails",
-    SERVER_TEST_CONNECTION: "/test-connection",
-    SERVER_GET_VORNAME: "/db/get-firstname",
-    SERVER_PUT_VORNAME: "/db/put-firstname",
-    SERVER_GET_LOCATION: "/get-location"
+    ENDPOINT_FIRSTNAME: "/db/firstname"
 };

@@ -1,26 +1,22 @@
-import constants from "./constants";
+import constants from "../util/constants";
 
 const JSON_HEADERS = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 };
 
-function getParameterString(url_parameters) {
-    let parameters = url_parameters.reduce((parameter_string, parameter) => {
-        return [parameter_string, "&", encodeURIComponent(parameter.key), "=", encodeURIComponent(parameter.value)].join("");
+function getParameterString(url_parameters: Array<{key: string, value: string}>) {
+    let parameters = url_parameters.reduce((parameter_string, {key, value}) => {
+        return [parameter_string, "&", encodeURIComponent(key), "=", encodeURIComponent(value)].join("");
     }, "");
+    // remove first "&" and prefix "?"
     parameters = "?" + parameters.substring(1, parameters.length);
     return parameters;
 }
 
 export default {
 
-    /**
-     * @param {*} path 
-     * @param {Array} url_parameters 
-     * @param {*} headers 
-     */
-    get(path, url_parameters = [], headers) {
+    get(path: string, url_parameters: Array<{key: string, value: string}> = [], headers: Headers) {
 
         const fetch_headers = headers ? headers : JSON_HEADERS;
 
@@ -35,7 +31,7 @@ export default {
 
     },
 
-    put(path, body, headers) {
+    put(path: string, body: Object, headers: Headers) {
 
         const fetch_headers = headers ? headers : JSON_HEADERS;
 
@@ -47,7 +43,7 @@ export default {
 
     },
 
-    post(path, body, headers) {
+    post(path: string, body: Object, headers: Headers) {
 
         const fetch_headers = headers ? headers : JSON_HEADERS;
 
@@ -59,7 +55,7 @@ export default {
 
     },
 
-    delete(path, headers) {
+    delete(path: string, headers: Headers) {
 
         const fetch_headers = headers ? headers : JSON_HEADERS;
 
@@ -70,7 +66,7 @@ export default {
 
     },
 
-    isOk(responseJSON){
+    isOk(responseJSON: any){
         if(responseJSON && responseJSON.status === "ok"){
             return true;
         }
