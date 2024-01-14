@@ -101,7 +101,7 @@ export class Database {
     getGender(firstname: string) {
         return new Promise((resolve, reject) => {
             connection.get(
-                constants.SERVER_GET_VORNAME,
+                constants.ENDPOINT_FIRSTNAME,
                 [{
                     key: "name",
                     value: firstname
@@ -133,7 +133,7 @@ export class Database {
      * @param {"F" | "M"} gender 
      */
     addFirstName(name: string, gender: "F" | "M") {
-        connection.put(constants.SERVER_PUT_VORNAME, {
+        connection.put(constants.ENDPOINT_FIRSTNAME, {
             name: name,
             gender: gender,
         }, null)

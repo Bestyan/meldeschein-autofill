@@ -90,6 +90,5 @@ export default {
     },
 
     SERVER_WAKE_UP: "/wake-up",
-    SERVER_GET_VORNAME: "/db/get-firstname",
-    SERVER_PUT_VORNAME: "/db/put-firstname"
+    ENDPOINT_FIRSTNAME: "/db/firstname"
 };
