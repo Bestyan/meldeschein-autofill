@@ -17,7 +17,7 @@ import { PopupController } from './popup/controller';
 // enable mutators
 Tabulator.registerModule([MutatorModule, SelectRowModule, PageModule, InteractionModule, FormatModule]);
 
-const database = new Database(refreshStatus, window);
+const database = new Database(window);
 const popupController = new PopupController(database);
 const ui = new UI(popupController);
 
@@ -49,7 +49,7 @@ function handleExcelUpload(event: Event) {
         const workbook = new Workbook();
         workbook.xlsx.load(event.target.result as ArrayBuffer).then((workbook: Workbook)=> {
             const guestExcel = new GuestExcel(workbook.worksheets[0]);
-            database.initBookings(guestExcel.getBookings());
+            database.initBookings(guestExcel.getBookings(), refreshStatus);
             uiHelper.hideLoadingOverlay();
             console.log(database.findAll());
         });

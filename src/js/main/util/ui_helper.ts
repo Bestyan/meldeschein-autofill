@@ -157,5 +157,5 @@ export default {
     hideHtmlElement: (element: HTMLElement) => utils.addCssClass(element, "hide"),
     createMeldescheinGroupsTabulatorTable: (selector: string | HTMLElement, rows: Array<MeldescheinGroup>, onRowClick: (event: Event, row: RowComponent) => void) =>
         utils.createMeldescheinGroupsTabulatorTable(selector, rows, onRowClick),
-    setTrafficLightEmoji: (element: HTMLElement, status: "red" | "yellow" | "green") => utils.setTrafficLightEmoji(element, status)
+    setStatusEmoji: (element: HTMLElement, status: "red" | "yellow" | "green") => utils.setTrafficLightEmoji(element, status)
 };

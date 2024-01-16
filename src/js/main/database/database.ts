@@ -13,11 +13,9 @@ const DB = new localStorageDB("meldeschein", "localStorage");
 
 export class Database {
     localStorage: Window["localStorage"];
-    updateExcelDataStatus: () => void;
     guestXlsUploadDatetime: string;
 
-    constructor(updateExcelDataStatus: () => void, window: Window) {
-        this.updateExcelDataStatus = updateExcelDataStatus;
+    constructor(window: Window) {
         this.localStorage = window.localStorage;
         this.guestXlsUploadDatetime = this.localStorage.getItem(constants.localStorage.keys.guestXlsUploadDateTime);
     };
@@ -49,23 +47,23 @@ export class Database {
     /**
      * sets up bookings tables for use
      */
-    initBookings(bookings: Array<Booking>) {
+    initBookings(bookings: Array<Booking>, updateExcelDataStatus: Function) {
         /*
         clear old data and create table
         */
         this.resetBookingsTable();
         DB.createTableWithData(TABLE_BOOKINGS, bookings);
         DB.commit();
-        this.setUploadTime();
+        this.setUploadTime(updateExcelDataStatus);
     };
 
     /**
      * sets xls_upload_datetime to current time
      */
-    setUploadTime() {
+    setUploadTime(updateExcelDataStatus: Function) {
         this.guestXlsUploadDatetime = new Date().toLocaleDateString('de-DE', constants.dateFormat.dateAndTime.format);
         window.localStorage.setItem(constants.localStorage.keys.guestXlsUploadDateTime, this.guestXlsUploadDatetime);
-        this.updateExcelDataStatus();
+        updateExcelDataStatus();
     };
 
     hasData() {
