@@ -64,7 +64,7 @@ function refreshStatus() {
     if (database.hasData()) {
 
         status.classList.add("good");
-        status.innerHTML = `Daten vom ${database.xls_upload_datetime}`;
+        status.innerHTML = `Daten vom ${database.guestXlsUploadDatetime}`;
 
     } else {
 
@@ -134,7 +134,7 @@ function generateReviewMail() {
  * send a single request to wake the server from its sleep
  */
 function wakeServer() {
-    fetch(constants.getServerURL() + constants.SERVER_WAKE_UP)
+    fetch(constants.getServerURL() + constants.server.endpoints.wakeUp)
         .then(response => response.json())
         .then(json => {
             // set server status here

@@ -2,6 +2,7 @@ import "../../css/options.css";
 import constants from "./util/constants";
 import XLSX from 'xlsx';
 import { Database } from './database/database';
+import uiHelper from './util/ui_helper';
 
 const database = new Database(() => {}, window);
 
@@ -34,7 +35,7 @@ const setKeysXlsStatus = (htmlContent: string, ...cssClasses: string[]) => {
  */
 const refreshCheckInDocStatus = () => {
     // check for an existing checkin docx
-    let currentDocx = window.localStorage.getItem(constants.SETTINGS_CHECKIN_DOCX);
+    let currentDocx = window.localStorage.getItem(constants.localStorage.keys.checkinDocxAsBinaryText);
     // set status accordingly
     if (currentDocx === null) {
         setCheckInDocStatus("fehlt &cross;", "bad");
@@ -48,7 +49,7 @@ const refreshCheckInDocStatus = () => {
  */
 const refreshKeysXlsStatus = () => {
     // check for an existing keys xls
-    let currentXls = window.localStorage.getItem(constants.SETTINGS_KEYS_XLS);
+    let currentXls = window.localStorage.getItem(constants.localStorage.keys.keysXlsStatus);
     // set status accordingly
     if (currentXls === null) {
         setKeysXlsStatus("fehlt &cross;", "bad");
@@ -79,7 +80,7 @@ function buildCheckinDocumentUI() {
         toBinaryString(file)
             .then((binaryString: string) => {
                 // save to local storage
-                window.localStorage.setItem(constants.SETTINGS_CHECKIN_DOCX, binaryString);
+                window.localStorage.setItem(constants.localStorage.keys.checkinDocxAsBinaryText, binaryString);
                 refreshCheckInDocStatus();
             })
             .catch(error => setCheckInDocStatus(error.toString(), "bad"));
@@ -114,7 +115,7 @@ function buildKeysUI() {
 
                 // save keys to database
                 database.initKeysTable(sheet_as_json);
-                window.localStorage.setItem(constants.SETTINGS_KEYS_XLS, "saved");
+                window.localStorage.setItem(constants.localStorage.keys.keysXlsStatus, "saved");
                 refreshKeysXlsStatus();
 
             } catch (error) {

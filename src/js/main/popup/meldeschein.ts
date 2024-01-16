@@ -1,5 +1,5 @@
 import { MeldescheinGroup, Guest } from "../database/guest_excel";
-import { Anrede as Title } from "../util/constants";
+import { Title as Title } from "../util/constants";
 import constants from "../util/constants";
 import ContentScriptConnector from "../content_scripts/connector";
 import Database from "../database/database";
