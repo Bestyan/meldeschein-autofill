@@ -1,6 +1,6 @@
 import { Tabulator, RowComponent, CellComponent } from 'tabulator-tables';
 import dataUtil from '../util/data_util';
-import { Booking, MeldescheinGroup, Guest } from '../database/guest_excel';
+import { Booking, MeldescheinGroup, Guest, ValidationError } from '../database/guest_excel';
 
 
 function dateMutator(value: Date | string, data: any, type: any, params: any, component: any): string {
@@ -9,6 +9,13 @@ function dateMutator(value: Date | string, data: any, type: any, params: any, co
 
 function guestsMutator(value: Array<Guest>, data: any, type: any, params: any, component: any): string {
     return value.reduce((accumulator, guest) => accumulator + guest.firstname + ", ", "").slice(0, -2);
+}
+
+function validationErrorsMutator(value: Array<ValidationError>, data: any, type: any, params: any, component: any): string {
+    if (value.length > 0) {
+        return "⚠️";
+    }
+    return "✔️";
 }
 
 const utils = {
@@ -39,8 +46,6 @@ const utils = {
             data: rows,
             selectableRollingSelection: true,
             selectable: 1,
-            pagination: true,
-            paginationSize: 10,
             columns: [{
                 title: "Vorname",
                 field: "organiserFirstname"
@@ -66,8 +71,12 @@ const utils = {
             {
                 title: "Email",
                 field: "email"
-            }
-            ]
+            },
+            {
+                title: "valid",
+                field: "validationErrors",
+                mutator: validationErrorsMutator
+            }]
         });
         table.on("rowClick", onRowClick);
         return table;
@@ -106,7 +115,7 @@ const utils = {
     },
 
     addCssClass: (element: HTMLElement, className: string) => {
-        if(!element.classList.contains(className)){
+        if (!element.classList.contains(className)) {
             element.classList.add(className);
         }
     },
