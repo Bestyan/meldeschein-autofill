@@ -4,30 +4,24 @@ import XLSX from 'xlsx';
 import { Database } from './database/database';
 import uiHelper from './util/ui_helper';
 
-const database = new Database(() => {}, window);
+const database = new Database(() => { }, window);
 
 /**
  * set the html content and the css classes of the checkin doc status field  
  * removes all css classes from the field before setting new ones
  */
-const setCheckInDocStatus = (htmlContent: string, ...cssClasses: string[]) => {
+const setCheckInDocStatus = (status: "red" | "yellow" | "green") => {
     const uploadStatus = document.getElementById("checkin_docx_status");
-    // remove all classes
-    uploadStatus.classList.remove(...uploadStatus.classList);
-    uploadStatus.innerHTML = htmlContent;
-    uploadStatus.classList.add("bold", ...cssClasses);
+    uiHelper.setTrafficLightEmoji(uploadStatus, status);
 };
 
 /**
  * set the html content and the css classes of the keys xls status field  
  * removes all css classes from the field before setting new ones
  */
-const setKeysXlsStatus = (htmlContent: string, ...cssClasses: string[]) => {
+const setKeysXlsStatus = (status: "red" | "yellow" | "green") => {
     const uploadStatus = document.getElementById("keys_xls_status");
-    // remove all classes
-    uploadStatus.classList.remove(...uploadStatus.classList);
-    uploadStatus.innerHTML = htmlContent;
-    uploadStatus.classList.add("bold", ...cssClasses);
+    uiHelper.setTrafficLightEmoji(uploadStatus, status);
 };
 
 /**
@@ -38,9 +32,9 @@ const refreshCheckInDocStatus = () => {
     let currentDocx = window.localStorage.getItem(constants.localStorage.keys.checkinDocxAsBinaryText);
     // set status accordingly
     if (currentDocx === null) {
-        setCheckInDocStatus("fehlt &cross;", "bad");
+        setCheckInDocStatus("red");
     } else {
-        setCheckInDocStatus("vorhanden &check;", "good");
+        setCheckInDocStatus("green");
     }
 };
 
@@ -52,9 +46,9 @@ const refreshKeysXlsStatus = () => {
     let currentXls = window.localStorage.getItem(constants.localStorage.keys.keysXlsStatus);
     // set status accordingly
     if (currentXls === null) {
-        setKeysXlsStatus("fehlt &cross;", "bad");
+        setKeysXlsStatus("red");
     } else {
-        setKeysXlsStatus("vorhanden &check;", "good");
+        setKeysXlsStatus("green");
     }
 };
 
@@ -66,7 +60,7 @@ function buildCheckinDocumentUI() {
 
     uploadButton.addEventListener("change", event => {
 
-        setCheckInDocStatus("lädt...", "bad");
+        setCheckInDocStatus("yellow");
 
         const toBinaryString = (file: File) => new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -83,7 +77,10 @@ function buildCheckinDocumentUI() {
                 window.localStorage.setItem(constants.localStorage.keys.checkinDocxAsBinaryText, binaryString);
                 refreshCheckInDocStatus();
             })
-            .catch(error => setCheckInDocStatus(error.toString(), "bad"));
+            .catch(error => {
+                console.error(error)
+                setCheckInDocStatus("red")
+            });
     });
 
 }
@@ -96,7 +93,7 @@ function buildKeysUI() {
 
     uploadButton.addEventListener("change", event => {
 
-        setKeysXlsStatus("lädt...", "bad");
+        setKeysXlsStatus("yellow");
 
         let files = (event.target as HTMLInputElement).files,
             f = files[0];
@@ -119,7 +116,8 @@ function buildKeysUI() {
                 refreshKeysXlsStatus();
 
             } catch (error) {
-                console.log(error);
+                console.error(error);
+                setKeysXlsStatus("red");
             }
         };
         reader.readAsArrayBuffer(f);

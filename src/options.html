@@ -8,14 +8,12 @@
 
 <body class="col">
   <!-- Check-in Dokument -->
-  <div class="row space-between">
+  <div>
     <h1>Check-in Dokument</h1>
   </div>
 
   <div class="row skewered">
-    <div>
-      <span id="checkin_docx_status" class="bad bold">placeholder wheeeee</span>
-    </div>
+    <div id="checkin_docx_status"> status_dummy </div>
     <div>
       <input type="file" id="upload_checkin" class="hide-input-file"></input>
       <label for="upload_checkin" class="button neutral">check-in docx hochladen</label>
@@ -23,14 +21,12 @@
   </div>
 
   <!-- Schlüssel -->
-  <div class="row space-between">
+  <div>
     <h1>Schlüsselkennungen</h1>
   </div>
 
   <div class="row skewered">
-    <div>
-      <span id="keys_xls_status" class="bad bold">this text will be replaced by js</span>
-    </div>
+    <div id="keys_xls_status"> status_dummy </div>
     <div>
       <input type="file" id="upload_keys" class="hide-input-file"></input>
       <label for="upload_keys" class="button neutral">Schlüssel xls hochladen</label>
@@ -38,77 +34,63 @@
   </div>
 
   <!-- Email templates -->
-  <div class="row space-between">
-    <h1>Bewertungs-Mails</h1>
-    <p>Plain Text und HTML Text sollten je Template sich <strong>nur in der Formatierung</strong> unterscheiden, nicht im Textinhalt!</p>
+  <div class="vertical-space-after">
+    <h1 class="no-margin">Bewertungs-Mails</h1>
+    <p class="description">Plain Text und HTML Text sollten sich je Template <strong>nur in der Formatierung</strong>
+      unterscheiden, nicht im Textinhalt!</p>
   </div>
 
-  <div class="row space-between">
+  <div class="vertical-space-after">
     <h3>Persönliches Template ("Du")</h3>
-  </div>
-
-  <div class="row skewered">
-    <div>
-      <span id="mail_template_plain_du_status" class="bad bold">this text will be replaced by js</span>
+    <div class="row skewered">
+      <div id="mail_template_plain_du_status"> status_dummy </div>
+      <div>
+        <input type="file" id="upload_template_plain_du" class="hide-input-file"></input>
+        <label for="upload_template_plain_du" class="button neutral">Plain Text hochladen (.txt)</label>
+      </div>
     </div>
-    <div>
-      <input type="file" id="upload_template_plain_du" class="hide-input-file"></input>
-      <label for="upload_template_plain_du" class="button neutral">Plain Text hochladen (.txt)</label>
-    </div>
-  </div>
-  <div class="row skewered">
-    <div>
-      <span id="mail_template_html_du_status" class="bad bold">this text will be replaced by js</span>
-    </div>
-    <div>
-      <input type="file" id="upload_template_html_du" class="hide-input-file"></input>
-      <label for="upload_template_html_du" class="button neutral">HTML Text hochladen (.html)</label>
+    <div class="row skewered">
+      <div id="mail_template_html_du_status"> status_dummy </div>
+      <div>
+        <input type="file" id="upload_template_html_du" class="hide-input-file"></input>
+        <label for="upload_template_html_du" class="button neutral">HTML Text hochladen (.html)</label>
+      </div>
     </div>
   </div>
 
-  <div class="row space-between">
+  <div class="vertical-space-after">
     <h3>Allgemeines Template ("Sie"), erster Besuch</h3>
-  </div>
-
-  <div class="row skewered">
-    <div>
-      <span id="mail_template_plain_sie_firstvisit_status" class="bad bold">this text will be replaced by js</span>
+    <div class="row skewered">
+      <div id="mail_template_plain_sie_firstvisit_status"> status_dummy </div>
+      <div>
+        <input type="file" id="upload_template_plain_sie_firstvisit" class="hide-input-file"></input>
+        <label for="upload_template_plain_sie_firstvisit" class="button neutral">Plain Text hochladen (.txt)</label>
+      </div>
     </div>
-    <div>
-      <input type="file" id="upload_template_plain_sie_firstvisit" class="hide-input-file"></input>
-      <label for="upload_template_plain_sie_firstvisit" class="button neutral">Plain Text hochladen (.txt)</label>
-    </div>
-  </div>
-  <div class="row skewered">
-    <div>
-      <span id="mail_template_html_sie_firstvisit_status" class="bad bold">this text will be replaced by js</span>
-    </div>
-    <div>
-      <input type="file" id="upload_template_html_sie_firstvisit" class="hide-input-file"></input>
-      <label for="upload_template_html_sie_firstvisit" class="button neutral">HTML Text hochladen (.html)</label>
+    <div class="row skewered">
+      <div id="mail_template_html_sie_firstvisit_status"> status_dummy </div>
+      <div>
+        <input type="file" id="upload_template_html_sie_firstvisit" class="hide-input-file"></input>
+        <label for="upload_template_html_sie_firstvisit" class="button neutral">HTML Text hochladen (.html)</label>
+      </div>
     </div>
   </div>
 
-  <div class="row space-between">
+  <div class="vertical-space-after">
     <h3>Allgemeines Template ("Sie")</h3>
-  </div>
-
-  <div class="row skewered">
-    <div>
-      <span id="mail_template_plain_sie_status" class="bad bold">this text will be replaced by js</span>
+    <div class="row skewered">
+      <div id="mail_template_plain_sie_status"> status_dummy </div>
+      <div>
+        <input type="file" id="upload_template_plain_sie" class="hide-input-file"></input>
+        <label for="upload_template_plain_sie" class="button neutral">Plain Text hochladen (.txt)</label>
+      </div>
     </div>
-    <div>
-      <input type="file" id="upload_template_plain_sie" class="hide-input-file"></input>
-      <label for="upload_template_plain_sie" class="button neutral">Plain Text hochladen (.txt)</label>
-    </div>
-  </div>
-  <div class="row skewered">
-    <div>
-      <span id="mail_template_html_sie_status" class="bad bold">this text will be replaced by js</span>
-    </div>
-    <div>
-      <input type="file" id="upload_template_html_sie" class="hide-input-file"></input>
-      <label for="upload_template_html_sie" class="button neutral">HTML Text hochladen (.html)</label>
+    <div class="row skewered">
+      <div id="mail_template_html_sie_status"> status_dummy </div>
+      <div>
+        <input type="file" id="upload_template_html_sie" class="hide-input-file"></input>
+        <label for="upload_template_html_sie" class="button neutral">HTML Text hochladen (.html)</label>
+      </div>
     </div>
   </div>
 
