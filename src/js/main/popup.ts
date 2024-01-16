@@ -5,7 +5,7 @@ import { Tabulator, MutatorModule, SelectRowModule, PageModule, InteractionModul
 import mailGenerator from './popup/mail_generator';
 import { Database } from './database/database';
 import dataUtil from './util/data_util';
-import uiHelper from './popup/ui_helper';
+import uiHelper from './util/ui_helper';
 import UI from './popup/ui';
 import constants from './util/constants';
 import contentScriptConnector from './content_scripts/connector';

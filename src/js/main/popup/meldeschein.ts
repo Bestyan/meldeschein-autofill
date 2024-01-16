@@ -4,7 +4,7 @@ import constants from "../util/constants";
 import ContentScriptConnector from "../content_scripts/connector";
 import Database from "../database/database";
 import contentScriptConnector from "../content_scripts/connector";
-import uiHelper from "./ui_helper";
+import uiHelper from "../util/ui_helper";
 
 
 interface EventInput {

@@ -1,4 +1,4 @@
-import uiHelper from "./ui_helper";
+import uiHelper from "../util/ui_helper";
 import { PopupController } from "./controller";
 import { RowComponent, Tabulator } from "tabulator-tables";
 import { Booking, MeldescheinGroup, Guest } from "../database/guest_excel";

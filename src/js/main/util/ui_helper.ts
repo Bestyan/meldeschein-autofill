@@ -1,5 +1,5 @@
 import { Tabulator, RowComponent, CellComponent } from 'tabulator-tables';
-import dataUtil from '../util/data_util';
+import dataUtil from './data_util';
 import { Booking, MeldescheinGroup, Guest, ValidationError } from '../database/guest_excel';
 
 
