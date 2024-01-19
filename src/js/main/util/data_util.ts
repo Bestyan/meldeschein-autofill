@@ -1,3 +1,4 @@
+import { ValidationError } from "../database/guest_excel";
 import constants from "./constants";
 
 const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
@@ -158,5 +159,11 @@ export default {
         } catch (error) {
             return countryCode;
         }
+    },
+
+    formatValidationErrors(validationErrors: Array<ValidationError>): string {
+        return validationErrors
+            .map(validationError => ValidationError.toMessage(validationError))
+            .reduce((total: string, errorString: string) => total + "\n" + errorString);
     }
 };
