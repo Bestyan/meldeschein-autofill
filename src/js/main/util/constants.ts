@@ -56,7 +56,7 @@ export default {
             checkinDocxAsBinaryText: "settings_checkin_docx",
             keysXlsStatus: "settings_keys_xls",
             guestXlsUploadDateTime: "xls_upload_datetime",
-            mailTemplates: "settings_review_mail_templates"
+            mailTemplateNames: "mail_template_names"
         }
     },
 
