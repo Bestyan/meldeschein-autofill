@@ -3,6 +3,7 @@ import { PopupController } from "./controller";
 import { RowComponent, Tabulator, CellComponent } from "tabulator-tables";
 import { Booking, MeldescheinGroup } from "../database/guest_excel";
 import dataUtil from "../util/data_util";
+import LocalStorage from "../database/local_storage";
 
 export default class UI {
     private controller: PopupController;
@@ -68,6 +69,47 @@ export default class UI {
             this.controller.deleteExcelData();
             alert("Daten gelöscht");
             refreshStatus();
+        });
+    };
+
+    initMailTemplateNames() {
+        const mailTemplateNames = LocalStorage.getMailTemplateNames();
+        const select = document.getElementById("mail_templates") as HTMLSelectElement;
+        select.childNodes.forEach(child => select.removeChild(child));
+        if (mailTemplateNames.length === 0) {
+            select.appendChild(new Option("---", "noTemplates"));
+            return;
+        }
+
+        mailTemplateNames.forEach((templateName, index) => select.appendChild(new Option(templateName, `${index}`)));
+    };
+
+    initSearchDropDowns() {
+        const searchDropdown = uiHelper.getHtmlSelectElement("search_field");
+        const searchDateInput = uiHelper.getHtmlInputElement("search_input_date");
+        const searchTextInput = uiHelper.getHtmlInputElement("search_input_text");
+
+        searchDropdown.addEventListener("change", event => {
+            const selected = searchDropdown.value;
+            if (selected === "arrival" || selected === "departure") {
+                uiHelper.showHtmlElement(searchDateInput);
+                uiHelper.hideHtmlElement(searchTextInput);
+            } else {
+                uiHelper.showHtmlElement(searchTextInput);
+                uiHelper.hideHtmlElement(searchDateInput);
+            }
+        });
+
+        // preset the anreise/abreise search field to today
+        searchDateInput.value = new Date().toISOString().substring(0, "yyyy-MM-dd".length);
+
+        // +1 day on the anreise/abreise search field
+        document.getElementById("date_plus_one").addEventListener("click", event => {
+            searchDateInput.stepUp(1);
+        });
+        // -1 day on the anreise/abreise search field
+        document.getElementById("date_minus_one").addEventListener("click", event => {
+            searchDateInput.stepUp(-1);
         });
     };
 
@@ -191,8 +233,8 @@ export default class UI {
         return bookings.filter(booking => booking.ID === rowData.ID)[0];
     }
 
-    initCheckinDocumentButton(button: HTMLElement): void {
-        button.addEventListener('click', event => {
+    initCheckinDocumentButton(): void {
+        document.getElementById('checkin_download').addEventListener('click', event => {
             this.controller.generateCheckinDocument(this.getSelectedSearchResultsData());
         });
     }

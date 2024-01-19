@@ -4,8 +4,8 @@ import { Booking } from "../database/guest_excel";
 import LocalStorage from "../database/local_storage";
 
 const TEMPLATE_NAME = "name:"
-const TEMPLATE_START = "--- template start ---";
-const TEMPLATE_END = "--- template end ---";
+const TEMPLATE_START = "--- start template ---";
+const TEMPLATE_END = "--- end template ---";
 const PLAINTEXT_START = "--- start plaintext ---";
 const PLAINTEXT_END = "--- end plaintext ---";
 const HTMLTEXT_START = "--- start htmltext ---";
@@ -49,12 +49,13 @@ export class Template {
         this.name = this.extractName(raw);
         this.plaintext = this.extractPlaintext(raw);
         this.htmltext = this.extractHtmltext(raw);
+        console.log(`created new template ${this.name}`);
     }
 
     extractName(raw: string): string {
         const header = raw.substring(0, raw.indexOf(PLAINTEXT_START)).trim();
         // template header should contain nothing but "name: my-template"
-        return header.substring(header.indexOf(TEMPLATE_NAME)).trim();
+        return header.substring(header.indexOf(TEMPLATE_NAME) + TEMPLATE_NAME.length).trim();
     }
 
     extractPlaintext(raw: string): string {

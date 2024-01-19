@@ -55,39 +55,6 @@ function refreshStatus() {
     }
 }
 
-/**
- * populate the popup.html <select> tags with <option> tags
- */
-function setupSearchDropDowns() {
-
-    const searchDropdown = uiHelper.getHtmlSelectElement("search_field");
-    const searchDateInput = uiHelper.getHtmlInputElement("search_input_date");
-    const searchTextInput = uiHelper.getHtmlInputElement("search_input_text");
-
-    searchDropdown.addEventListener("change", event => {
-        const selected = searchDropdown.value;
-        if (selected === "arrival" || selected === "departure") {
-            uiHelper.showHtmlElement(searchDateInput);
-            uiHelper.hideHtmlElement(searchTextInput);
-        } else {
-            uiHelper.showHtmlElement(searchTextInput);
-            uiHelper.hideHtmlElement(searchDateInput);
-        }
-    });
-
-    // preset the anreise/abreise search field to today
-    searchDateInput.value = new Date().toISOString().substring(0, "yyyy-MM-dd".length);
-
-    // +1 day on the anreise/abreise search field
-    document.getElementById("date_plus_one").addEventListener("click", event => {
-        searchDateInput.stepUp(1);
-    });
-    // -1 day on the anreise/abreise search field
-    document.getElementById("date_minus_one").addEventListener("click", event => {
-        searchDateInput.stepUp(-1);
-    });
-}
-
 function generateReviewMail() {
     const data = ui.getSelectedSearchResultsData();
     if (data == null) {
@@ -138,7 +105,7 @@ function buildUI() {
     document.getElementById('upload').addEventListener('change', handleExcelUpload, false);
 
     // Suchparameter (Dropdowns)
-    setupSearchDropDowns();
+    ui.initSearchDropDowns();
 
     // Button/Form "suchen"
     document.getElementById('search').addEventListener('submit', (event: Event) => ui.searchBookings(event));
@@ -160,26 +127,10 @@ function buildUI() {
     });
 
     // Button "Check-in Dokument"
-    ui.initCheckinDocumentButton(document.getElementById('checkin_download'));
+    ui.initCheckinDocumentButton();
 
-    // Dropdown "Sie"/"Du"
-    document.getElementById('pronomen').addEventListener('change', event => {
-        const pronomen = uiHelper.getHtmlSelectElement('pronomen');
-        const anrede = uiHelper.getHtmlSelectElement('anrede');
-        const firstVisit = uiHelper.getHtmlSelectElement('is_first_visit');
-
-        if (pronomen.value === "Sie") {
-
-            anrede.removeAttribute("disabled");
-            firstVisit.removeAttribute("disabled");
-
-        } else if (pronomen.value === "Du") {
-
-            anrede.setAttribute("disabled", "disabled");
-            firstVisit.setAttribute("disabled", "disabled");
-
-        }
-    })
+    // init Mail Template dropdown
+    ui.initMailTemplateNames();
 
     // Button [Mail] "erstellen"
     document.getElementById('generate').addEventListener('click', generateReviewMail, false);
@@ -205,8 +156,5 @@ function buildUI() {
 
 wakeServer();
 console.log(`environment: ${process.env.NODE_ENV}`);
-
-// Tabulator table
-let result_table: any = null;
 
 buildUI();
