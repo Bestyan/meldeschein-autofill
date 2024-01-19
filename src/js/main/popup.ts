@@ -76,7 +76,7 @@ function setupSearchDropDowns() {
     });
 
     // preset the anreise/abreise search field to today
-    searchDateInput.value = dataUtil.formatDate(new Date());
+    searchDateInput.value = new Date().toISOString().substring(0, "yyyy-MM-dd".length);
 
     // +1 day on the anreise/abreise search field
     document.getElementById("date_plus_one").addEventListener("click", event => {
