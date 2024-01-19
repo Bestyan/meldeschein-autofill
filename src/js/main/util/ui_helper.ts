@@ -39,7 +39,7 @@ const utils = {
         }
     },
 
-    createBookingsTabulatorTable: (selector: string | HTMLElement, rows: Array<Booking>, onRowClick: (event: Event, row: RowComponent) => void) => {
+    createBookingsTabulatorTable: (selector: string | HTMLElement, rows: Array<Booking>, onRowClick: (event: Event, row: RowComponent) => void, onIsValidCellClick: (event: Event, cell: CellComponent) => void) => {
         const table = new Tabulator(selector, {
             layout: "fitData",
             layoutColumnsOnNewData: true,
@@ -75,7 +75,8 @@ const utils = {
             {
                 title: "valid",
                 field: "validationErrors",
-                mutator: validationErrorsMutator
+                mutator: validationErrorsMutator,
+                cellClick: onIsValidCellClick
             }]
         });
         table.on("rowClick", onRowClick);
@@ -151,8 +152,11 @@ export default {
     getHtmlSelectElement: (id: string) => document.getElementById(id) as HTMLSelectElement,
     hideContent: () => utils.setContentVisible(false),
     showContent: () => utils.setContentVisible(true),
-    createBookingsTabulatorTable: (selector: string | HTMLElement, rows: Array<Booking>, onRowClick: (event: Event, row: RowComponent) => void) =>
-        utils.createBookingsTabulatorTable(selector, rows, onRowClick),
+    createBookingsTabulatorTable: (selector: string | HTMLElement,
+        rows: Array<Booking>,
+        onRowClick: (event: Event, row: RowComponent) => void,
+        onIsValidCellClick: (event: Event, cell: CellComponent) => void) =>
+        utils.createBookingsTabulatorTable(selector, rows, onRowClick, onIsValidCellClick),
     showHtmlElement: (element: HTMLElement) => utils.removeCssClass(element, "hide"),
     hideHtmlElement: (element: HTMLElement) => utils.addCssClass(element, "hide"),
     createMeldescheinGroupsTabulatorTable: (selector: string | HTMLElement, rows: Array<MeldescheinGroup>, onRowClick: (event: Event, row: RowComponent) => void) =>

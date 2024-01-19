@@ -8,17 +8,17 @@ const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
 export class ValidationError {
     rowNumber: number;
     field: string;
-    value: string;
+    badValue: string;
     message: string;
     constructor(field: string, value: string, message: string) {
         this.field = field;
-        this.value = value;
+        this.badValue = value;
         this.message = message;
-    }
+    };
 
-    toString(): string {
-        return `Row ${this.rowNumber}: ${this.field} "${this.value}" ${this.message}`;
-    }
+    public static toMessage(error: ValidationError): string {
+        return `Zeile ${error.rowNumber}: ${error.field} "${error.badValue}" ${error.message}`;
+    };
 }
 
 const FIELD_TO_DISPLAYNAME = {
@@ -62,12 +62,12 @@ export class RowValues {
         const errors: Array<ValidationError> = [];
         let arrivalIsDate = true;
         if (!this.arrival || typeof this.arrival !== "object") {
-            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], this.arrival as string, "ist kein gültiges Datum"));
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], (this.arrival as string || ""), "ist kein gültiges Datum"));
             arrivalIsDate = false;
         }
         let departureIsDate = true;
         if (!this.departure || typeof this.departure !== "object") {
-            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["departure"], this.departure as string, "ist kein gültiges Datum"));
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["departure"], (this.departure as string || ""), "ist kein gültiges Datum"));
             departureIsDate = false;
         }
         const arrivalDate = this.arrival as Date;
@@ -103,7 +103,7 @@ export class RowValues {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestFirstname"], this.guestFirstname, "ist leer"));
         }
         if (!this.guestBirthdate || typeof this.guestBirthdate !== "object") {
-            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestBirthdate"], this.guestBirthdate as string, "ist kein gültiges Datum"));
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestBirthdate"], (this.guestBirthdate as string || ""), "ist kein gültiges Datum"));
         }
         if (!this.guestStreet || this.guestStreet.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestStreet"], this.guestStreet, "ist leer"));
