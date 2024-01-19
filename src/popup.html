@@ -36,7 +36,12 @@
     <form id="search" class="col">
 
       <div class="row">
-        <select id="search_field"></select>
+        <select id="search_field">
+          <option value="arrival">Anreise</option>
+          <option value="departure">Abreise</option>
+          <option value="organiserLastname">Nachname</option>
+          <option value="email">Email</option>
+        </select>
         <input id="search_input_date" type="date" step="1" />
         <input id="search_input_text" type="text" class="hide" />
         <button id="date_plus_one" type="button" class="good">+1</button>
@@ -92,20 +97,15 @@
       </div>
 
       <div class="row">
-        <select id="pronomen">
-          <option value="Sie">Sie</option>
-          <option value="Du">Du</option>
-        </select>
 
-        <select id="anrede">
+        <select id="mail_title">
           <option value="Familie">Familie</option>
           <option value="Herr">Herr</option>
           <option value="Frau">Frau</option>
         </select>
 
-        <select id="is_first_visit">
-          <option value="true">war zum ersten Mal da</option>
-          <option value="false">war zum wiederholten Mal da</option>
+        <select id="mail_templates">
+          <option value="no_templates">---</option>
         </select>
 
         <button id="generate" class="neutral">erstellen</button>

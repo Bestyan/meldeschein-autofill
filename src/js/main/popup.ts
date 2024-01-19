@@ -21,25 +21,6 @@ const database = new Database(window);
 const popupController = new PopupController(database);
 const ui = new UI(popupController);
 
-class Option {
-    text: string;
-    value: string;
-
-    static of(text: string, value: string): Option {
-        const option = new Option();
-        option.value = value;
-        option.text = text;
-        return option;
-    }
-}
-
-// dropdowns in popup
-const SEARCH_OPTIONS = [
-    Option.of("Anreise", "arrival"), 
-    Option.of("Abreise", "departure"), 
-    Option.of("Nachname", "organiserLastname"), 
-    Option.of("Email", "email")];
-
 // reads excel file
 // TODO move to UI / controller
 function handleExcelUpload(event: Event) {
@@ -83,27 +64,19 @@ function setupSearchDropDowns() {
     const searchDateInput = uiHelper.getHtmlInputElement("search_input_date");
     const searchTextInput = uiHelper.getHtmlInputElement("search_input_text");
 
-    // anreise / abreise
-    SEARCH_OPTIONS.forEach(entry => {
-        let option = document.createElement("option");
-        option.value = entry.value;
-        option.innerHTML = entry.text;
-        searchDropdown.append(option);
-    });
-
     searchDropdown.addEventListener("change", event => {
         const selected = searchDropdown.value;
-        searchDateInput.classList.remove("hide");
-        searchTextInput.classList.remove("hide");
         if (selected === "arrival" || selected === "departure") {
-            searchTextInput.classList.add("hide");
+            uiHelper.showHtmlElement(searchDateInput);
+            uiHelper.hideHtmlElement(searchTextInput);
         } else {
-            searchDateInput.classList.add("hide");
+            uiHelper.showHtmlElement(searchTextInput);
+            uiHelper.hideHtmlElement(searchDateInput);
         }
     });
 
     // preset the anreise/abreise search field to today
-    searchDateInput.value = new Date().toISOString().substring(0, "yyyy-mm-dd".length);
+    searchDateInput.value = dataUtil.formatDate(new Date());
 
     // +1 day on the anreise/abreise search field
     document.getElementById("date_plus_one").addEventListener("click", event => {
