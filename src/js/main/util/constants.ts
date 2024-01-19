@@ -50,20 +50,7 @@ export default {
             checkinDocxAsBinaryText: "settings_checkin_docx",
             keysXlsStatus: "settings_keys_xls",
             guestXlsUploadDateTime: "xls_upload_datetime",
-            mailTemplates: {
-                individual: {
-                    plain: "review_mailtemplate_individual_plain",
-                    html: "review_mailtemplate_individual_html"
-                },
-                generalFirstVisit: {
-                    plain: "review_mailtemplate_general_firstvisit_plain",
-                    html: "review_mailtemplate_general_firstvisit_html"
-                },
-                general: {
-                    plain: "review_mailtemplate_general_plain",
-                    html: "review_mailtemplate_general_html"
-                }
-            }
+            mailTemplates: "settings_review_mail_templates"
         }
     },
 

@@ -106,82 +106,22 @@ export default class UI {
         }
     }
 
-    private initEmailTemplateUI(options: {
-        plain: {
-            status: HTMLElement
-            uploadButton: HTMLInputElement,
-            localStorageKey: string
-        },
-        html: {
-            status: HTMLElement
-            uploadButton: HTMLInputElement,
-            localStorageKey: string
-        }
-    }) {
-        this.refreshEmailTemplateStatus(options.plain.status, options.plain.localStorageKey);
-        options.plain.uploadButton.addEventListener("change",
-        event => {
-            uiHelper.setStatusEmoji(options.plain.status, "yellow");
-            this.controller.uploadMailTemplate(
-                options.plain.uploadButton,
-                options.plain.localStorageKey,
-                () => { uiHelper.setStatusEmoji(options.plain.status, "green"); },
-                () => { uiHelper.setStatusEmoji(options.plain.status, "red"); });
-            })
-            
-        this.refreshEmailTemplateStatus(options.html.status, options.html.localStorageKey);
-        options.html.uploadButton.addEventListener("change",
-            event => {
-                uiHelper.setStatusEmoji(options.html.status, "yellow");
-                this.controller.uploadMailTemplate(
-                    options.html.uploadButton,
-                    options.html.localStorageKey,
-                    () => { uiHelper.setStatusEmoji(options.html.status, "green"); },
-                    () => { uiHelper.setStatusEmoji(options.html.status, "red"); });
-            })
-    };
-
     initEmailTemplatesUI() {
-        const individualTemplate = {
-            plain: {
-                status: document.getElementById("mail_template_plain_du_status"),
-                uploadButton: document.getElementById("upload_template_plain_du") as HTMLInputElement,
-                localStorageKey: constants.localStorage.keys.mailTemplates.individual.plain
-            },
-            html: {
-                status: document.getElementById("mail_template_html_du_status"),
-                uploadButton: document.getElementById("upload_template_html_du") as HTMLInputElement,
-                localStorageKey: constants.localStorage.keys.mailTemplates.individual.html
-            }
+        const options = {
+            status: document.getElementById("mail_templates_status"),
+            uploadButton: document.getElementById("upload_mail_templates") as HTMLInputElement,
+            localStorageKey: constants.localStorage.keys.mailTemplates
         };
-        this.initEmailTemplateUI(individualTemplate);
 
-        const generalTemplateFirstVisit = {
-            plain: {
-                status: document.getElementById("mail_template_plain_sie_firstvisit_status"),
-                uploadButton: document.getElementById("upload_template_plain_sie_firstvisit") as HTMLInputElement,
-                localStorageKey: constants.localStorage.keys.mailTemplates.generalFirstVisit.plain
-            },
-            html: {
-                status: document.getElementById("mail_template_html_sie_firstvisit_status"),
-                uploadButton: document.getElementById("upload_template_html_sie_firstvisit") as HTMLInputElement,
-                localStorageKey: constants.localStorage.keys.mailTemplates.generalFirstVisit.html
-            }
-        };
-        this.initEmailTemplateUI(generalTemplateFirstVisit);
-
-        const generalTemplate = {
-            plain: {
-                status: document.getElementById("mail_template_plain_sie_status"),
-                uploadButton: document.getElementById("upload_template_plain_sie") as HTMLInputElement,
-                localStorageKey: constants.localStorage.keys.mailTemplates.general.plain
-            },
-            html: {
-                status: document.getElementById("mail_template_html_sie_status"),
-                uploadButton: document.getElementById("upload_template_html_sie") as HTMLInputElement,
-                localStorageKey: constants.localStorage.keys.mailTemplates.general.html
-            }
-        };
-        this.initEmailTemplateUI(generalTemplate);
+        this.refreshEmailTemplateStatus(options.status, options.localStorageKey);
+        options.uploadButton.addEventListener("change",
+            event => {
+                uiHelper.setStatusEmoji(options.status, "yellow");
+                this.controller.uploadMailTemplate(
+                    options.uploadButton,
+                    options.localStorageKey,
+                    () => { uiHelper.setStatusEmoji(options.status, "green"); },
+                    () => { uiHelper.setStatusEmoji(options.status, "red"); });
+            });
     };
 }
