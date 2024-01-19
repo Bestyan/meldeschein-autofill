@@ -1,5 +1,5 @@
 
-export enum Anrede {
+export enum Title {
     Herr = 1,
     Frau = 4,
     Gast = 48
@@ -18,63 +18,46 @@ export enum Apartment {
 
 export default {
 
-    SEARCH_RESULT_DATE_FORMAT: {
-        year: "numeric" as "numeric" | "2-digit",
-        month: '2-digit',
-        day: '2-digit'
+    dateFormat: {
+        dateAndTime:{
+            description: "dd.MM.yyyy, hh:mm", // not in use, just for documentation purposes
+            format: {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            } as Intl.DateTimeFormatOptions
+        },
+        dateWithLeadingZeroes: {
+            description: "dd.MM.yyyy",
+            format: {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            } as Intl.DateTimeFormatOptions
+        }
     },
 
-    BIRTHDAY_DATE_FORMAT: {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    },
-
-    STATUS_DATE_FORMAT: {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    },
-
-    getTitle(gender: string): Anrede {
+    getTitle(gender: string): Title {
         if (gender === "F") {
-            return Anrede.Frau;
+            return Title.Frau;
         }
 
         if (gender === "M") {
-            return Anrede.Herr;
+            return Title.Herr;
         }
 
-        return Anrede.Gast;
+        return Title.Gast;
     },
 
-    SETTINGS_CHECKIN_DOCX: "settings_checkin_docx",
-    SETTINGS_KEYS_XLS: "settings_keys_xls",
-
-    FIRSTNAME_FIELDS: [
-        "vorname0",
-        "vorname1",
-        "vorname2",
-        "vorname3",
-        "vorname4",
-        "vorname5",
-    ],
-
-    LASTNAME_FIELDS: [
-        "nachname0",
-        "nachname1_input"
-    ],
-
-    ANREDE_FIELDS: [
-        "anrede0",
-        "anrede1"
-    ],
-
-    FIELDS_BEGL1: {
-        birthdate: "geburtsdatum1_input",
-        lastname: "nachname1_input"
+    localStorage: {
+        keys: {
+            checkinDocxAsBinaryText: "settings_checkin_docx",
+            keysXlsStatus: "settings_keys_xls",
+            guestXlsUploadDateTime: "xls_upload_datetime",
+            mailTemplates: "settings_review_mail_templates"
+        }
     },
 
     getServerURL(): string {
@@ -86,6 +69,10 @@ export default {
         return serverUrl[process.env.NODE_ENV as "production" | "development"].toString();
     },
 
-    SERVER_WAKE_UP: "/wake-up",
-    ENDPOINT_FIRSTNAME: "/db/firstname"
+    server: {
+        endpoints: {
+            wakeUp: "/wake-up",
+            firstname: "/db/firstname"
+        }
+    }
 };

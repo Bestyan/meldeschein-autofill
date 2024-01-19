@@ -3,8 +3,6 @@ import constants from '../util/constants';
 import connection from '../rest/connection';
 import { Booking } from '../database/guest_excel';
 
-const LOCALSTORAGE_LAST_UPLOAD = "xls_upload_datetime";
-
 // bookings tables
 const TABLE_BOOKINGS = "booking";
 
@@ -15,13 +13,11 @@ const DB = new localStorageDB("meldeschein", "localStorage");
 
 export class Database {
     localStorage: Window["localStorage"];
-    updateExcelDataStatus: () => void;
-    xls_upload_datetime: string;
+    guestXlsUploadDatetime: string;
 
-    constructor(updateExcelDataStatus: () => void, window: Window) {
-        this.updateExcelDataStatus = updateExcelDataStatus;
+    constructor(window: Window) {
         this.localStorage = window.localStorage;
-        this.xls_upload_datetime = this.localStorage.getItem(LOCALSTORAGE_LAST_UPLOAD);
+        this.guestXlsUploadDatetime = this.localStorage.getItem(constants.localStorage.keys.guestXlsUploadDateTime);
     };
 
     resetBookingsTable() {
@@ -51,23 +47,23 @@ export class Database {
     /**
      * sets up bookings tables for use
      */
-    initBookings(bookings: Array<Booking>) {
+    initBookings(bookings: Array<Booking>, updateExcelDataStatus: Function) {
         /*
         clear old data and create table
         */
         this.resetBookingsTable();
         DB.createTableWithData(TABLE_BOOKINGS, bookings);
         DB.commit();
-        this.setUploadTime();
+        this.setUploadTime(updateExcelDataStatus);
     };
 
     /**
      * sets xls_upload_datetime to current time
      */
-    setUploadTime() {
-        this.xls_upload_datetime = new Date().toLocaleDateString('de-DE', constants.STATUS_DATE_FORMAT as Intl.DateTimeFormatOptions);
-        window.localStorage.setItem(LOCALSTORAGE_LAST_UPLOAD, this.xls_upload_datetime);
-        this.updateExcelDataStatus();
+    setUploadTime(updateExcelDataStatus: Function) {
+        this.guestXlsUploadDatetime = new Date().toLocaleDateString('de-DE', constants.dateFormat.dateAndTime.format);
+        window.localStorage.setItem(constants.localStorage.keys.guestXlsUploadDateTime, this.guestXlsUploadDatetime);
+        updateExcelDataStatus();
     };
 
     hasData() {
@@ -101,7 +97,7 @@ export class Database {
     getGender(firstname: string) {
         return new Promise((resolve, reject) => {
             connection.get(
-                constants.ENDPOINT_FIRSTNAME,
+                constants.server.endpoints.firstname,
                 [{
                     key: "name",
                     value: firstname
@@ -133,7 +129,7 @@ export class Database {
      * @param {"F" | "M"} gender 
      */
     addFirstName(name: string, gender: "F" | "M") {
-        connection.put(constants.ENDPOINT_FIRSTNAME, {
+        connection.put(constants.server.endpoints.firstname, {
             name: name,
             gender: gender,
         }, null)

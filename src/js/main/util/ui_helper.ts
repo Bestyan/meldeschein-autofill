@@ -1,5 +1,5 @@
 import { Tabulator, RowComponent, CellComponent } from 'tabulator-tables';
-import dataUtil from '../util/data_util';
+import dataUtil from './data_util';
 import { Booking, MeldescheinGroup, Guest, ValidationError } from '../database/guest_excel';
 
 
@@ -122,6 +122,25 @@ const utils = {
 
     removeCssClass: (element: HTMLElement, className: string) => {
         element.classList.remove(className);
+    },
+
+    setTrafficLightEmoji: (element: HTMLElement, status: "red" | "yellow" | "green") => {
+        let emoji = "";
+        switch (status) {
+            case 'red':
+                emoji = "🔴";
+                break;
+            case 'yellow':
+                emoji = "🟡";
+                break;
+            case 'green':
+                emoji = "🟢";
+                break;
+            default:
+                console.error(`illegal status in setTrafficLightEmoji: ${status}`);
+                return;
+        }
+        element.innerHTML = emoji;
     }
 };
 
@@ -137,5 +156,6 @@ export default {
     showHtmlElement: (element: HTMLElement) => utils.removeCssClass(element, "hide"),
     hideHtmlElement: (element: HTMLElement) => utils.addCssClass(element, "hide"),
     createMeldescheinGroupsTabulatorTable: (selector: string | HTMLElement, rows: Array<MeldescheinGroup>, onRowClick: (event: Event, row: RowComponent) => void) =>
-        utils.createMeldescheinGroupsTabulatorTable(selector, rows, onRowClick)
+        utils.createMeldescheinGroupsTabulatorTable(selector, rows, onRowClick),
+    setStatusEmoji: (element: HTMLElement, status: "red" | "yellow" | "green") => utils.setTrafficLightEmoji(element, status)
 };

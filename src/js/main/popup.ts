@@ -5,7 +5,7 @@ import { Tabulator, MutatorModule, SelectRowModule, PageModule, InteractionModul
 import mailGenerator from './popup/mail_generator';
 import { Database } from './database/database';
 import dataUtil from './util/data_util';
-import uiHelper from './popup/ui_helper';
+import uiHelper from './util/ui_helper';
 import UI from './popup/ui';
 import constants from './util/constants';
 import contentScriptConnector from './content_scripts/connector';
@@ -17,7 +17,7 @@ import { PopupController } from './popup/controller';
 // enable mutators
 Tabulator.registerModule([MutatorModule, SelectRowModule, PageModule, InteractionModule, FormatModule]);
 
-const database = new Database(refreshStatus, window);
+const database = new Database(window);
 const popupController = new PopupController(database);
 const ui = new UI(popupController);
 
@@ -49,7 +49,7 @@ function handleExcelUpload(event: Event) {
         const workbook = new Workbook();
         workbook.xlsx.load(event.target.result as ArrayBuffer).then((workbook: Workbook)=> {
             const guestExcel = new GuestExcel(workbook.worksheets[0]);
-            database.initBookings(guestExcel.getBookings());
+            database.initBookings(guestExcel.getBookings(), refreshStatus);
             uiHelper.hideLoadingOverlay();
             console.log(database.findAll());
         });
@@ -64,7 +64,7 @@ function refreshStatus() {
     if (database.hasData()) {
 
         status.classList.add("good");
-        status.innerHTML = `Daten vom ${database.xls_upload_datetime}`;
+        status.innerHTML = `Daten vom ${database.guestXlsUploadDatetime}`;
 
     } else {
 
@@ -134,7 +134,7 @@ function generateReviewMail() {
  * send a single request to wake the server from its sleep
  */
 function wakeServer() {
-    fetch(constants.getServerURL() + constants.SERVER_WAKE_UP)
+    fetch(constants.getServerURL() + constants.server.endpoints.wakeUp)
         .then(response => response.json())
         .then(json => {
             // set server status here

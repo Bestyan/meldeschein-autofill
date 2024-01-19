@@ -1,7 +1,7 @@
 @import "reset.css";
 @import "style.css";
 
-html{
+html {
     width: 420px;
     display: flex;
     flex-direction: column;
@@ -30,7 +30,10 @@ html{
     display: flex;
 }
 
-.currency {
-    max-width: 40px;
-    text-align: right;
+.vertical-space-after {
+    margin-bottom: 0.5rem;
+}
+
+.description {
+    font-size: 11pt;
 }

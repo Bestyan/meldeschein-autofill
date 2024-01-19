@@ -1,5 +1,7 @@
 import constants from "./constants";
 
+const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
+
 interface DeferredPromise {
     promise: Promise<any>,
     resolve: (value: any) => void
@@ -133,10 +135,28 @@ export default {
      * @returns dd.MM.yyyy
      */
     formatDate(date: Date): string {
-        return date.toLocaleDateString("de-DE");
+        return date.toLocaleDateString("de-DE", constants.dateFormat.dateWithLeadingZeroes.format);
     },
 
     clone(object: any): any {
         return JSON.parse(JSON.stringify(object));
+    },
+
+    readTextFile(file: Blob): Promise<string> {
+        const reader = new FileReader()
+        return new Promise((resolve, reject) => {
+            reader.onload = event => resolve(event.target.result as string)
+            reader.onerror = error => reject(error)
+            reader.readAsText(file, "UTF-8")
+        })
+    },
+
+    tryCountryCode(countryCode: string): string {
+        countryCode = countryCode || "";
+        try {
+            return regionNamesToFull.of(countryCode.toUpperCase());
+        } catch (error) {
+            return countryCode;
+        }
     }
 };

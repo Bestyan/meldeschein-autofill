@@ -34,6 +34,10 @@ textarea {
     resize: none;
 }
 
+strong {
+    font-weight: bold;
+}
+
 button,
 label.button {
     display: inline-block;
@@ -142,10 +146,16 @@ button.settings {
     flex-grow: 2;
 }
 
-span.bad, div.bad {
+span.bad,
+div.bad {
     color: red;
 }
 
-span.good, div.good {
+span.good,
+div.good {
     color: green;
+}
+
+.no-margin {
+    margin: 0;
 }

@@ -33,7 +33,7 @@ function generate(placeholderData: any) {
     return new Promise<void>((resolve, reject) => {
 
         // load base64 encoded docx from local storage
-        const docxBinaryString = window.localStorage.getItem(constants.SETTINGS_CHECKIN_DOCX);
+        const docxBinaryString = window.localStorage.getItem(constants.localStorage.keys.checkinDocxAsBinaryText);
         if (docxBinaryString === null) {
             reject("Check-in Dokument fehlt. Bitte in Einstellungen hochladen.");
             return;
