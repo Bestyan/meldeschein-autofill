@@ -1,6 +1,7 @@
 import 'regenerator-runtime/runtime'; // required by exceljs
 import { Row, CellValue, Worksheet } from "exceljs";
 import { Apartment } from "../util/constants";
+import dataUtil from '../util/data_util';
 
 const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
 
@@ -59,21 +60,25 @@ export class RowValues {
 
     validateBookingColumns(): Array<ValidationError> {
         const errors: Array<ValidationError> = [];
+        let arrivalIsDate = true;
         if (!this.arrival || typeof this.arrival !== "object") {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], this.arrival as string, "ist kein gültiges Datum"));
+            arrivalIsDate = false;
         }
+        let departureIsDate = true;
         if (!this.departure || typeof this.departure !== "object") {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["departure"], this.departure as string, "ist kein gültiges Datum"));
+            departureIsDate = false;
         }
         const arrivalDate = this.arrival as Date;
         const departureDate = this.departure as Date;
-        if (arrivalDate && departureDate && arrivalDate.getTime() >= departureDate.getTime()) {
-            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], (this.arrival as Date).toLocaleDateString("de-DE"), "ist gleich oder nach dem Abreisedatum"));
+        if (arrivalIsDate && departureIsDate && arrivalDate.getTime() >= departureDate.getTime()) {
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], dataUtil.formatDate(this.arrival as Date), "ist gleich oder nach dem Abreisedatum"));
         }
         if (!this.apartment || this.apartment.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["apartment"], this.apartment, "ist leer"));
         }
-        if (!Object.values(Apartment).includes(this.apartment.toLowerCase())) {
+        if (this.apartment && !Object.values(Apartment).includes(this.apartment.toLowerCase())) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["apartment"], this.apartment, "ist kein bekanntes Apartment"));
         }
         if (!this.organiserFirstname || this.organiserFirstname.length === 0) {
@@ -111,6 +116,12 @@ export class RowValues {
         }
         if (!this.guestNationalityCode || this.guestNationalityCode.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestNationalityCode"], this.guestNationalityCode, "ist leer"));
+        } else {
+            try {
+                regionNamesToFull.of(this.guestNationalityCode);
+            } catch (error) {
+                errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestNationalityCode"], this.guestNationalityCode, "ist kein gültiger Ländercode"));
+            }
         }
         errors.forEach(error => error.rowNumber = this.rowNumber);
         return errors;
@@ -131,7 +142,7 @@ export class GuestExcel {
     private processSheet(sheet: Worksheet) {
         let currentBooking = new Booking();
         let isNewBooking = true;
-        sheet.eachRow({includeEmpty: true }, (row: Row, rowNumber: number) => {
+        sheet.eachRow({ includeEmpty: true }, (row: Row, rowNumber: number) => {
             if (rowNumber <= 2) {
                 return;
             }
@@ -258,7 +269,7 @@ export class MeldescheinGroup {
         meldescheinGroup.streetAndNumber = rowValues.guestStreet;
         meldescheinGroup.zip = rowValues.guestZip;
         meldescheinGroup.city = rowValues.guestCity;
-        meldescheinGroup.country = regionNamesToFull.of(rowValues.guestNationalityCode.toUpperCase());
+        meldescheinGroup.country = dataUtil.tryCountryCode(rowValues.guestNationalityCode);
         meldescheinGroup.guests = [Guest.fromRowValues(rowValues)];
         return meldescheinGroup
     }
@@ -282,7 +293,7 @@ export class Guest {
         guest.firstname = rowValues.guestFirstname;
         guest.lastname = rowValues.guestLastname;
         guest.birthdate = rowValues.guestBirthdate as Date;
-        guest.nationality = regionNamesToFull.of((rowValues.guestNationalityCode || "").toUpperCase());
+        guest.nationality = dataUtil.tryCountryCode(rowValues.guestNationalityCode);
         return guest;
     }
 

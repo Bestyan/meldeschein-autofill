@@ -28,10 +28,16 @@ export default {
                 hour: '2-digit',
                 minute: '2-digit'
             } as Intl.DateTimeFormatOptions
+        },
+        dateWithLeadingZeroes: {
+            description: "dd.MM.yyyy",
+            format: {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            } as Intl.DateTimeFormatOptions
         }
     },
-
-    STATUS_DATE_FORMAT: {},
 
     getTitle(gender: string): Title {
         if (gender === "F") {

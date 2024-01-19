@@ -5,6 +5,7 @@ import ContentScriptConnector from "../content_scripts/connector";
 import Database from "../database/database";
 import contentScriptConnector from "../content_scripts/connector";
 import uiHelper from "../util/ui_helper";
+import dataUtil from "../util/data_util";
 
 
 interface EventInput {
@@ -59,15 +60,15 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
     const numberOfGuests = meldescheinGroup.guests.length;
 
     const formData = new FormData();
-    formData.anreise_input = arrival.toLocaleDateString("de-DE");
-    formData.abreise_input = departure.toLocaleDateString("de-DE");
+    formData.anreise_input = dataUtil.formatDate(arrival);
+    formData.abreise_input = dataUtil.formatDate(departure);
 
     // each meldeschein group has at least one guest
     const guest1 = meldescheinGroup.guests[0];
     formData.nachname0 = guest1.lastname;
     formData.vorname0 = guest1.firstname;
     formData.geburtsdatum0_input = {
-        value: guest1.birthdate.toLocaleDateString("de-DE"),
+        value: dataUtil.formatDate(guest1.birthdate),
         event: "blur"
     };
     formData.staat0_input = guest1.nationality;
@@ -86,7 +87,7 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
         formData.nachname1_input = guest2.lastname;
         formData.vorname1 = guest2.firstname;
         formData.geburtsdatum1_input = {
-            value: guest2.birthdate.toLocaleDateString("de-DE"),
+            value: dataUtil.formatDate(guest2.birthdate),
             event: "blur"
         };
         formData.staat1_input = guest2.nationality;
@@ -96,7 +97,7 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
         const guest3 = meldescheinGroup.guests[2];
         formData.vorname2 = guest3.firstname;
         formData.geburtsdatum2_input = {
-            value: guest3.birthdate.toLocaleDateString("de-DE"),
+            value: dataUtil.formatDate(guest3.birthdate),
             event: "blur"
         };
     }
@@ -105,7 +106,7 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
         const guest4 = meldescheinGroup.guests[3];
         formData.vorname3 = guest4.firstname;
         formData.geburtsdatum3_input = {
-            value: guest4.birthdate.toLocaleDateString("de-DE"),
+            value: dataUtil.formatDate(guest4.birthdate),
             event: "blur"
         };
     }
@@ -114,7 +115,7 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
         const guest5 = meldescheinGroup.guests[4];
         formData.vorname4 = guest5.firstname;
         formData.geburtsdatum4_input = {
-            value: guest5.birthdate.toLocaleDateString("de-DE"),
+            value: dataUtil.formatDate(guest5.birthdate),
             event: "blur"
         };
     }
@@ -123,7 +124,7 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
         const guest6 = meldescheinGroup.guests[5];
         formData.vorname5 = guest6.firstname;
         formData.geburtsdatum5_input = {
-            value: guest6.birthdate.toLocaleDateString("de-DE"),
+            value: dataUtil.formatDate(guest6.birthdate),
             event: "blur"
         };
     }
