@@ -142,6 +142,30 @@ const utils = {
                 return;
         }
         element.innerHTML = emoji;
+    },
+
+    downloadMailTemplate(mailText: string, lastname: string) {
+        let textFile: any = null;
+        const makeTextFile = (text: string) => {
+            const data = new Blob([text], {
+                type: 'text/plain;charset=iso-8859-1'
+            });
+
+            if (textFile !== null) {
+                window.URL.revokeObjectURL(textFile);
+            }
+
+            textFile = window.URL.createObjectURL(data);
+
+            return textFile;
+        };
+
+        const link = document.createElement('a');
+        link.href = makeTextFile(mailText);
+        link.download = `bewertung_${lastname}.eml`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 };
 
@@ -152,14 +176,10 @@ export default {
     getHtmlSelectElement: (id: string) => document.getElementById(id) as HTMLSelectElement,
     hideContent: () => utils.setContentVisible(false),
     showContent: () => utils.setContentVisible(true),
-    createBookingsTabulatorTable: (selector: string | HTMLElement,
-        rows: Array<Booking>,
-        onRowClick: (event: Event, row: RowComponent) => void,
-        onIsValidCellClick: (event: Event, cell: CellComponent) => void) =>
-        utils.createBookingsTabulatorTable(selector, rows, onRowClick, onIsValidCellClick),
+    createBookingsTabulatorTable: utils.createBookingsTabulatorTable,
     showHtmlElement: (element: HTMLElement) => utils.removeCssClass(element, "hide"),
     hideHtmlElement: (element: HTMLElement) => utils.addCssClass(element, "hide"),
-    createMeldescheinGroupsTabulatorTable: (selector: string | HTMLElement, rows: Array<MeldescheinGroup>, onRowClick: (event: Event, row: RowComponent) => void) =>
-        utils.createMeldescheinGroupsTabulatorTable(selector, rows, onRowClick),
-    setStatusEmoji: (element: HTMLElement, status: "red" | "yellow" | "green") => utils.setTrafficLightEmoji(element, status)
+    createMeldescheinGroupsTabulatorTable: utils.createMeldescheinGroupsTabulatorTable,
+    setStatusEmoji: utils.setTrafficLightEmoji,
+    downloadMailTemplate: utils.downloadMailTemplate
 };

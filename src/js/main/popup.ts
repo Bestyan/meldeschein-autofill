@@ -2,7 +2,6 @@
 import "../../css/popup.css";
 
 import { Tabulator, MutatorModule, SelectRowModule, PageModule, InteractionModule, FormatModule, RowComponent } from 'tabulator-tables';
-import mailGenerator from './popup/mail_generator';
 import { Database } from './database/database';
 import dataUtil from './util/data_util';
 import uiHelper from './util/ui_helper';
@@ -53,21 +52,6 @@ function refreshStatus() {
         status.innerHTML = "keine Daten";
         return;
     }
-}
-
-function generateReviewMail() {
-    const data = ui.getSelectedSearchResultsData();
-    if (data == null) {
-        alert("keine Tabellenzeile ausgewählt");
-        return;
-    }
-
-    // TODO
-    //data.anrede = uiHelper.getHtmlSelectElement('anrede').value;
-    const pronomen = uiHelper.getHtmlSelectElement('pronomen').value;
-    const isFirstVisit = uiHelper.getHtmlSelectElement('is_first_visit').value == 'true';
-
-    mailGenerator.generate(data, pronomen as "Du" | "Sie", isFirstVisit);
 }
 
 /**
@@ -133,7 +117,7 @@ function buildUI() {
     ui.initMailTemplateNames();
 
     // Button [Mail] "erstellen"
-    document.getElementById('generate').addEventListener('click', generateReviewMail, false);
+    ui.initGenerateMailButton();
 
     // Visibility of Buttons
     chrome.tabs.query({

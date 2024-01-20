@@ -66,8 +66,9 @@ export class Template {
         return dataUtil.getStringBetween(raw, HTMLTEXT_START, HTMLTEXT_END).trim();
     }
 
-    generateEncodedMailText(booking: Booking): string {
+    static generateEncodedMailText(template: Template, booking: Booking, title: string): string {
         const placeholderValues = {
+            anrede: title,
             vorname: booking.organiserFirstname,
             nachname: booking.organiserLastname,
             anreise: booking.arrival,
@@ -76,8 +77,8 @@ export class Template {
             email: booking.email
         };
         const mailStart = dataUtil.replacePlaceholders(MAIL_FRAMES[0], placeholderValues);
-        const finalizedPlaintext = dataUtil.replacePlaceholders(this.plaintext, placeholderValues);
-        const finalizedHtmltext = dataUtil.replacePlaceholders(this.htmltext, placeholderValues);
+        const finalizedPlaintext = dataUtil.replacePlaceholders(template.plaintext, placeholderValues);
+        const finalizedHtmltext = dataUtil.replacePlaceholders(template.htmltext, placeholderValues);
 
         return mailStart + dataUtil.base64Encode(finalizedPlaintext) + MAIL_FRAMES[1] + dataUtil.base64Encode(finalizedHtmltext) + MAIL_FRAMES[2];
     }

@@ -77,7 +77,7 @@ export default class UI {
         const select = document.getElementById("mail_templates") as HTMLSelectElement;
         select.childNodes.forEach(child => select.removeChild(child));
         if (mailTemplateNames.length === 0) {
-            select.appendChild(new Option("---", "noTemplates"));
+            select.appendChild(new Option("---", "no_templates"));
             return;
         }
 
@@ -112,6 +112,27 @@ export default class UI {
             searchDateInput.stepUp(-1);
         });
     };
+
+    initGenerateMailButton() {
+        document.getElementById('generate_mail').addEventListener('click', event => {
+            const selectedBooking = this.getSelectedSearchResultsData();
+            if (selectedBooking == null) {
+                alert("keine Tabellenzeile ausgewählt");
+                return;
+            }
+        
+            const title = uiHelper.getHtmlSelectElement('mail_title').value;
+            const selectTemplateValue = uiHelper.getHtmlSelectElement('mail_templates').value;
+            if(selectTemplateValue === "no_templates"){
+                alert("Keine Email Templates vorhanden! Bitte in den Plugin Einstellungen hochladen.")
+                return;
+            }
+            const templateIndex = +selectTemplateValue;
+        
+            const mailText = this.controller.generateMailTextForTemplateIndex(templateIndex, selectedBooking, title);
+            uiHelper.downloadMailTemplate(mailText, selectedBooking.organiserLastname);
+        });
+    }
 
     searchBookings(event: Event) {
         event.preventDefault();

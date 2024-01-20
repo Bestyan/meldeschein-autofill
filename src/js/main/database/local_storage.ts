@@ -3,9 +3,9 @@ import constants from "../util/constants";
 
 const localStorage = window.localStorage;
 
-export default {
+export default class LocalStorage {
 
-    addMailTemplateToLocalStorage(template: Template): void {
+    static addMailTemplateToLocalStorage(template: Template): void {
         const localStorageKey = constants.localStorage.keys.mailTemplateNames;
         const storedNamesJson = window.localStorage.getItem(localStorageKey);
         let names: Array<string>;
@@ -17,21 +17,37 @@ export default {
         }
         window.localStorage.setItem(localStorageKey, JSON.stringify(names));
         window.localStorage.setItem(template.name, JSON.stringify(template));
-    },
+    };
 
-    clearMailTemplates(): void {
+    static clearMailTemplates(): void {
         const names = this.getMailTemplateNames() as Array<string>;
         names.forEach(templateName => localStorage.removeItem(templateName));
         localStorage.removeItem(constants.localStorage.keys.mailTemplateNames);
-    },
-    
-    getMailTemplateNames(): Array<string> {
+    };
+
+    static getMailTemplateNames(): Array<string> {
         const localStorageKey = constants.localStorage.keys.mailTemplateNames;
         const storedNamesJson = window.localStorage.getItem(localStorageKey);
-        if(storedNamesJson == null){
+        if (storedNamesJson == null) {
             return [];
         }
 
         return JSON.parse(storedNamesJson) as Array<string>;
+    };
+
+    static getMailTemplate(templateName: string): Template {
+        const templateJson = localStorage.getItem(templateName);
+        return JSON.parse(templateJson) as Template;
     }
+
+    static getMailTemplateByIndex(index: number): Template {
+        const templateNames = LocalStorage.getMailTemplateNames();
+        if (templateNames.length < index + 1) {
+            alert(`Template für index ${index} nicht vorhanden.`);
+            return null;
+        }
+
+        const templateName = templateNames[index];
+        return LocalStorage.getMailTemplate(templateName);
+    };
 }
