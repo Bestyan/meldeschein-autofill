@@ -168,8 +168,8 @@ export default {
             .reduce((total: string, errorString: string) => total + "\n" + errorString);
     },
 
-    getStringBetween(input: string, start: string, end: string): string{
-        if(!input.includes(start) || !input.includes(end)){
+    getStringBetween(input: string, start: string, end: string): string {
+        if (!input.includes(start) || !input.includes(end)) {
             throw "data_util.getStringBetween: input does not include start or end string";
         }
 
@@ -186,5 +186,18 @@ export default {
 
     base64Encode(input: string): string {
         return Buffer.from(input).toString("base64");
+    },
+
+    parseDateCell(cellValue: Object | string): Date | null {
+        // due to some Excel shenanigans, not all Date cells actually provide dates, but sometimes strings
+        if (typeof cellValue === "object") {
+            return cellValue as Date;
+        }
+        if (typeof cellValue === "string") {
+            const parts = cellValue.trim().split(".");
+            // convert to UTC string since that is the only bulletproof approach
+            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00Z`);
+        }
+        return null;
     }
 };

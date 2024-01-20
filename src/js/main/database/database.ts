@@ -72,7 +72,8 @@ export class Database {
 
         const queryResult = DB.queryAll(TABLE_BOOKINGS, {
             query: (row: any) => {
-                const rowString: string = JSON.stringify(row[column]);
+                const rowString = JSON.stringify(row[column]);
+                console.log(rowString);
                 return rowString.toLowerCase().includes((value || "").toLowerCase());
             }
         });
