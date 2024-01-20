@@ -1,9 +1,11 @@
 import uiHelper from "../util/ui_helper";
 import { PopupController } from "./controller";
 import { RowComponent, Tabulator, CellComponent } from "tabulator-tables";
-import { Booking, MeldescheinGroup } from "../database/guest_excel";
+import { Booking, GuestExcel, MeldescheinGroup } from "../database/guest_excel";
 import dataUtil from "../util/data_util";
 import LocalStorage from "../database/local_storage";
+import 'regenerator-runtime/runtime'; // required by exceljs
+import { Workbook } from "exceljs";
 
 export default class UI {
     private controller: PopupController;
@@ -38,7 +40,8 @@ export default class UI {
 
     }
 
-    initMinimizeButton(minimizeButton: HTMLElement) {
+    initMinimizeButton() {
+        const minimizeButton = document.getElementById('minimize');
         minimizeButton.addEventListener("click", event => {
             uiHelper.hideContent();
             uiHelper.hideHtmlElement(minimizeButton);
@@ -46,7 +49,8 @@ export default class UI {
         });
     };
 
-    initMaximizeButton(maximizeButton: HTMLElement) {
+    initMaximizeButton() {
+        const maximizeButton = document.getElementById('maximize');
         maximizeButton.addEventListener('click', event => {
             uiHelper.showContent();
             uiHelper.hideHtmlElement(maximizeButton);
@@ -54,8 +58,8 @@ export default class UI {
         });
     };
 
-    initSettingsButton(button: HTMLElement) {
-        button.addEventListener('click', event => {
+    initSettingsButton() {
+        document.getElementById('settings').addEventListener('click', event => {
             if (chrome.runtime.openOptionsPage) {
                 chrome.runtime.openOptionsPage();
                 return;
@@ -64,11 +68,42 @@ export default class UI {
         });
     };
 
-    initDeleteExcelDataButton(button: HTMLElement, refreshStatus: Function) {
-        button.addEventListener('click', event => {
+    initUploadExcelButton() {
+        document.getElementById('upload').addEventListener('change', (event: Event) => {
+            uiHelper.showLoadingOverlay();
+
+            const reader = new FileReader();
+            reader.onload = event => {
+                const workbook = new Workbook();
+                workbook.xlsx.load(event.target.result as ArrayBuffer).then((workbook: Workbook) => {
+                    const guestExcel = new GuestExcel(workbook.worksheets[0]);
+                    this.controller.uploadExcel(guestExcel);
+
+                    uiHelper.hideLoadingOverlay();
+                });
+            };
+            reader.readAsArrayBuffer((event.target as HTMLInputElement).files[0]);
+        });
+    }
+
+    updateExcelDataStatus() {
+        const status = document.getElementById("status");
+        status.classList.remove("good", "bad");
+
+        if (this.controller.databaseHasData()) {
+            status.classList.add("good");
+            status.innerHTML = `Daten vom ${LocalStorage.getGuestExcelDataUploadTime()}`;
+        } else {
+            status.classList.add("bad");
+            status.innerHTML = "keine Daten";
+        }
+    }
+
+    initDeleteExcelDataButton() {
+        document.getElementById('delete').addEventListener('click', event => {
             this.controller.deleteExcelData();
             alert("Daten gelöscht");
-            refreshStatus();
+            this.updateExcelDataStatus();
         });
     };
 
@@ -113,6 +148,13 @@ export default class UI {
         });
     };
 
+    initSearchBookingsButton() {
+        document.getElementById('search').addEventListener('submit', (event: Event) => {
+            event.preventDefault();
+            this.searchBookings();
+        });
+    }
+
     initGenerateMailButton() {
         document.getElementById('generate_mail').addEventListener('click', event => {
             const selectedBooking = this.getSelectedSearchResultsData();
@@ -120,23 +162,21 @@ export default class UI {
                 alert("keine Tabellenzeile ausgewählt");
                 return;
             }
-        
+
             const title = uiHelper.getHtmlSelectElement('mail_title').value;
             const selectTemplateValue = uiHelper.getHtmlSelectElement('mail_templates').value;
-            if(selectTemplateValue === "no_templates"){
+            if (selectTemplateValue === "no_templates") {
                 alert("Keine Email Templates vorhanden! Bitte in den Plugin Einstellungen hochladen.")
                 return;
             }
             const templateIndex = +selectTemplateValue;
-        
-            const mailText = this.controller.generateMailTextForTemplateIndex(templateIndex, selectedBooking, title);
+
+            const mailText = this.controller.getMailTextForTemplateIndex(templateIndex, selectedBooking, title);
             uiHelper.downloadMailTemplate(mailText, selectedBooking.organiserLastname);
         });
     }
 
-    searchBookings(event: Event) {
-        event.preventDefault();
-
+    searchBookings() {
         // hide the tables
         uiHelper.hideHtmlElement(this.meldescheinGroupsSection);
         uiHelper.hideHtmlElement(this.allBookingsSection);
@@ -195,7 +235,7 @@ export default class UI {
     /**
      * what happens when you click on the "valid" column in any Bookings table
      */
-    onIsValidCellClick(cell: CellComponent, bookings: Array<Booking>): void {
+    private onIsValidCellClick(cell: CellComponent, bookings: Array<Booking>): void {
         const clickedBooking = this.getBookingsDataByTableRow(cell.getRow(), bookings);
         if (clickedBooking.validationErrors.length === 0) {
             return;
@@ -240,7 +280,7 @@ export default class UI {
 
     getSelectedSearchResultsData(): Booking {
         const selectedTableRowData = this.getSelectedTableRow(this.searchResultsTable);
-        if(selectedTableRowData == null){
+        if (selectedTableRowData == null) {
             return null;
         }
         return this.searchResultsBookings.filter(booking => booking.ID === selectedTableRowData.ID)[0];
@@ -248,7 +288,7 @@ export default class UI {
 
     getSelectedAllBookingsData(): Booking {
         const selectedTableRowData = this.getSelectedTableRow(this.allBookingsTable);
-        if(selectedTableRowData == null){
+        if (selectedTableRowData == null) {
             return null;
         }
         return this.allBookings.filter(booking => booking.ID === selectedTableRowData.ID)[0];
@@ -265,7 +305,7 @@ export default class UI {
     initCheckinDocumentButton(): void {
         document.getElementById('checkin_download').addEventListener('click', event => {
             const selectedBooking = this.getSelectedSearchResultsData();
-            if(selectedBooking == null){
+            if (selectedBooking == null) {
                 alert("keine Tabellenzeile ausgewählt");
                 return;
             }

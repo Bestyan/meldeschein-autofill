@@ -4,13 +4,9 @@ import "../../css/popup.css";
 import { Tabulator, MutatorModule, SelectRowModule, PageModule, InteractionModule, FormatModule, RowComponent } from 'tabulator-tables';
 import { Database } from './database/database';
 import dataUtil from './util/data_util';
-import uiHelper from './util/ui_helper';
 import UI from './popup/ui';
 import constants from './util/constants';
 import contentScriptConnector from './content_scripts/connector';
-import { GuestExcel } from "./database/guest_excel";
-import 'regenerator-runtime/runtime'; // required by exceljs
-import { Workbook } from 'exceljs';
 import { PopupController } from './popup/controller';
 
 // enable mutators
@@ -19,40 +15,6 @@ Tabulator.registerModule([MutatorModule, SelectRowModule, PageModule, Interactio
 const database = new Database(window);
 const popupController = new PopupController(database);
 const ui = new UI(popupController);
-
-// reads excel file
-// TODO move to UI / controller
-function handleExcelUpload(event: Event) {
-    uiHelper.showLoadingOverlay();
-    const reader = new FileReader();
-    reader.onload = event => {
-        const workbook = new Workbook();
-        workbook.xlsx.load(event.target.result as ArrayBuffer).then((workbook: Workbook)=> {
-            const guestExcel = new GuestExcel(workbook.worksheets[0]);
-            database.initBookings(guestExcel.getBookings(), refreshStatus);
-            uiHelper.hideLoadingOverlay();
-            console.log(database.findAll());
-        });
-    };
-    reader.readAsArrayBuffer((event.target as HTMLInputElement).files[0]);
-}
-
-function refreshStatus() {
-    const status = document.getElementById("status");
-    status.classList.remove("good", "bad");
-
-    if (database.hasData()) {
-
-        status.classList.add("good");
-        status.innerHTML = `Daten vom ${database.guestXlsUploadDatetime}`;
-
-    } else {
-
-        status.classList.add("bad");
-        status.innerHTML = "keine Daten";
-        return;
-    }
-}
 
 /**
  * send a single request to wake the server from its sleep
@@ -71,28 +33,28 @@ function wakeServer() {
 }
 
 function buildUI() {
-    refreshStatus();
+    ui.updateExcelDataStatus();
 
     // Button minimieren
-    ui.initMinimizeButton(document.getElementById('minimize'));
+    ui.initMinimizeButton();
 
     // Button maximieren
-    ui.initMaximizeButton(document.getElementById('maximize'));
+    ui.initMaximizeButton();
 
     // Button Einstellungen (Zahnrad)
-    ui.initSettingsButton(document.getElementById('settings'));
+    ui.initSettingsButton();
 
     // Button "Daten löschen"
-    ui.initDeleteExcelDataButton(document.getElementById('delete'), refreshStatus);
+    ui.initDeleteExcelDataButton();
 
     // Button "xls hochladen"
-    document.getElementById('upload').addEventListener('change', handleExcelUpload, false);
+    ui.initUploadExcelButton();
 
     // Suchparameter (Dropdowns)
     ui.initSearchDropDowns();
 
     // Button/Form "suchen"
-    document.getElementById('search').addEventListener('submit', (event: Event) => ui.searchBookings(event));
+    ui.initSearchBookingsButton();
 
     // Button "WLAN Voucher ausfüllen"
     document.getElementById('wlan_voucher_fill').addEventListener('click', event => {

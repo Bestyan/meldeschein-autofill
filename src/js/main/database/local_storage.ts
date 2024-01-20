@@ -5,6 +5,15 @@ const localStorage = window.localStorage;
 
 export default class LocalStorage {
 
+    static setGuestExcelDataUploadTime(): void {
+        const uploadTime = new Date().toLocaleDateString('de-DE', constants.dateFormat.dateAndTime.format);
+        localStorage.setItem(constants.localStorage.keys.guestExcelUploadTime, uploadTime);
+    };
+
+    static getGuestExcelDataUploadTime(): string {
+        return localStorage.getItem(constants.localStorage.keys.guestExcelUploadTime);
+    }
+
     static addMailTemplateToLocalStorage(template: Template): void {
         const localStorageKey = constants.localStorage.keys.mailTemplateNames;
         const storedNamesJson = window.localStorage.getItem(localStorageKey);

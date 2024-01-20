@@ -2,6 +2,7 @@ import localStorageDB from 'localStorageDB';
 import constants from '../util/constants';
 import connection from '../rest/connection';
 import { Booking } from '../database/guest_excel';
+import LocalStorage from './local_storage';
 
 // bookings tables
 const TABLE_BOOKINGS = "booking";
@@ -13,11 +14,9 @@ const DB = new localStorageDB("meldeschein", "localStorage");
 
 export class Database {
     localStorage: Window["localStorage"];
-    guestXlsUploadDatetime: string;
 
     constructor(window: Window) {
         this.localStorage = window.localStorage;
-        this.guestXlsUploadDatetime = this.localStorage.getItem(constants.localStorage.keys.guestXlsUploadDateTime);
     };
 
     resetBookingsTable() {
@@ -47,30 +46,21 @@ export class Database {
     /**
      * sets up bookings tables for use
      */
-    initBookings(bookings: Array<Booking>, updateExcelDataStatus: Function) {
+    initBookings(bookings: Array<Booking>) {
         /*
         clear old data and create table
         */
         this.resetBookingsTable();
         DB.createTableWithData(TABLE_BOOKINGS, bookings);
         DB.commit();
-        this.setUploadTime(updateExcelDataStatus);
-    };
-
-    /**
-     * sets xls_upload_datetime to current time
-     */
-    setUploadTime(updateExcelDataStatus: Function) {
-        this.guestXlsUploadDatetime = new Date().toLocaleDateString('de-DE', constants.dateFormat.dateAndTime.format);
-        window.localStorage.setItem(constants.localStorage.keys.guestXlsUploadDateTime, this.guestXlsUploadDatetime);
-        updateExcelDataStatus();
+        LocalStorage.setGuestExcelDataUploadTime();
     };
 
     hasData() {
         return DB.tableExists(TABLE_BOOKINGS) && DB.queryAll(TABLE_BOOKINGS, {}).length > 0;
     };
 
-    findAll(){
+    findAll() {
         return DB.queryAll(TABLE_BOOKINGS, {});
     };
 
@@ -119,7 +109,7 @@ export class Database {
 
                     resolve(json.data);
                 })
-                .catch(error => reject(error.toString()));
+                .catch(error => reject(error));
         });
     };
 
