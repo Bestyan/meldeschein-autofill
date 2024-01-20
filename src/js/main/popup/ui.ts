@@ -30,7 +30,7 @@ export default class UI {
 
         const allBookingsResultDiv = document.getElementById("bookings_results");
         this.allBookingsTable = uiHelper.createBookingsTabulatorTable(allBookingsResultDiv, [],
-            (event: Event, row: RowComponent) => this.onBookingsResultRowClick(event, row),
+            (event: Event, row: RowComponent) => this.onAllBookingsRowClick(event, row),
             (event: Event, cell: CellComponent) => this.onIsValidCellClick(cell, this.allBookings));
 
         const meldescheinGroupsResultDiv = document.getElementById("meldeschein_groups_results");
@@ -180,12 +180,12 @@ export default class UI {
     /**
      * what happens when you click on a row in the booking_results table
      */
-    onBookingsResultRowClick(event: Event, row: RowComponent) {
+    onAllBookingsRowClick(event: Event, row: RowComponent) {
         // show meldeschein table, tabulator needs it to be visible
         uiHelper.showHtmlElement(this.meldescheinGroupsSection);
 
         const selectedBooking = this.getSelectedAllBookingsData();
-        if (selectedBooking.meldescheinGroups == null) {
+        if (selectedBooking == null || selectedBooking.meldescheinGroups == null) {
             return;
         }
         this.meldescheinGroups = selectedBooking.meldescheinGroups;
@@ -241,8 +241,7 @@ export default class UI {
     getSelectedSearchResultsData(): Booking {
         const selectedTableRowData = this.getSelectedTableRow(this.searchResultsTable);
         if(selectedTableRowData == null){
-            alert("keine Tabellenzeile ausgewählt");
-            throw "getSelectedSearchResultsData(): keine Tabellenzeile ausgewählt";
+            return null;
         }
         return this.searchResultsBookings.filter(booking => booking.ID === selectedTableRowData.ID)[0];
     }
@@ -250,8 +249,7 @@ export default class UI {
     getSelectedAllBookingsData(): Booking {
         const selectedTableRowData = this.getSelectedTableRow(this.allBookingsTable);
         if(selectedTableRowData == null){
-            alert("keine Tabellenzeile ausgewählt");
-            throw "getSelectedAllBookingsData(): keine Tabellenzeile ausgewählt";
+            return null;
         }
         return this.allBookings.filter(booking => booking.ID === selectedTableRowData.ID)[0];
     }
@@ -266,7 +264,12 @@ export default class UI {
 
     initCheckinDocumentButton(): void {
         document.getElementById('checkin_download').addEventListener('click', event => {
-            this.controller.generateCheckinDocument(this.getSelectedSearchResultsData());
+            const selectedBooking = this.getSelectedSearchResultsData();
+            if(selectedBooking == null){
+                alert("keine Tabellenzeile ausgewählt");
+                return;
+            }
+            this.controller.generateCheckinDocument(selectedBooking);
         });
     }
 }
