@@ -1,5 +1,6 @@
 import { ValidationError } from "../database/guest_excel";
 import constants from "./constants";
+import { Buffer } from "buffer";
 
 const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
 
@@ -165,5 +166,25 @@ export default {
         return validationErrors
             .map(validationError => ValidationError.toMessage(validationError))
             .reduce((total: string, errorString: string) => total + "\n" + errorString);
+    },
+
+    getStringBetween(input: string, start: string, end: string): string{
+        if(!input.includes(start) || !input.includes(end)){
+            throw "data_util.getStringBetween: input does not include start or end string";
+        }
+
+        return input.split(start)[1].split(end)[0];
+    },
+
+    replacePlaceholders(input: string, placeholderValues: Object): string {
+        Object.entries(placeholderValues).forEach(entry => {
+            const [key, value] = entry;
+            input = input.replaceAll(`{{ ${key} }}`, value);
+        });
+        return input;
+    },
+
+    base64Encode(input: string): string {
+        return Buffer.from(input).toString("base64");
     }
 };

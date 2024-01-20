@@ -174,7 +174,6 @@ export class GuestExcel {
         if (!isNewBooking) {
             this.bookings.push(currentBooking);
         }
-        console.log(this.bookings); //TODO
     }
 
     private extractRowValues(row: Row, rowNumber: number): RowValues {

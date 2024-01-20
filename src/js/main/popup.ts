@@ -2,16 +2,11 @@
 import "../../css/popup.css";
 
 import { Tabulator, MutatorModule, SelectRowModule, PageModule, InteractionModule, FormatModule, RowComponent } from 'tabulator-tables';
-import mailGenerator from './popup/mail_generator';
 import { Database } from './database/database';
 import dataUtil from './util/data_util';
-import uiHelper from './util/ui_helper';
 import UI from './popup/ui';
 import constants from './util/constants';
 import contentScriptConnector from './content_scripts/connector';
-import { GuestExcel } from "./database/guest_excel";
-import 'regenerator-runtime/runtime'; // required by exceljs
-import { Workbook } from 'exceljs';
 import { PopupController } from './popup/controller';
 
 // enable mutators
@@ -20,115 +15,6 @@ Tabulator.registerModule([MutatorModule, SelectRowModule, PageModule, Interactio
 const database = new Database(window);
 const popupController = new PopupController(database);
 const ui = new UI(popupController);
-
-class Option {
-    text: string;
-    value: string;
-
-    static of(text: string, value: string): Option {
-        const option = new Option();
-        option.value = value;
-        option.text = text;
-        return option;
-    }
-}
-
-// dropdowns in popup
-const SEARCH_OPTIONS = [
-    Option.of("Anreise", "arrival"), 
-    Option.of("Abreise", "departure"), 
-    Option.of("Nachname", "organiserLastname"), 
-    Option.of("Email", "email")];
-
-// reads excel file
-// TODO move to UI / controller
-function handleExcelUpload(event: Event) {
-    uiHelper.showLoadingOverlay();
-    const reader = new FileReader();
-    reader.onload = event => {
-        const workbook = new Workbook();
-        workbook.xlsx.load(event.target.result as ArrayBuffer).then((workbook: Workbook)=> {
-            const guestExcel = new GuestExcel(workbook.worksheets[0]);
-            database.initBookings(guestExcel.getBookings(), refreshStatus);
-            uiHelper.hideLoadingOverlay();
-            console.log(database.findAll());
-        });
-    };
-    reader.readAsArrayBuffer((event.target as HTMLInputElement).files[0]);
-}
-
-function refreshStatus() {
-    const status = document.getElementById("status");
-    status.classList.remove("good", "bad");
-
-    if (database.hasData()) {
-
-        status.classList.add("good");
-        status.innerHTML = `Daten vom ${database.guestXlsUploadDatetime}`;
-
-    } else {
-
-        status.classList.add("bad");
-        status.innerHTML = "keine Daten";
-        return;
-    }
-}
-
-/**
- * populate the popup.html <select> tags with <option> tags
- */
-function setupSearchDropDowns() {
-
-    const searchDropdown = uiHelper.getHtmlSelectElement("search_field");
-    const searchDateInput = uiHelper.getHtmlInputElement("search_input_date");
-    const searchTextInput = uiHelper.getHtmlInputElement("search_input_text");
-
-    // anreise / abreise
-    SEARCH_OPTIONS.forEach(entry => {
-        let option = document.createElement("option");
-        option.value = entry.value;
-        option.innerHTML = entry.text;
-        searchDropdown.append(option);
-    });
-
-    searchDropdown.addEventListener("change", event => {
-        const selected = searchDropdown.value;
-        searchDateInput.classList.remove("hide");
-        searchTextInput.classList.remove("hide");
-        if (selected === "arrival" || selected === "departure") {
-            searchTextInput.classList.add("hide");
-        } else {
-            searchDateInput.classList.add("hide");
-        }
-    });
-
-    // preset the anreise/abreise search field to today
-    searchDateInput.value = new Date().toISOString().substring(0, "yyyy-mm-dd".length);
-
-    // +1 day on the anreise/abreise search field
-    document.getElementById("date_plus_one").addEventListener("click", event => {
-        searchDateInput.stepUp(1);
-    });
-    // -1 day on the anreise/abreise search field
-    document.getElementById("date_minus_one").addEventListener("click", event => {
-        searchDateInput.stepUp(-1);
-    });
-}
-
-function generateReviewMail() {
-    const data = ui.getSelectedSearchResultsData();
-    if (data == null) {
-        alert("keine Tabellenzeile ausgewählt");
-        return;
-    }
-
-    // TODO
-    //data.anrede = uiHelper.getHtmlSelectElement('anrede').value;
-    const pronomen = uiHelper.getHtmlSelectElement('pronomen').value;
-    const isFirstVisit = uiHelper.getHtmlSelectElement('is_first_visit').value == 'true';
-
-    mailGenerator.generate(data, pronomen as "Du" | "Sie", isFirstVisit);
-}
 
 /**
  * send a single request to wake the server from its sleep
@@ -147,28 +33,28 @@ function wakeServer() {
 }
 
 function buildUI() {
-    refreshStatus();
+    ui.updateExcelDataStatus();
 
     // Button minimieren
-    ui.initMinimizeButton(document.getElementById('minimize'));
+    ui.initMinimizeButton();
 
     // Button maximieren
-    ui.initMaximizeButton(document.getElementById('maximize'));
+    ui.initMaximizeButton();
 
     // Button Einstellungen (Zahnrad)
-    ui.initSettingsButton(document.getElementById('settings'));
+    ui.initSettingsButton();
 
     // Button "Daten löschen"
-    ui.initDeleteExcelDataButton(document.getElementById('delete'), refreshStatus);
+    ui.initDeleteExcelDataButton();
 
     // Button "xls hochladen"
-    document.getElementById('upload').addEventListener('change', handleExcelUpload, false);
+    ui.initUploadExcelButton();
 
     // Suchparameter (Dropdowns)
-    setupSearchDropDowns();
+    ui.initSearchDropDowns();
 
     // Button/Form "suchen"
-    document.getElementById('search').addEventListener('submit', (event: Event) => ui.searchBookings(event));
+    ui.initSearchBookingsButton();
 
     // Button "WLAN Voucher ausfüllen"
     document.getElementById('wlan_voucher_fill').addEventListener('click', event => {
@@ -187,29 +73,13 @@ function buildUI() {
     });
 
     // Button "Check-in Dokument"
-    ui.initCheckinDocumentButton(document.getElementById('checkin_download'));
+    ui.initCheckinDocumentButton();
 
-    // Dropdown "Sie"/"Du"
-    document.getElementById('pronomen').addEventListener('change', event => {
-        const pronomen = uiHelper.getHtmlSelectElement('pronomen');
-        const anrede = uiHelper.getHtmlSelectElement('anrede');
-        const firstVisit = uiHelper.getHtmlSelectElement('is_first_visit');
-
-        if (pronomen.value === "Sie") {
-
-            anrede.removeAttribute("disabled");
-            firstVisit.removeAttribute("disabled");
-
-        } else if (pronomen.value === "Du") {
-
-            anrede.setAttribute("disabled", "disabled");
-            firstVisit.setAttribute("disabled", "disabled");
-
-        }
-    })
+    // init Mail Template dropdown
+    ui.initMailTemplateNames();
 
     // Button [Mail] "erstellen"
-    document.getElementById('generate').addEventListener('click', generateReviewMail, false);
+    ui.initGenerateMailButton();
 
     // Visibility of Buttons
     chrome.tabs.query({
@@ -232,8 +102,5 @@ function buildUI() {
 
 wakeServer();
 console.log(`environment: ${process.env.NODE_ENV}`);
-
-// Tabulator table
-let result_table: any = null;
 
 buildUI();

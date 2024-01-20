@@ -110,18 +110,20 @@ export default class UI {
         const options = {
             status: document.getElementById("mail_templates_status"),
             uploadButton: document.getElementById("upload_mail_templates") as HTMLInputElement,
-            localStorageKey: constants.localStorage.keys.mailTemplates
+            localStorageKey: constants.localStorage.keys.mailTemplateNames
         };
 
         this.refreshEmailTemplateStatus(options.status, options.localStorageKey);
         options.uploadButton.addEventListener("change",
             event => {
                 uiHelper.setStatusEmoji(options.status, "yellow");
-                this.controller.uploadMailTemplate(
-                    options.uploadButton,
-                    options.localStorageKey,
-                    () => { uiHelper.setStatusEmoji(options.status, "green"); },
-                    () => { uiHelper.setStatusEmoji(options.status, "red"); });
+                this.controller.uploadMailTemplate(options.uploadButton)
+                    .then(fileText => this.controller.processMailTemplate(fileText))
+                    .then(() => uiHelper.setStatusEmoji(options.status, "green"))
+                    .catch(error => {
+                        console.error(error);
+                        uiHelper.setStatusEmoji(options.status, "red");
+                    });
             });
     };
 }

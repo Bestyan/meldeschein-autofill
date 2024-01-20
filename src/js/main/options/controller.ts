@@ -2,6 +2,8 @@ import XLSX from 'xlsx';
 import Database from '../database/database';
 import constants from "../util/constants";
 import dataUtil from '../util/data_util';
+import MailTemplater from '../mail_template/mail_templater'
+import LocalStorage from '../database/local_storage';
 
 export class OptionsController {
     database: Database;
@@ -38,16 +40,13 @@ export class OptionsController {
         reader.readAsArrayBuffer(file);
     };
 
-    uploadMailTemplate(uploadElement: HTMLInputElement, localStorageKey: string, onSuccess: Function, onError: Function) {
+    uploadMailTemplate(uploadElement: HTMLInputElement): Promise<string> {
         const file = uploadElement.files[0];
-        dataUtil.readTextFile(file)
-            .then(text => {
-                window.localStorage.setItem(localStorageKey, text);
-                onSuccess();
-            })
-            .catch(error => {
-                console.error(error);
-                onError();
-            })
+        return dataUtil.readTextFile(file);
     };
+
+    processMailTemplate(rawTemplateText: string){
+        LocalStorage.clearMailTemplates();
+        MailTemplater.processRawTemplate(rawTemplateText);
+    }
 };
