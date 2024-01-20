@@ -13,7 +13,7 @@ export class PopupController{
     }
 
     uploadExcel(guestExcel: GuestExcel): void{
-        this.database.initBookings(guestExcel.getBookings());
+        this.database.initBookings(guestExcel.bookings);
     }
 
     deleteExcelData(): void {

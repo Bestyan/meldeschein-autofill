@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime'; // required by exceljs
 import { Row, CellValue, Worksheet } from "exceljs";
 import { Apartment } from "../util/constants";
-import dataUtil from '../util/data_util';
+import DataUtil from '../util/data_util';
 
 const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
 
@@ -60,20 +60,20 @@ export class RowValues {
 
     validateBookingColumns(): Array<ValidationError> {
         const errors: Array<ValidationError> = [];
+        const arrivalDate = DataUtil.parseDateCell(this.arrival);
+        const departureDate = DataUtil.parseDateCell(this.departure);
         let arrivalIsDate = true;
-        if (!this.arrival || typeof this.arrival !== "object") {
+        if (!this.arrival || arrivalDate === null) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], (this.arrival as string || ""), "ist kein gültiges Datum"));
             arrivalIsDate = false;
         }
         let departureIsDate = true;
-        if (!this.departure || typeof this.departure !== "object") {
+        if (!this.departure || departureDate === null) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["departure"], (this.departure as string || ""), "ist kein gültiges Datum"));
             departureIsDate = false;
         }
-        const arrivalDate = this.arrival as Date;
-        const departureDate = this.departure as Date;
         if (arrivalIsDate && departureIsDate && arrivalDate.getTime() >= departureDate.getTime()) {
-            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], dataUtil.formatDate(this.arrival as Date), "ist gleich oder nach dem Abreisedatum"));
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["arrival"], DataUtil.formatDate(this.arrival as Date), "ist gleich oder nach dem Abreisedatum"));
         }
         if (!this.apartment || this.apartment.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["apartment"], this.apartment, "ist leer"));
@@ -102,7 +102,7 @@ export class RowValues {
         if (!this.guestFirstname || this.guestFirstname.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestFirstname"], this.guestFirstname, "ist leer"));
         }
-        if (!this.guestBirthdate || typeof this.guestBirthdate !== "object") {
+        if (!this.guestBirthdate || DataUtil.parseDateCell(this.guestBirthdate) === null) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestBirthdate"], (this.guestBirthdate as string || ""), "ist kein gültiges Datum"));
         }
         if (!this.guestStreet || this.guestStreet.length === 0) {
@@ -129,14 +129,10 @@ export class RowValues {
 }
 
 export class GuestExcel {
-    private bookings: Array<Booking> = [];
+    bookings: Array<Booking> = [];
 
     constructor(sheet: Worksheet) {
         this.processSheet(sheet);
-    }
-
-    getBookings(): Array<Booking> {
-        return this.bookings;
     }
 
     private processSheet(sheet: Worksheet) {
@@ -174,6 +170,7 @@ export class GuestExcel {
         if (!isNewBooking) {
             this.bookings.push(currentBooking);
         }
+        console.log(this.bookings);
     }
 
     private extractRowValues(row: Row, rowNumber: number): RowValues {
@@ -214,8 +211,8 @@ export class Booking {
 
         booking.organiserFirstname = rowValues.organiserFirstname;
         booking.organiserLastname = rowValues.organiserLastname;
-        booking.arrival = rowValues.arrival as Date;
-        booking.departure = rowValues.departure as Date;
+        booking.arrival = DataUtil.parseDateCell(rowValues.arrival);
+        booking.departure = DataUtil.parseDateCell(rowValues.departure);
         booking.apartment = rowValues.apartment;
         booking.email = rowValues.email;
         booking.meldescheinGroups = [];
@@ -268,7 +265,7 @@ export class MeldescheinGroup {
         meldescheinGroup.streetAndNumber = rowValues.guestStreet;
         meldescheinGroup.zip = rowValues.guestZip;
         meldescheinGroup.city = rowValues.guestCity;
-        meldescheinGroup.country = dataUtil.tryCountryCode(rowValues.guestNationalityCode);
+        meldescheinGroup.country = DataUtil.tryCountryCode(rowValues.guestNationalityCode);
         meldescheinGroup.guests = [Guest.fromRowValues(rowValues)];
         return meldescheinGroup
     }
@@ -291,8 +288,8 @@ export class Guest {
         const guest = new Guest();
         guest.firstname = rowValues.guestFirstname;
         guest.lastname = rowValues.guestLastname;
-        guest.birthdate = rowValues.guestBirthdate as Date;
-        guest.nationality = dataUtil.tryCountryCode(rowValues.guestNationalityCode);
+        guest.birthdate = DataUtil.parseDateCell(rowValues.guestBirthdate);
+        guest.nationality = DataUtil.tryCountryCode(rowValues.guestNationalityCode);
         return guest;
     }
 

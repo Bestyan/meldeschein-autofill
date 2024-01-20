@@ -78,7 +78,7 @@ export default class UI {
                 workbook.xlsx.load(event.target.result as ArrayBuffer).then((workbook: Workbook) => {
                     const guestExcel = new GuestExcel(workbook.worksheets[0]);
                     this.controller.uploadExcel(guestExcel);
-
+                    this.updateExcelDataStatus();
                     uiHelper.hideLoadingOverlay();
                 });
             };
