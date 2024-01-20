@@ -196,7 +196,7 @@ export default class UI {
      * what happens when you click on the "valid" column in any Bookings table
      */
     onIsValidCellClick(cell: CellComponent, bookings: Array<Booking>): void {
-        const clickedBooking = this.getSelectedBookingsData(cell.getRow().getData(), bookings);
+        const clickedBooking = this.getBookingsDataByTableRow(cell.getRow(), bookings);
         if (clickedBooking.validationErrors.length === 0) {
             return;
         }
@@ -220,7 +220,7 @@ export default class UI {
                     return;
                 }
                 // because the mutator alters the results of row.getData(), we need to get the original meldescheinGroup from the booking table
-                const meldescheinGroup = this.getSelectedMeldescheinGroupsData(row);
+                const meldescheinGroup = this.getClickedMeldescheinGroupsData(row);
                 this.controller.fillMeldeschein(meldescheinGroup, searchedBooking.arrival, searchedBooking.departure, searchedBooking.email);
             });
     };
@@ -239,19 +239,29 @@ export default class UI {
     };
 
     getSelectedSearchResultsData(): Booking {
-        return this.searchResultsBookings.filter(booking => booking.ID === this.getSelectedTableRow(this.searchResultsTable).ID)[0];
+        const selectedTableRowData = this.getSelectedTableRow(this.searchResultsTable);
+        if(selectedTableRowData == null){
+            alert("keine Tabellenzeile ausgewählt");
+            throw "getSelectedSearchResultsData(): keine Tabellenzeile ausgewählt";
+        }
+        return this.searchResultsBookings.filter(booking => booking.ID === selectedTableRowData.ID)[0];
     }
 
     getSelectedAllBookingsData(): Booking {
-        return this.allBookings.filter(booking => booking.ID === this.getSelectedTableRow(this.allBookingsTable).ID)[0];
+        const selectedTableRowData = this.getSelectedTableRow(this.allBookingsTable);
+        if(selectedTableRowData == null){
+            alert("keine Tabellenzeile ausgewählt");
+            throw "getSelectedAllBookingsData(): keine Tabellenzeile ausgewählt";
+        }
+        return this.allBookings.filter(booking => booking.ID === selectedTableRowData.ID)[0];
     }
 
-    getSelectedMeldescheinGroupsData(row: RowComponent): MeldescheinGroup {
+    getClickedMeldescheinGroupsData(row: RowComponent): MeldescheinGroup {
         return this.meldescheinGroups.filter(group => group.ID === row.getData().ID)[0];
     }
 
-    getSelectedBookingsData(rowData: any, bookings: Array<Booking>): Booking {
-        return bookings.filter(booking => booking.ID === rowData.ID)[0];
+    getBookingsDataByTableRow(row: RowComponent, bookings: Array<Booking>): Booking {
+        return bookings.filter(booking => booking.ID === row.getData().ID)[0];
     }
 
     initCheckinDocumentButton(): void {
