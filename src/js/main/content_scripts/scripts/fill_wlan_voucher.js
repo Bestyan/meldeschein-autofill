@@ -54,8 +54,6 @@ chrome.runtime.onMessage.addListener(
 
                     // set value and trigger change event
                     hotspot.value = HOTSPOT_TO_VALUE[request.data.hotspot];
-                    //const changeEvent_hotspot = document.createEvent("HTMLEvents");
-                    //changeEvent_hotspot.initEvent("change", false, true);
                     const changeEvent_hotspot = new Event("change", { bubbles: false, cancelable: true })
                     hotspot.dispatchEvent(changeEvent_hotspot);
                 }
