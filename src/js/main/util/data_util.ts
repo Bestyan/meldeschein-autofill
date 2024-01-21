@@ -1,4 +1,4 @@
-import { ValidationError } from "../database/guest_excel";
+import { Booking, ValidationError } from "../database/guest_excel";
 import constants from "./constants";
 import { Buffer } from "buffer";
 
@@ -45,7 +45,13 @@ Geburtsdatum: ${birthdate}
 Anreise: ${date}`);
             return -1;
         }
-    }
+    },
+    /**
+     * @returns dd.MM.yyyy
+     */
+    formatDate(date: Date): string {
+        return date.toLocaleDateString("de-DE", constants.dateFormat.dateWithLeadingZeroes.format);
+    },
 }
 
 
@@ -79,7 +85,7 @@ export default {
         const lengthOfStay: number = Math.ceil((abreise.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) + 1; // abreise - heute + 1
 
         if (lengthOfStay < 0) {
-            alert("ungültige Aufenthaltsdauer: Abreise - Anreise < 0");
+            alert(`Abreise ${utils.formatDate(abreise)} liegt in der Vergangenheit!`);
             return null;
         }
 
@@ -102,8 +108,8 @@ export default {
         return `${daysValid} Tage`;
     },
 
-    getVoucherComment: (table_data: any) => {
-        return `${table_data.nachname} ${table_data.apartment} ${table_data.anreise} bis ${table_data.abreise}`;
+    getVoucherComment: (booking: Booking) => {
+        return `${booking.organiserLastname} ${booking.apartment} ${utils.formatDate(booking.arrival)} bis ${utils.formatDate(booking.departure)}`;
     },
 
     /**
@@ -133,12 +139,7 @@ export default {
         return numberOfKeys;
     },
 
-    /**
-     * @returns dd.MM.yyyy
-     */
-    formatDate(date: Date): string {
-        return date.toLocaleDateString("de-DE", constants.dateFormat.dateWithLeadingZeroes.format);
-    },
+    formatDate: utils.formatDate,
 
     clone(object: any): any {
         return JSON.parse(JSON.stringify(object));

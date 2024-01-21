@@ -2,8 +2,8 @@ console.log("fill_wlan_voucher loaded");
 
 const HOTSPOT_TEXT = "Hotspot:";
 
-const TEXT_TO_DATA_FIELD = {
-    "Voucher-Definition:": "gueltigkeit",
+const TEXT_TO_FORM_INPUT_NAME = {
+    "Gutschein-Definition:": "gueltigkeit",
     "Anzahl:": "anzahl",
     "Drucken:": "drucken",
     "Kommentar:": "kommentar"
@@ -41,17 +41,20 @@ chrome.runtime.onMessage.addListener(
         const tdTags = document.getElementsByTagName("td");
 
         // find input fields / selects, skip if no textNode as first child
-        [...tdTags].filter(_ => _.hasChildNodes() &&
-                _.childNodes[0].nodeType === Node.TEXT_NODE &&
-                _.childNodes[0].nodeValue.includes(HOTSPOT_TEXT))
+        [...tdTags].filter(td =>
+            td.hasChildNodes() &&
+            !td.innerHTML.includes("<td") &&
+            td.innerHTML.includes(HOTSPOT_TEXT))
             .forEach(
                 td => {
+                    if(td.nextSibling == null){
+                        console.log(td)
+                    }
                     const hotspot = td.nextSibling.childNodes[0];
 
                     // set value and trigger change event
                     hotspot.value = HOTSPOT_TO_VALUE[request.data.hotspot];
-                    const changeEvent_hotspot = document.createEvent("HTMLEvents");
-                    changeEvent_hotspot.initEvent("change", false, true);
+                    const changeEvent_hotspot = new Event("change", { bubbles: false, cancelable: true })
                     hotspot.dispatchEvent(changeEvent_hotspot);
                 }
             );
@@ -59,32 +62,32 @@ chrome.runtime.onMessage.addListener(
         // wait 1s for the site's ajax reload
         new Promise(resolve => setTimeout(resolve, 1000)).then(
             () => {
-                const data_fields = {};
-                const text_to_data_field = JSON.parse(JSON.stringify(TEXT_TO_DATA_FIELD)); // copy the object
-                const tdTags_after_reload = document.getElementsByTagName("td");
+                const siteFormInputs = {};
+                const textToFormInputName = JSON.parse(JSON.stringify(TEXT_TO_FORM_INPUT_NAME)); // copy the object
+                const tdTagsAfterReload = document.getElementsByTagName("td");
 
-                [...tdTags_after_reload].filter(_ => _.hasChildNodes() && _.childNodes[0].nodeType === Node.TEXT_NODE).forEach(
+                // find the relevant input nodes by searching for their label text
+                [...tdTagsAfterReload].filter(td => td.hasChildNodes() && !td.innerHTML.includes("<td")).forEach(
                     td => {
-                        const textNode = td.childNodes[0];
-                        for (const [text, data_field] of Object.entries(text_to_data_field)) {
+                        for (const [labelText, data_field] of Object.entries(textToFormInputName)) {
 
-                            if (!textNode.nodeValue.includes(text)) {
+                            if (!td.innerHTML.includes(labelText)) {
                                 continue;
                             }
 
                             const input_field = td.nextSibling.childNodes[0];
-                            data_fields[data_field] = input_field;
-                            delete text_to_data_field[text];
+                            siteFormInputs[data_field] = input_field;
+                            delete textToFormInputName[labelText];
                             break;
                         }
                     }
                 );
 
                 // set values
-                data_fields.gueltigkeit.value = GUELTIGKEIT_TO_VALUE[request.data.gueltigkeit]
-                data_fields.anzahl.value = 2;
-                data_fields.drucken.checked = true;
-                data_fields.kommentar.value = request.data.kommentar;
+                siteFormInputs.gueltigkeit.value = GUELTIGKEIT_TO_VALUE[request.data.gueltigkeit]
+                siteFormInputs.anzahl.value = 2;
+                siteFormInputs.drucken.checked = true;
+                siteFormInputs.kommentar.value = request.data.kommentar;
             }
         )
 

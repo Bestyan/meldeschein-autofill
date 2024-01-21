@@ -3,7 +3,7 @@ import "../../css/popup.css";
 
 import { Tabulator, MutatorModule, SelectRowModule, PageModule, InteractionModule, FormatModule, RowComponent } from 'tabulator-tables';
 import { Database } from './database/database';
-import dataUtil from './util/data_util';
+import DataUtil from './util/data_util';
 import UI from './popup/ui';
 import constants from './util/constants';
 import contentScriptConnector from './content_scripts/connector';
@@ -58,17 +58,17 @@ function buildUI() {
 
     // Button "WLAN Voucher ausfüllen"
     document.getElementById('wlan_voucher_fill').addEventListener('click', event => {
-        const data = ui.getSelectedSearchResultsData();
-        if (data == null) {
+        const booking = ui.getSelectedSearchResultsData();
+        if (booking == null) {
             alert("keine Tabellenzeile ausgewählt");
             return;
         }
 
         // message to content script fill_vlan_voucher.js
         contentScriptConnector.send({
-            hotspot: dataUtil.getHotspotName(data.apartment),
-            gueltigkeit: dataUtil.getVoucherDuration(data.departure),
-            kommentar: dataUtil.getVoucherComment(data)
+            hotspot: DataUtil.getHotspotName(booking.apartment),
+            gueltigkeit: DataUtil.getVoucherDuration(booking.departure),
+            kommentar: DataUtil.getVoucherComment(booking)
         });
     });
 

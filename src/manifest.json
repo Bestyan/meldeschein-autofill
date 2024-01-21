@@ -1,6 +1,6 @@
 {
   "name": "Meldeschein Autofill",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "manifest_version": 3,
   "options_ui": {
     "page": "options.html",
