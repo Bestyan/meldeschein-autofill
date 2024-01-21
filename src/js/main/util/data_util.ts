@@ -85,7 +85,7 @@ export default {
         const lengthOfStay: number = Math.ceil((abreise.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) + 1; // abreise - heute + 1
 
         if (lengthOfStay < 0) {
-            alert("ungültige Aufenthaltsdauer: Abreise - Anreise < 0");
+            alert(`Abreise ${utils.formatDate(abreise)} liegt in der Vergangenheit!`);
             return null;
         }
 
