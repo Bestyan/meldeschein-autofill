@@ -22,6 +22,7 @@ class FormData {
     geburtsdatum0_input: EventInput | null;
     anrede0 = Title.Herr;
     staat0_input = "Deutschland";
+    passnumber = "";
 
     strasse0 = "";
     land0_input = "Deutschland";
@@ -33,6 +34,7 @@ class FormData {
     geburtsdatum1_input: EventInput | null;
     anrede1 = Title.Herr;
     staat1_input = "Deutschland";
+    passnumber1 = "";
 
     vorname2 = "";
     geburtsdatum2_input: EventInput | null;
@@ -72,6 +74,7 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
         event: "blur"
     };
     formData.staat0_input = guest1.nationality;
+    formData.passnumber = guest1.passportCode;
 
     // address
     formData.strasse0 = meldescheinGroup.streetAndNumber;
@@ -91,6 +94,7 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
             event: "blur"
         };
         formData.staat1_input = guest2.nationality;
+        formData.passnumber1 = guest2.passportCode;
     }
 
     if (numberOfGuests >= 3) {
@@ -208,5 +212,5 @@ function fillTitleInformation(guests: Array<Guest>, database: Database): void {
 }
 
 export default {
-    fillMeldeschein: (meldescheinGroup: MeldescheinGroup, arrival: Date, departure: Date, email: string, database: Database): void => fillMeldeschein(meldescheinGroup, arrival, departure, email, database)
+    fillMeldeschein: fillMeldeschein
 };

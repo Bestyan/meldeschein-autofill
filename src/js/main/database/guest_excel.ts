@@ -34,7 +34,8 @@ const FIELD_TO_DISPLAYNAME = {
     guestStreet: "Straße",
     guestZip: "PLZ",
     guestCity: "Ort",
-    guestNationalityCode: "Nationalität"
+    guestNationalityCode: "Nationalität",
+    guestPassportCode: "Passnummer"
 };
 
 export class RowValues {
@@ -53,6 +54,7 @@ export class RowValues {
     guestZip: string;
     guestCity: string;
     guestNationalityCode: string;
+    guestPassportCode: string;
 
     constructor(rowNumber: number) {
         this.rowNumber = rowNumber;
@@ -114,14 +116,22 @@ export class RowValues {
         if (!this.guestCity || this.guestCity.length === 0) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestCity"], this.guestCity, "ist leer"));
         }
-        if (!this.guestNationalityCode || this.guestNationalityCode.length === 0) {
+
+        const hasEmptyNationalityCode = !this.guestNationalityCode || this.guestNationalityCode.length === 0;
+        if (hasEmptyNationalityCode) {
             errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestNationalityCode"], this.guestNationalityCode, "ist leer"));
-        } else {
+        }
+        if(!hasEmptyNationalityCode) {
             try {
                 regionNamesToFull.of(this.guestNationalityCode);
             } catch (error) {
                 errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestNationalityCode"], this.guestNationalityCode, "ist kein gültiger Ländercode"));
             }
+        }
+        const livesOutsideGermany = !hasEmptyNationalityCode && this.guestNationalityCode.toLowerCase() !== "de";
+        const hasEmptyPassportNumber = !this.guestPassportCode || this.guestPassportCode.length === 0;
+        if(livesOutsideGermany && hasEmptyPassportNumber){
+            errors.push(new ValidationError(FIELD_TO_DISPLAYNAME["guestPassportCode"], this.guestPassportCode, "ist leer bei nicht-deutschem Ländercode"))
         }
         errors.forEach(error => error.rowNumber = this.rowNumber);
         return errors;
@@ -189,6 +199,7 @@ export class GuestExcel {
         values.guestZip = row.getCell("O").text.trim();
         values.guestCity = row.getCell("P").text.trim();
         values.guestNationalityCode = row.getCell("Q").text.trim();
+        values.guestPassportCode = row.getCell("R").text.trim();
         return values;
     }
 }
@@ -283,6 +294,7 @@ export class Guest {
     lastname: string;
     birthdate: Date | null;
     nationality: string;
+    passportCode: string;
 
     static fromRowValues(rowValues: RowValues): Guest {
         const guest = new Guest();
@@ -290,6 +302,7 @@ export class Guest {
         guest.lastname = rowValues.guestLastname;
         guest.birthdate = DataUtil.parseDateCell(rowValues.guestBirthdate);
         guest.nationality = DataUtil.tryCountryCode(rowValues.guestNationalityCode);
+        guest.passportCode = rowValues.guestPassportCode;
         return guest;
     }
 
