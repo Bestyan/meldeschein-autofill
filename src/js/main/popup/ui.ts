@@ -214,6 +214,9 @@ export default class UI {
             return;
         }
         this.allBookings = this.controller.findBookingsByEmail(selectedBooking.email);
+        if (selectedBooking.email === "") {
+            this.allBookings = this.allBookings.filter(booking => booking.organiserLastname === selectedBooking.organiserLastname);
+        }
         this.allBookingsTable.setData(dataUtil.clone(this.allBookings));
     };
 
