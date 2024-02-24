@@ -6,7 +6,7 @@ import Database from "../database/database";
 import contentScriptConnector from "../content_scripts/connector";
 import uiHelper from "../util/ui_helper";
 import dataUtil from "../util/data_util";
-
+import { Mutex } from 'async-mutex';
 
 interface EventInput {
     value: string | number;
@@ -20,7 +20,7 @@ class FormData {
     nachname0 = ""; // Nachname Gast
     vorname0 = "";
     geburtsdatum0_input: EventInput | null;
-    anrede0 = Title.Herr;
+    anrede0 = Title.Gast;
     staat0_input = "Deutschland";
     passnumber = "";
 
@@ -32,7 +32,7 @@ class FormData {
     nachname1_input = ""; // Nachname Begl. 1
     vorname1 = "";
     geburtsdatum1_input: EventInput | null;
-    anrede1 = Title.Herr;
+    anrede1 = Title.Gast;
     staat1_input = "Deutschland";
     passnumber1 = "";
 
@@ -49,6 +49,11 @@ class FormData {
     geburtsdatum5_input: EventInput | null;
 
     email = "";
+}
+
+class TitleData {
+    anrede0: Title;
+    anrede1: Title;
 }
 
 function fillMeldeschein(meldescheinGroup: MeldescheinGroup, arrival: Date, departure: Date, email: string, database: Database): void {
@@ -142,9 +147,10 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
 
 function fillTitleInformation(guests: Array<Guest>, database: Database): void {
     console.log("filling title information");
-    guests.forEach((guest: Guest, index: number) => {
+    const queryUserMutex = new Mutex();
+    guests.forEach((guest: Guest, guestIndex: number) => {
         // title info is only needed for the first 2 entries
-        if (index >= 2) {
+        if (guestIndex >= 2) {
             console.log(`skipping title for guest ${guest.firstname} because they are not one of the first 2`)
             return;
         }
@@ -155,60 +161,74 @@ function fillTitleInformation(guests: Array<Guest>, database: Database): void {
         }
 
         database.getGender(guest.firstname)
-            .then(
-                // onFulfilled
-                (gender: "M" | "F" | undefined) => {
-
-                    if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
-                        const title = constants.getTitle(gender);
-
-                        // send data to content script fill_meldeschein.js
-                        contentScriptConnector.send({
-                            anrede0: title,
-                            // Anrede der Begleitperson != Anrede des Buchenden
-                            anrede1: title === Title.Herr ? Title.Frau : Title.Herr
-                        });
-                        return;
-                    }
-
-                    // firstname does not have an entry in the firstname table => query the user for its gender
-                    const genderPopup = document.getElementById("firstname_gender");
-                    uiHelper.showHtmlElement(genderPopup)
-                    document.getElementById("firstname").textContent = `"${guest.firstname}"`;
-
-                    document.getElementById("firstname_male").addEventListener("click", function handler(event) {
-                        uiHelper.hideHtmlElement(genderPopup);
-                        database.addFirstName(guest.firstname, "M");
-                        contentScriptConnector.send({
-                            anrede0: Title.Herr,
-                            anrede1: Title.Frau,
-                        });
-                        event.target.removeEventListener(event.type, handler);
-                    });
-
-                    document.getElementById("firstname_female").addEventListener("click", function handler(event) {
-                        uiHelper.hideHtmlElement(genderPopup);
-                        database.addFirstName(guest.firstname, "F");
-                        contentScriptConnector.send({
-                            anrede0: Title.Frau,
-                            anrede1: Title.Herr,
-                        });
-                        event.target.removeEventListener(event.type, handler);
-                    });
-
-                    document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
-                        uiHelper.hideHtmlElement(genderPopup);
-                        contentScriptConnector.send({
-                            anrede0: Title.Gast,
-                            anrede1: Title.Gast,
-                        });
-                        event.target.removeEventListener(event.type, handler);
-                    });
+            .then((gender: "M" | "F" | undefined) => {
+                if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
+                    const titleData = getContentScriptTitleDataFor(guestIndex as 0 | 1, constants.getTitle(gender));
+                    contentScriptConnector.send(titleData);
+                    return;
                 }
-
-            )
+                queryUserMutex.acquire().then(release => queryUserForFirstnameGender(guest, guestIndex as 0 | 1, database, release));
+            })
             .catch(error => console.error(error));
-    })
+    });
+}
+
+function queryUserForFirstnameGender(guest: Guest, guestIndex: 0 | 1, database: Database, release: Function): void {
+    console.log(`querying user for gender of "${guest.firstname}"`);
+    // firstname does not have an entry in the firstname table => query the user for its gender
+    const genderPopup = document.getElementById("firstname_gender");
+    uiHelper.showHtmlElement(genderPopup)
+    document.getElementById("firstname").textContent = `"${guest.firstname}"`;
+
+    document.getElementById("firstname_male").addEventListener("click", function handler(event) {
+        try {
+            uiHelper.hideHtmlElement(genderPopup);
+            database.addFirstName(guest.firstname, "M");
+            contentScriptConnector.send(getContentScriptTitleDataFor(guestIndex, Title.Herr));
+            event.target.removeEventListener(event.type, handler);
+        } finally {
+            release();
+        }
+    });
+
+    document.getElementById("firstname_female").addEventListener("click", function handler(event) {
+        try {
+            uiHelper.hideHtmlElement(genderPopup);
+            database.addFirstName(guest.firstname, "F");
+            contentScriptConnector.send(getContentScriptTitleDataFor(guestIndex, Title.Frau));
+            event.target.removeEventListener(event.type, handler);
+        } finally {
+            release();
+        }
+    });
+
+    document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
+        try {
+            uiHelper.hideHtmlElement(genderPopup);
+            // Do nothing, "Gast" is already the formData default
+            // Otherwise the inferred gender via the partner's title might be overridden
+            event.target.removeEventListener(event.type, handler);
+        } finally {
+            release();
+        }
+    });
+}
+
+function getContentScriptTitleDataFor(guestIndex: 0 | 1, title: Title): TitleData {
+    const oppositeTitle = dataUtil.getAntonymTitle(title);
+
+    if (guestIndex == 0) {
+        return {
+            anrede0: title,
+            anrede1: oppositeTitle
+        };
+    }
+    if (guestIndex == 1) {
+        return {
+            anrede0: oppositeTitle,
+            anrede1: title
+        };
+    }
 }
 
 export default {

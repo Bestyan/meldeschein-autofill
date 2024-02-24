@@ -31,6 +31,7 @@
     "write-file-webpack-plugin": "4.5.1"
   },
   "dependencies": {
+    "async-mutex": "^0.4.1",
     "buffer": "^6.0.3",
     "docxtemplater": "^3.18.0",
     "exceljs": "^4.3.0",
