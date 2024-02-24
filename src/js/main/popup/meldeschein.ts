@@ -51,6 +51,11 @@ class FormData {
     email = "";
 }
 
+class TitleData {
+    anrede0: Title;
+    anrede1: Title;
+}
+
 function fillMeldeschein(meldescheinGroup: MeldescheinGroup, arrival: Date, departure: Date, email: string, database: Database): void {
     fillNonInteractiveInformation(meldescheinGroup, arrival, departure, email)
         .then(() => fillTitleInformation(meldescheinGroup.guests, database))
@@ -140,11 +145,15 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
     return ContentScriptConnector.send(formData);
 }
 
-function fillTitleInformation(guests: Array<Guest>, database: Database): void {
+async function fillTitleInformation(guests: Array<Guest>, database: Database): Promise<any> {
     console.log("filling title information");
-    guests.forEach((guest: Guest, index: number) => {
+
+    let titleData: TitleData;
+
+    for(let guestIndex = 0; guestIndex < guests.length; guestIndex++){
+        const guest = guests[guestIndex];
         // title info is only needed for the first 2 entries
-        if (index >= 2) {
+        if (guestIndex >= 2) {
             console.log(`skipping title for guest ${guest.firstname} because they are not one of the first 2`)
             return;
         }
@@ -154,61 +163,64 @@ function fillTitleInformation(guests: Array<Guest>, database: Database): void {
             return;
         }
 
-        database.getGender(guest.firstname)
-            .then(
-                // onFulfilled
-                (gender: "M" | "F" | undefined) => {
+        const gender = await database.getGender(guest.firstname).catch(error => console.error(error)) as "M" | "F" | undefined;
 
-                    if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
-                        const title = constants.getTitle(gender);
+        if (gender === "M" || gender === "F") { // firstname has an entry in the firstname table
+            titleData = getContentScriptTitleDataFor(guestIndex as 0 | 1, constants.getTitle(gender));
+            break;
+        }
+        queryUserForFirstnameGender(guest, guestIndex as 0 | 1, database);
+    }
 
-                        // send data to content script fill_meldeschein.js
-                        contentScriptConnector.send({
-                            anrede0: title,
-                            // Anrede der Begleitperson != Anrede des Buchenden
-                            anrede1: title === Title.Herr ? Title.Frau : Title.Herr
-                        });
-                        return;
-                    }
+    contentScriptConnector.send(titleData);
+}
 
-                    // firstname does not have an entry in the firstname table => query the user for its gender
-                    const genderPopup = document.getElementById("firstname_gender");
-                    uiHelper.showHtmlElement(genderPopup)
-                    document.getElementById("firstname").textContent = `"${guest.firstname}"`;
+function queryUserForFirstnameGender(guest: Guest, guestIndex: 0 | 1, database: Database): void {
+    // firstname does not have an entry in the firstname table => query the user for its gender
+    const genderPopup = document.getElementById("firstname_gender");
+    uiHelper.showHtmlElement(genderPopup)
+    document.getElementById("firstname").textContent = `"${guest.firstname}"`;
 
-                    document.getElementById("firstname_male").addEventListener("click", function handler(event) {
-                        uiHelper.hideHtmlElement(genderPopup);
-                        database.addFirstName(guest.firstname, "M");
-                        contentScriptConnector.send({
-                            anrede0: Title.Herr,
-                            anrede1: Title.Frau,
-                        });
-                        event.target.removeEventListener(event.type, handler);
-                    });
+    document.getElementById("firstname_male").addEventListener("click", function handler(event) {
+        uiHelper.hideHtmlElement(genderPopup);
+        database.addFirstName(guest.firstname, "M");
+        contentScriptConnector.send(getContentScriptTitleDataFor(guestIndex, Title.Herr));
+        event.target.removeEventListener(event.type, handler);
+    });
 
-                    document.getElementById("firstname_female").addEventListener("click", function handler(event) {
-                        uiHelper.hideHtmlElement(genderPopup);
-                        database.addFirstName(guest.firstname, "F");
-                        contentScriptConnector.send({
-                            anrede0: Title.Frau,
-                            anrede1: Title.Herr,
-                        });
-                        event.target.removeEventListener(event.type, handler);
-                    });
+    document.getElementById("firstname_female").addEventListener("click", function handler(event) {
+        uiHelper.hideHtmlElement(genderPopup);
+        database.addFirstName(guest.firstname, "F");
+        contentScriptConnector.send(getContentScriptTitleDataFor(guestIndex, Title.Frau));
+        event.target.removeEventListener(event.type, handler);
+    });
 
-                    document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
-                        uiHelper.hideHtmlElement(genderPopup);
-                        contentScriptConnector.send({
-                            anrede0: Title.Gast,
-                            anrede1: Title.Gast,
-                        });
-                        event.target.removeEventListener(event.type, handler);
-                    });
-                }
+    document.getElementById("firstname_unknown").addEventListener("click", function handler(event) {
+        uiHelper.hideHtmlElement(genderPopup);
+        // only if the first guest's gender is unknown, "Gast" is sent
+        // Otherwise the inferred gender via the partner's title might be overridden
+        if(guestIndex == 0){
+            contentScriptConnector.send(getContentScriptTitleDataFor(guestIndex, Title.Gast));
+        }
+        event.target.removeEventListener(event.type, handler);
+    });
+}
 
-            )
-            .catch(error => console.error(error));
-    })
+function getContentScriptTitleDataFor(guestIndex: 0 | 1, title: Title): TitleData {
+    const oppositeTitle = this.getAntonymTitle(title);
+
+    if(guestIndex == 0){
+        return { 
+            anrede0: title,
+            anrede1: oppositeTitle
+        };
+    }
+    if(guestIndex == 1){
+        return { 
+            anrede0: oppositeTitle,
+            anrede1: title
+        };
+    }
 }
 
 export default {

@@ -1,6 +1,7 @@
 import { Booking, ValidationError } from "../database/guest_excel";
 import constants from "./constants";
 import { Buffer } from "buffer";
+import { Title } from "./constants";
 
 const regionNamesToFull = new Intl.DisplayNames(['de'], { type: 'region' });
 
@@ -200,5 +201,17 @@ export default {
             return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00Z`);
         }
         return null;
+    },
+    
+    getAntonymTitle(title: Title): Title {
+        switch(title){
+            case Title.Frau:
+                return Title.Herr;
+            case Title.Herr:
+                return Title.Frau;
+            default:
+                return Title.Gast;
+        }
     }
+    
 };
