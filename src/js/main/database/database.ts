@@ -71,9 +71,8 @@ export class Database {
         }
 
         const queryResult = DB.queryAll(TABLE_BOOKINGS, {
-            query: (row: any) => {
+            query: (row: any): boolean => {
                 const rowString = JSON.stringify(row[column]);
-                console.log(rowString);
                 return rowString.toLowerCase().includes((value || "").toLowerCase());
             }
         });
@@ -120,7 +119,7 @@ export class Database {
      * @param {"F" | "M"} gender 
      */
     addFirstName(name: string, gender: "F" | "M") {
-        connection.put(constants.server.endpoints.firstname, {
+        connection.post(constants.server.endpoints.firstname, {
             name: name,
             gender: gender,
         }, null)
