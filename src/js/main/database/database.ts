@@ -73,6 +73,9 @@ export class Database {
         const queryResult = DB.queryAll(TABLE_BOOKINGS, {
             query: (row: any): boolean => {
                 const rowString = JSON.stringify(row[column]);
+                if(value === ""){ // any string includes "", therefore only show matches
+                    return rowString === `""`;
+                }
                 return rowString.toLowerCase().includes((value || "").toLowerCase());
             }
         });
