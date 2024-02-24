@@ -2,7 +2,7 @@
 export enum Title {
     Herr = 1,
     Frau = 4,
-    Gast = 48,
+    Gast = 48
 }
 
 export enum Apartment {
