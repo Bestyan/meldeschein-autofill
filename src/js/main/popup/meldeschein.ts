@@ -145,7 +145,7 @@ function fillNonInteractiveInformation(meldescheinGroup: MeldescheinGroup, arriv
     return ContentScriptConnector.send(formData);
 }
 
-async function fillTitleInformation(guests: Array<Guest>, database: Database): Promise<any> {
+function fillTitleInformation(guests: Array<Guest>, database: Database): void {
     console.log("filling title information");
     const queryUserMutex = new Mutex();
     guests.forEach((guest: Guest, guestIndex: number) => {
