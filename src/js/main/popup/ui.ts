@@ -214,10 +214,8 @@ export default class UI {
             return;
         }
         this.allBookings = this.controller.findBookingsByEmail(selectedBooking.email);
-        console.log(this.allBookings);
         if (selectedBooking.email === "") {
             this.allBookings = this.allBookings.filter(booking => booking.organiserLastname === selectedBooking.organiserLastname);
-            console.log(this.allBookings);
         }
         this.allBookingsTable.setData(dataUtil.clone(this.allBookings));
     };
