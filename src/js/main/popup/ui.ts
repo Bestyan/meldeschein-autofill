@@ -6,6 +6,7 @@ import dataUtil from "../util/data_util";
 import LocalStorage from "../database/local_storage";
 import 'regenerator-runtime/runtime'; // required by exceljs
 import { Workbook } from "exceljs";
+import contentScriptConnector from '../content_scripts/connector';
 
 export default class UI {
     private controller: PopupController;
@@ -173,6 +174,24 @@ export default class UI {
 
             const mailText = this.controller.getMailTextForTemplateIndex(templateIndex, selectedBooking, title);
             uiHelper.downloadMailTemplate(mailText, selectedBooking.organiserLastname);
+        });
+    }
+
+    initWlanVoucherFillButton() {
+        document.getElementById('wlan_voucher_fill').addEventListener('click', event => {
+            const booking = this.getSelectedSearchResultsData();
+            if (booking == null) {
+                alert("keine Tabellenzeile ausgewählt");
+                return;
+            }
+    
+            // message to content script fill_vlan_voucher.js
+            contentScriptConnector.send({
+                hotspot: dataUtil.getHotspotName(booking.apartment),
+                hotspotLabelText: LocalStorage.getWlanVoucherHotspotLabelText(),
+                gueltigkeit: dataUtil.getVoucherDuration(booking.departure),
+                kommentar: dataUtil.getVoucherComment(booking)
+            });
         });
     }
 

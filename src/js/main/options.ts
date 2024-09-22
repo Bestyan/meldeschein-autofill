@@ -13,3 +13,4 @@ const ui = new UI(controller);
 ui.initCheckinDocumentUI();
 ui.initKeysUI();
 ui.initEmailTemplatesUI();
+ui.initWlanVoucherUI();

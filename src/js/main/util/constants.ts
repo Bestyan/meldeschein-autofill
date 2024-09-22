@@ -56,7 +56,8 @@ export default {
             checkinDocxAsBinaryText: "settings_checkin_docx",
             keysXlsStatus: "settings_keys_xls",
             guestExcelUploadTime: "xls_upload_datetime",
-            mailTemplateNames: "mail_template_names"
+            mailTemplateNames: "mail_template_names",
+            wlanVoucherHotspotLabelText: "wlan_voucher_hotspot_label"
         }
     },
 

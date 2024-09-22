@@ -1,7 +1,5 @@
 console.log("fill_wlan_voucher loaded");
 
-const HOTSPOT_TEXT = "Hotspot:";
-
 const TEXT_TO_FORM_INPUT_NAME = {
     "Gutschein-Definition:": "gueltigkeit",
     "Anzahl:": "anzahl",
@@ -44,7 +42,7 @@ chrome.runtime.onMessage.addListener(
         [...tdTags].filter(td =>
             td.hasChildNodes() &&
             !td.innerHTML.includes("<td") &&
-            td.innerHTML.includes(HOTSPOT_TEXT))
+            td.innerHTML.includes(request.data.hotspotLabelText))
             .forEach(
                 td => {
                     if(td.nextSibling == null){
