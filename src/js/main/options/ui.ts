@@ -126,4 +126,16 @@ export default class UI {
                     });
             });
     };
+
+    initWlanVoucherUI(){
+        console.log("Loading WLAN Voucher");
+        const hotspotLabelInput = document.getElementById("voucher_hotspot_label") as HTMLInputElement;
+        hotspotLabelInput.value = this.controller.getWlanVoucherHotspotName();
+
+        hotspotLabelInput.addEventListener("input", event => {
+            const inputElement = event.target as HTMLInputElement;
+            console.log(`writing Hotspot name "${inputElement.value}" to local storage`);
+            this.controller.setWlanVoucherHotspotName(inputElement.value);
+        })
+    }
 }

@@ -59,4 +59,12 @@ export default class LocalStorage {
         const templateName = templateNames[index];
         return LocalStorage.getMailTemplate(templateName);
     };
+
+    static getWlanVoucherHotspotLabelText(): string {
+        return localStorage.getItem(constants.localStorage.keys.wlanVoucherHotspotLabelText);
+    }
+
+    static setWlanVoucherHotspotLabelText(label: string): void {
+        localStorage.setItem(constants.localStorage.keys.wlanVoucherHotspotLabelText, label);
+    }
 }

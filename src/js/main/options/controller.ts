@@ -49,4 +49,12 @@ export class OptionsController {
         LocalStorage.clearMailTemplates();
         MailTemplater.processRawTemplate(rawTemplateText);
     }
+
+    setWlanVoucherHotspotName(label: string){
+        LocalStorage.setWlanVoucherHotspotLabelText(label);
+    }
+
+    getWlanVoucherHotspotName(){
+        return LocalStorage.getWlanVoucherHotspotLabelText();
+    }
 };
