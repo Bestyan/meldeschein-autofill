@@ -60,11 +60,43 @@ export default class LocalStorage {
         return LocalStorage.getMailTemplate(templateName);
     };
 
-    static getWlanVoucherHotspotLabelText(): string {
-        return localStorage.getItem(constants.localStorage.keys.wlanVoucherHotspotLabelText);
+    static getWlanVoucherHotspotLabel(): string {
+        return localStorage.getItem(constants.localStorage.keys.wlanVoucher.labels.hotspot);
     }
 
-    static setWlanVoucherHotspotLabelText(label: string): void {
-        localStorage.setItem(constants.localStorage.keys.wlanVoucherHotspotLabelText, label);
+    static setWlanVoucherHotspotLabel(label: string): void {
+        localStorage.setItem(constants.localStorage.keys.wlanVoucher.labels.hotspot, label);
+    }
+
+    static getWlanVoucherDurationLabel(): string {
+        return localStorage.getItem(constants.localStorage.keys.wlanVoucher.labels.duration);
+    }
+
+    static setWlanVoucherDurationLabel(label: string): void {
+        localStorage.setItem(constants.localStorage.keys.wlanVoucher.labels.duration, label);
+    }
+
+    static getWlanVoucherAmountLabel(): string {
+        return localStorage.getItem(constants.localStorage.keys.wlanVoucher.labels.amount);
+    }
+
+    static setWlanVoucherAmountLabel(label: string): void {
+        localStorage.setItem(constants.localStorage.keys.wlanVoucher.labels.amount, label);
+    }
+
+    static getWlanVoucherPrintLabel(): string {
+        return localStorage.getItem(constants.localStorage.keys.wlanVoucher.labels.print);
+    }
+
+    static setWlanVoucherPrintLabel(label: string): void {
+        localStorage.setItem(constants.localStorage.keys.wlanVoucher.labels.print, label);
+    }
+
+    static getWlanVoucherCommentLabel(): string {
+        return localStorage.getItem(constants.localStorage.keys.wlanVoucher.labels.comment);
+    }
+
+    static setWlanVoucherCommentLabel(label: string): void {
+        localStorage.setItem(constants.localStorage.keys.wlanVoucher.labels.comment, label);
     }
 }

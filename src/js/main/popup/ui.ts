@@ -188,9 +188,13 @@ export default class UI {
             // message to content script fill_vlan_voucher.js
             contentScriptConnector.send({
                 hotspot: dataUtil.getHotspotName(booking.apartment),
-                hotspotLabelText: LocalStorage.getWlanVoucherHotspotLabelText(),
-                gueltigkeit: dataUtil.getVoucherDuration(booking.departure),
-                kommentar: dataUtil.getVoucherComment(booking)
+                hotspotLabel: LocalStorage.getWlanVoucherHotspotLabel(),
+                duration: dataUtil.getVoucherDuration(booking.departure),
+                durationLabel: LocalStorage.getWlanVoucherDurationLabel(),
+                comment: dataUtil.getVoucherComment(booking),
+                commentLabel: LocalStorage.getWlanVoucherCommentLabel(),
+                amountLabel: LocalStorage.getWlanVoucherAmountLabel(),
+                printLabel: LocalStorage.getWlanVoucherPrintLabel()
             });
         });
     }

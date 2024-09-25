@@ -1,12 +1,5 @@
 console.log("fill_wlan_voucher loaded");
 
-const TEXT_TO_FORM_INPUT_NAME = {
-    "Gutschein-Definition:": "gueltigkeit",
-    "Anzahl:": "anzahl",
-    "Drucken:": "drucken",
-    "Kommentar:": "kommentar"
-};
-
 const HOTSPOT_TO_VALUE = {
     "02-14-21 Fruehling": "REF_HotPor02Primel",
     "12 Enzian": "REF_HotPor12Enzian",
@@ -36,16 +29,21 @@ chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
         console.log(request.data);
 
+        if (!isValidRequestData(request.data)) {
+            alert("Alle Label Texte müssen in den Plugin Einstellungen konfiguriert sein! Felder werden nicht ausgefüllt.");
+            return;
+        }
+
         const tdTags = document.getElementsByTagName("td");
 
         // find input fields / selects, skip if no textNode as first child
         [...tdTags].filter(td =>
             td.hasChildNodes() &&
             !td.innerHTML.includes("<td") &&
-            td.innerHTML.includes(request.data.hotspotLabelText))
+            td.innerHTML.includes(request.data.hotspotLabel))
             .forEach(
                 td => {
-                    if(td.nextSibling == null){
+                    if (td.nextSibling == null) {
                         console.log(td)
                     }
                     const hotspot = td.nextSibling.childNodes[0];
@@ -60,34 +58,93 @@ chrome.runtime.onMessage.addListener(
         // wait 1s for the site's ajax reload
         new Promise(resolve => setTimeout(resolve, 1000)).then(
             () => {
-                const siteFormInputs = {};
-                const textToFormInputName = JSON.parse(JSON.stringify(TEXT_TO_FORM_INPUT_NAME)); // copy the object
+                const siteFormInputs = {
+                    duration: [],
+                    amount: [],
+                    print: [],
+                    comment: []
+                };
                 const tdTagsAfterReload = document.getElementsByTagName("td");
 
                 // find the relevant input nodes by searching for their label text
-                [...tdTagsAfterReload].filter(td => td.hasChildNodes() && !td.innerHTML.includes("<td")).forEach(
-                    td => {
-                        for (const [labelText, data_field] of Object.entries(textToFormInputName)) {
-
-                            if (!td.innerHTML.includes(labelText)) {
-                                continue;
+                [...tdTagsAfterReload]
+                    .filter(td => td.hasChildNodes() && !td.innerHTML.includes("<td"))
+                    .filter(td => td.nextSibling != null && td.nextSibling.hasChildNodes())
+                    .filter(td => td.nextSibling.innerHTML.includes("<input") || td.nextSibling.innerHTML.includes("<select"))
+                    .forEach(
+                        td => {
+                            const inputField = td.nextSibling.childNodes[0];
+                            if(!isValidInputField(inputField)){
+                                return;
                             }
-
-                            const input_field = td.nextSibling.childNodes[0];
-                            siteFormInputs[data_field] = input_field;
-                            delete textToFormInputName[labelText];
-                            break;
+                            if (td.innerHTML.includes(request.data.durationLabel)) {
+                                console.log("found durationLabel");
+                                siteFormInputs.duration.push(inputField);
+                                return;
+                            }
+                            if (td.innerHTML.includes(request.data.amountLabel)) {
+                                console.log("found amountLabel");
+                                siteFormInputs.amount.push(inputField);
+                                return;
+                            }
+                            if (td.innerHTML.includes(request.data.printLabel)) {
+                                console.log("found printLabel");
+                                siteFormInputs.print.push(inputField);
+                                return;
+                            }
+                            if (td.innerHTML.includes(request.data.commentLabel)) {
+                                console.log("found commentLabel");
+                                siteFormInputs.comment.push(inputField);
+                                return;
+                            }
                         }
-                    }
-                );
+                    );
 
-                // set values
-                siteFormInputs.gueltigkeit.value = GUELTIGKEIT_TO_VALUE[request.data.gueltigkeit]
-                siteFormInputs.anzahl.value = 2;
-                siteFormInputs.drucken.checked = true;
-                siteFormInputs.kommentar.value = request.data.kommentar;
+                // set values for all fields, some might throw errors but we ignore those
+                [...siteFormInputs.duration].forEach(field => {
+                    try {
+                        field.value = GUELTIGKEIT_TO_VALUE[request.data.duration]
+                    } catch {}
+                });
+                [...siteFormInputs.amount].forEach(field => {
+                    try {
+                        field.value = 2;
+                    } catch {}
+                });
+                [...siteFormInputs.print].forEach(field => {
+                    try {
+                        field.checked = true;
+                    } catch {}
+                });
+                [...siteFormInputs.comment].forEach(field => {
+                    try {
+                        field.value = request.data.comment;
+                    } catch {}
+                });
             }
-        )
-
+        );
     }
 );
+
+function isValidRequestData(data) {
+    if (data.durationLabel === "") {
+        return false;
+    }
+    if (data.amountLabel === "") {
+        return false;
+    }
+    if (data.printLabel === "") {
+        return false;
+    }
+    if (data.commentLabel === "") {
+        return false;
+    }
+    return true;
+}
+
+function isValidInputField(inputField){
+    const isInput = inputField.nodeName === "INPUT";
+    const isSelect = inputField.nodeName === "SELECT";
+    const isTypeTextOrCheckbox = inputField.type === "text" || inputField.type === "checkbox";
+    return isSelect || (isInput && isTypeTextOrCheckbox);
+}
