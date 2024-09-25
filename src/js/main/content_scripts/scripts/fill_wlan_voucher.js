@@ -58,39 +58,69 @@ chrome.runtime.onMessage.addListener(
         // wait 1s for the site's ajax reload
         new Promise(resolve => setTimeout(resolve, 1000)).then(
             () => {
-                const siteFormInputs = {};
+                const siteFormInputs = {
+                    duration: [],
+                    amount: [],
+                    print: [],
+                    comment: []
+                };
                 const tdTagsAfterReload = document.getElementsByTagName("td");
 
                 // find the relevant input nodes by searching for their label text
                 [...tdTagsAfterReload]
                     .filter(td => td.hasChildNodes() && !td.innerHTML.includes("<td"))
+                    .filter(td => td.nextSibling != null && td.nextSibling.hasChildNodes())
+                    .filter(td => td.nextSibling.innerHTML.includes("<input") || td.nextSibling.innerHTML.includes("<select"))
                     .forEach(
                         td => {
-                            const input_field = td.nextSibling.childNodes[0];
+                            const inputField = td.nextSibling.childNodes[0];
+                            if(!isValidInputField(inputField)){
+                                return;
+                            }
                             if (td.innerHTML.includes(request.data.durationLabel)) {
-                                siteFormInputs.duration = input_field;
+                                console.log("found durationLabel");
+                                siteFormInputs.duration.push(inputField);
                                 return;
                             }
                             if (td.innerHTML.includes(request.data.amountLabel)) {
-                                siteFormInputs.amount = input_field;
+                                console.log("found amountLabel");
+                                siteFormInputs.amount.push(inputField);
                                 return;
                             }
                             if (td.innerHTML.includes(request.data.printLabel)) {
-                                siteFormInputs.print = input_field;
+                                console.log("found printLabel");
+                                siteFormInputs.print.push(inputField);
                                 return;
                             }
                             if (td.innerHTML.includes(request.data.commentLabel)) {
-                                siteFormInputs.comment = input_field;
+                                console.log("found commentLabel");
+                                siteFormInputs.comment.push(inputField);
                                 return;
                             }
                         }
                     );
 
-                // set values
-                siteFormInputs.duration.value = GUELTIGKEIT_TO_VALUE[request.data.duration]
-                siteFormInputs.amount.value = 2;
-                siteFormInputs.print.checked = true;
-                siteFormInputs.comment.value = request.data.comment;
+                // set values for all fields, some might throw errors but we ignore those
+                [...siteFormInputs.duration].forEach(field => {
+                    try {
+                        field.value = GUELTIGKEIT_TO_VALUE[request.data.duration]
+                    } catch {}
+                });
+                [...siteFormInputs.amount].forEach(field => {
+                    try {
+                        field.value = 2;
+                    } catch {}
+                });
+                [...siteFormInputs.print].forEach(field => {
+                    try {
+                        field.checked = true;
+                    } catch {}
+                });
+                [...siteFormInputs.comment].forEach(field => {
+                    try {
+                        field.value = request.data.comment;
+                    } catch {}
+                });
             }
         );
     }
@@ -109,4 +139,12 @@ function isValidRequestData(data) {
     if (data.commentLabel === "") {
         return false;
     }
+    return true;
+}
+
+function isValidInputField(inputField){
+    const isInput = inputField.nodeName === "INPUT";
+    const isSelect = inputField.nodeName === "SELECT";
+    const isTypeTextOrCheckbox = inputField.type === "text" || inputField.type === "checkbox";
+    return isSelect || (isInput && isTypeTextOrCheckbox);
 }
