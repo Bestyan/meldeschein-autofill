@@ -127,15 +127,23 @@ export default class UI {
             });
     };
 
-    initWlanVoucherUI(){
-        console.log("Loading WLAN Voucher");
-        const hotspotLabelInput = document.getElementById("voucher_hotspot_label") as HTMLInputElement;
-        hotspotLabelInput.value = this.controller.getWlanVoucherHotspotName();
+    private initWlanVoucherInput(elementId: string, getFromLocalStorage: Function, setLocalStorage: Function, description: string): void {
+        const hotspotLabelInput = document.getElementById(elementId) as HTMLInputElement;
+        hotspotLabelInput.value = getFromLocalStorage();
 
         hotspotLabelInput.addEventListener("input", event => {
             const inputElement = event.target as HTMLInputElement;
-            console.log(`writing Hotspot name "${inputElement.value}" to local storage`);
-            this.controller.setWlanVoucherHotspotName(inputElement.value);
+            console.log(`writing ${description} "${inputElement.value}" to local storage`);
+            setLocalStorage(inputElement.value);
         })
+    }
+
+    initWlanVoucherUI(){
+        console.log("Loading WLAN Voucher");
+        this.initWlanVoucherInput("voucher_hotspot_label", this.controller.getWlanVoucherHotspotLabel, this.controller.setWlanVoucherHotspotLabel, "Hotspot Label")
+        this.initWlanVoucherInput("voucher_duration_label", this.controller.getWlanVoucherDurationLabel, this.controller.setWlanVoucherDurationLabel, "Duration Label")
+        this.initWlanVoucherInput("voucher_amount_label", this.controller.getWlanVoucherAmountLabel, this.controller.setWlanVoucherAmountLabel, "Amount Label")
+        this.initWlanVoucherInput("voucher_print_label", this.controller.getWlanVoucherPrintLabel, this.controller.setWlanVoucherPrintLabel, "Print Label")
+        this.initWlanVoucherInput("voucher_comment_label", this.controller.getWlanVoucherCommentLabel, this.controller.setWlanVoucherCommentLabel, "Comment Label")
     }
 }

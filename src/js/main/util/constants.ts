@@ -57,7 +57,15 @@ export default {
             keysXlsStatus: "settings_keys_xls",
             guestExcelUploadTime: "xls_upload_datetime",
             mailTemplateNames: "mail_template_names",
-            wlanVoucherHotspotLabelText: "wlan_voucher_hotspot_label"
+            wlanVoucher: {
+                labels: {
+                    hotspot: "wlan_voucher_hotspot_label",
+                    duration: "wlan_voucher_duration_label",
+                    amount: "wlan_voucher_amount_label",
+                    print: "wlan_voucher_print_label",
+                    comment: "wlan_voucher_comment_label"
+                }
+            }
         }
     },
 

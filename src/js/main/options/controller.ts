@@ -50,11 +50,43 @@ export class OptionsController {
         MailTemplater.processRawTemplate(rawTemplateText);
     }
 
-    setWlanVoucherHotspotName(label: string){
-        LocalStorage.setWlanVoucherHotspotLabelText(label);
+    setWlanVoucherHotspotLabel(label: string){
+        LocalStorage.setWlanVoucherHotspotLabel(label);
     }
 
-    getWlanVoucherHotspotName(){
-        return LocalStorage.getWlanVoucherHotspotLabelText();
+    getWlanVoucherHotspotLabel(){
+        return LocalStorage.getWlanVoucherHotspotLabel();
+    }
+
+    setWlanVoucherDurationLabel(label: string){
+        LocalStorage.setWlanVoucherDurationLabel(label);
+    }
+
+    getWlanVoucherDurationLabel(){
+        return LocalStorage.getWlanVoucherDurationLabel();
+    }
+
+    setWlanVoucherAmountLabel(label: string){
+        LocalStorage.setWlanVoucherAmountLabel(label);
+    }
+
+    getWlanVoucherAmountLabel(){
+        return LocalStorage.getWlanVoucherAmountLabel();
+    }
+
+    setWlanVoucherPrintLabel(label: string){
+        LocalStorage.setWlanVoucherPrintLabel(label);
+    }
+
+    getWlanVoucherPrintLabel(){
+        return LocalStorage.getWlanVoucherPrintLabel();
+    }
+
+    setWlanVoucherCommentLabel(label: string){
+        LocalStorage.setWlanVoucherCommentLabel(label);
+    }
+
+    getWlanVoucherCommentLabel(){
+        return LocalStorage.getWlanVoucherCommentLabel();
     }
 };
