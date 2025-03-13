@@ -15,10 +15,15 @@ chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
         console.log(request.data);
         for (const [key, value] of Object.entries(request.data)) {
+            
+            const htmlElement = document.getElementById(key);
+            if(htmlElement == null) {
+                console.log(`no htmlElement with id="${key}" found`)
+                continue;
+            }
 
             if(typeof value === "object"){
 
-                const htmlElement = document.getElementById(key);
                 htmlElement.value = value.value;
 
                 const changeEvent = document.createEvent("HTMLEvents");
@@ -27,7 +32,7 @@ chrome.runtime.onMessage.addListener(
 
             } else {
 
-                document.getElementById(key).value = value;
+                htmlElement.value = value;
 
             }
 
